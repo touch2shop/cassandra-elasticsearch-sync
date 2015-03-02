@@ -49,7 +49,7 @@ class TestCassandraLogEntryStore(object):
         assert_that(found, has_length(greater_than_or_equal_to(len(entries))))
         assert_that(found, has_items(*entries))
 
-    def test_find_log_entries_filtering_by_minimum_time_at_utc_timezone(self, cassandra_log_entry_store):
+    def test_find_log_entries_filtering_by_minimum_time_at_utc(self, cassandra_log_entry_store):
         minimum_time = iso8601.parse_date("2015-01-02T16:00:00.000000-0000")
         entries = list()
 

@@ -1,7 +1,8 @@
 from time_uuid import TimeUUID
+from app.core.AbstractDataObject import AbstractDataObject
 
 
-class CassandraLogEntry(object):
+class CassandraLogEntry(AbstractDataObject):
 
     def __init__(self):
         self._logged_keyspace = None
@@ -89,12 +90,7 @@ class CassandraLogEntry(object):
         else:
             return -1
 
-    def __eq__(self, other):
-        if other is None:
-            return False
-        if not isinstance(other, self.__class__):
-            return False
-
+    def _deep_equals(self, other):
         return self.time_uuid == other.time_uuid and \
             self.logged_keyspace == other.logged_keyspace and \
             self.logged_table == other.logged_table and \
@@ -102,7 +98,7 @@ class CassandraLogEntry(object):
             self.operation == other.operation and \
             self.updated_columns == other.updated_columns
 
-    def __hash__(self):
+    def _deep_hash(self):
         return hash((self.time_uuid, self.logged_keyspace, self.logged_table, self.logged_key,
                      self.operation, frozenset(self.updated_columns)))
 

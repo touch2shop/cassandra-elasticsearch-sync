@@ -32,7 +32,11 @@ class UpdateEvent(AbstractDataObject):
             return cmp(self.is_delete, other.is_delete)
 
     def _deep_hash(self):
-        return hash((self.identifier, self.timestamp, self.is_delete, frozenset(self.field_names)))
+        current_hash = hash((self.identifier, self.timestamp, self.is_delete))
+        if self.field_names is None:
+            return current_hash
+        else:
+            return hash((current_hash, frozenset(self.field_names)))
 
     def _deep_equals(self, other):
         return self.identifier == other.identifier and \

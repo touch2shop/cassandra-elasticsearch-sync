@@ -35,6 +35,11 @@ class CassandraLogEntryStore(SimpleCassandraClient):
             log_entry.operation,
             log_entry.updated_columns))
 
+    def find_all(self):
+        statement = self.prepare_statement(self._build_select_query())
+        rows = self.execute(statement)
+        return self._to_log_entries(rows)
+
     def find_by_logged_row(self, logged_keyspace, logged_table, logged_key):
         statement = self.prepare_statement(
             self._build_select_query(where="logged_keyspace = ? AND logged_table = ? AND logged_key = ?"))

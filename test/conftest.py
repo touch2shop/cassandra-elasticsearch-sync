@@ -1,8 +1,11 @@
 # py.test configuration file.
 
 import pytest
-
 from app.cassandra.CassandraLogEntryStore import CassandraLogEntryStore
+
+
+# This variable tells py.test which files and folders to ignore
+collect_ignore = ["env"]
 
 
 @pytest.fixture(scope="session")

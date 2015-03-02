@@ -1,4 +1,6 @@
 cassandra-driver==2.1.4
 elasticsearch==1.4.0
+python-dateutil==2.4.0
 pytest==2.6.4
 PyHamcrest==1.8.2
+time-uuid==0.1.1

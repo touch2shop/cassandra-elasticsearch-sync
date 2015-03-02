@@ -30,6 +30,13 @@ class CassandraLogEntry(object):
             return None
 
     @property
+    def timestamp(self):
+        if self.time_uuid is not None:
+            return self.time_uuid.get_timestamp()
+        else:
+            return None
+
+    @property
     def logged_keyspace(self):
         return self._logged_keyspace
 
@@ -62,6 +69,10 @@ class CassandraLogEntry(object):
         self._operation = value
 
     @property
+    def is_delete(self):
+        return self._operation.lower() == "delete"
+
+    @property
     def updated_columns(self):
         return self._updated_columns
 
@@ -71,6 +82,12 @@ class CassandraLogEntry(object):
             self._updated_columns = set(value)
         else:
             self._updated_columns = None
+
+    def __cmp__(self, other):
+        if self.time_uuid is not None:
+            return TimeUUID.__cmp__(self.time_uuid, other.time_uuid)
+        else:
+            return -1
 
     def __eq__(self, other):
         if other is None:
@@ -92,7 +109,6 @@ class CassandraLogEntry(object):
     def __repr__(self):
         return repr({
             "time_uuid": repr(self.time_uuid),
-            "time": repr(self.time.isoformat()) if self.time is not None else "",
             "logged_keyspace": repr(self.logged_keyspace),
             "logged_table": repr(self.logged_table),
             "logged_key": repr(self.logged_key),

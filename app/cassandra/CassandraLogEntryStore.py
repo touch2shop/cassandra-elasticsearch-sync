@@ -35,16 +35,16 @@ class CassandraLogEntryStore(SimpleCassandraClient):
             log_entry.operation,
             log_entry.updated_columns))
 
-    def find_all(self):
+    def find_all(self, timeout=None):
         statement = self.prepare_statement(self._build_select_query())
-        rows = self.execute(statement)
+        rows = self.execute(statement, timeout)
         return self._to_log_entries(rows)
 
-    def find_by_logged_row(self, logged_keyspace, logged_table, logged_key):
+    def find_by_logged_row(self, logged_keyspace, logged_table, logged_key, timeout=None):
         statement = self.prepare_statement(
             self._build_select_query(where="logged_keyspace = ? AND logged_table = ? AND logged_key = ?"))
 
-        rows = self.execute(statement, [logged_keyspace, logged_table, logged_key])
+        rows = self.execute(statement, [logged_keyspace, logged_table, logged_key], timeout)
         return self._to_log_entries(rows)
 
     def find_by_time_greater_or_equal_than(self, minimum_time, timeout=None):

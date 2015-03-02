@@ -99,8 +99,11 @@ class CassandraLogEntry(AbstractDataObject):
             self.updated_columns == other.updated_columns
 
     def _deep_hash(self):
-        return hash((self.time_uuid, self.logged_keyspace, self.logged_table, self.logged_key,
-                     self.operation, frozenset(self.updated_columns)))
+        current_hash = hash((self.time_uuid, self.logged_keyspace, self.logged_table, self.logged_key, self.operation))
+        if self.updated_columns is None:
+            return current_hash
+        else:
+            return hash((current_hash, frozenset(self.updated_columns)))
 
     def __repr__(self):
         return repr({

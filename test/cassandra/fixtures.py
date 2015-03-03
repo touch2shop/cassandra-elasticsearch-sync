@@ -1,3 +1,4 @@
+from app.cassandra.AbstractCassandraStore import AbstractCassandraStore
 
 class ProductFixture:
     def __init__(self, id_, name, quantity, description):
@@ -7,15 +8,27 @@ class ProductFixture:
         self.description = description
 
 
-# noinspection PyShadowingNames
-def create_fixture_product(cassandra_client, product, product_fixture_table):
-    statement = cassandra_client.prepare_statement(
-        """
-        INSERT INTO %s (id, name, quantity, description)
-        VALUES (?, ?, ?, ?)
-        """ % product_fixture_table)
-    cassandra_client.execute(statement, [product.id_, product.name, product.quantity, product.description])
+class ProductFixtureStore(AbstractCassandraStore):
 
+    def __init__(self, nodes, keyspace, table):
+        super(ProductFixtureStore, self).__init__(nodes, keyspace, table)
 
-def delete_all_product_fixtures(cassandra_client, product_fixture_table):
-    cassandra_client.execute("TRUNCATE %s" % product_fixture_table)
+    def create(self, product):
+        statement = self.prepare_statement(
+            """
+            INSERT INTO %s (id, name, quantity, description)
+            VALUES (?, ?, ?, ?)
+            """ % self.table)
+        self.execute(statement, [product.id_, product.name, product.quantity, product.description])
+
+    def update(self, product):
+        statement = self.prepare_statement(
+            """
+            UPDATE %s
+            SET name=?, quantity=?, description=?
+            WHERE id=?
+            """ % self.table)
+        self.execute(statement, [product.name, product.quantity, product.description, product.id_])
+
+    def delete_all(self):
+        self.execute("TRUNCATE %s" % self.table)

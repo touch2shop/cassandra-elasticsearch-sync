@@ -1,18 +1,17 @@
-from app.cassandra.SimpleCassandraClient import SimpleCassandraClient
+from app.cassandra.AbstractCassandraStore import AbstractCassandraStore
 from app.cassandra.CassandraLogEntry import CassandraLogEntry
 
 
-class CassandraLogEntryStore(SimpleCassandraClient):
+class CassandraLogEntryStore(AbstractCassandraStore):
 
     def __init__(self, nodes, log_keyspace, log_table):
-        super(CassandraLogEntryStore, self).__init__(nodes, log_keyspace)
-        self._log_table = log_table
+        super(CassandraLogEntryStore, self).__init__(nodes, log_keyspace, log_table)
 
     def _build_select_query(self, where=None, allow_filtering=False):
         query = """
           SELECT logged_keyspace, logged_table, logged_key, time_uuid, operation, updated_columns
           FROM %s
-          """ % self._log_table
+          """ % self.table
 
         if where is not None:
             query += " WHERE " + where
@@ -25,7 +24,7 @@ class CassandraLogEntryStore(SimpleCassandraClient):
         statement = self.prepare_statement("""
           INSERT INTO %s (logged_keyspace, logged_table, logged_key, time_uuid, operation, updated_columns)
           VALUES (?, ?, ?, ?, ?, ?)
-        """ % self._log_table)
+        """ % self.table)
 
         self.execute(statement, (
             log_entry.logged_keyspace,
@@ -53,6 +52,10 @@ class CassandraLogEntryStore(SimpleCassandraClient):
 
         rows = self.execute(statement, [minimum_time], timeout)
         return self._to_log_entries(rows)
+
+    def delete_all(self):
+        """Warning: wipes out the entire log table, use with caution."""
+        self.execute("TRUNCATE %s" % self.table)
 
     @staticmethod
     def _to_log_entries(rows):

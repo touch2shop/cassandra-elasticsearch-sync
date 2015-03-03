@@ -16,8 +16,8 @@ def cassandra_log_table():
 
 
 @pytest.fixture(scope="session")
-def fixture_cassandra_keyspace():
-    return "test"
+def cassandra_fixture_keyspace():
+    return "test_fixture"
 
 
 @pytest.fixture(scope="session")
@@ -38,19 +38,19 @@ def cassandra_log_trigger_name():
 
 # noinspection PyShadowingNames
 @pytest.fixture(scope="session")
-def fixture_cassandra_client(cassandra_nodes):
+def cassandra_fixture_client(cassandra_nodes):
     return SimpleCassandraClient(cassandra_nodes)
 
 
 # noinspection PyShadowingNames
 @pytest.fixture(scope="session", autouse=True)
-def create_fixture_cassandra_keyspace(fixture_cassandra_client, fixture_cassandra_keyspace):
-    fixture_cassandra_client.execute("DROP KEYSPACE IF EXISTS %s" % fixture_cassandra_keyspace)
-    fixture_cassandra_client.execute(
+def create_cassandra_fixture_keyspace(cassandra_fixture_client, cassandra_fixture_keyspace):
+    cassandra_fixture_client.execute("DROP KEYSPACE IF EXISTS %s" % cassandra_fixture_keyspace)
+    cassandra_fixture_client.execute(
         """
         CREATE KEYSPACE %s
         WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1};
         """
-        % fixture_cassandra_keyspace
+        % cassandra_fixture_keyspace
     )
-    fixture_cassandra_client.keyspace = fixture_cassandra_keyspace
+    cassandra_fixture_client.keyspace = cassandra_fixture_keyspace

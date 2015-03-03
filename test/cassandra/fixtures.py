@@ -15,4 +15,3 @@ def create_fixture_product(cassandra_client, product):
         VALUES (?, ?, ?, ?)
         """)
     cassandra_client.execute(statement, [product.id_, product.name, product.quantity, product.description])
-

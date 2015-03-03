@@ -1,4 +1,25 @@
+import uuid
 import pytest
+from app.cassandra.SimpleCassandraClient import SimpleCassandraClient
+from test.cassandra.fixtures import create_fixture_product, FixtureProduct
+
+
+@pytest.fixture(scope="module")
+def fixture_products(fixture_cassandra_client):
+    products = list()
+    products.append(FixtureProduct(uuid.uuid4(), "navy polo shirt", 5, "great shirt, great price!"))
+    products.append(FixtureProduct(uuid.uuid4(), "cool red shorts", 7, "perfect to go to the beach"))
+    products.append(FixtureProduct(uuid.uuid4(), "black DC skater shoes", 10, "yo!"))
+
+    for product in products:
+        create_fixture_product(fixture_cassandra_client, product)
+
+    return products
+
+
+@pytest.fixture(scope="module")
+def cassandra_client(cassandra_nodes):
+    return SimpleCassandraClient(cassandra_nodes)
 
 
 # noinspection PyClassHasNoInit,PyShadowingNames,PyMethodMayBeStatic

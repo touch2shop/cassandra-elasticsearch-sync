@@ -5,10 +5,6 @@ from app.cassandra.CassandraLogEntryStore import CassandraLogEntryStore
 from app.cassandra.SimpleCassandraClient import SimpleCassandraClient
 
 
-# This variable tells py.test which files and folders to ignore
-collect_ignore = ["env"]
-
-
 @pytest.fixture(scope="session")
 def cassandra_log_keyspace():
     return "logger"

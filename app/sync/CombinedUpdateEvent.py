@@ -1,23 +1,33 @@
 from sortedcontainers import SortedSet
+from app.sync.UpdateEventField import UpdateEventField
 
 
 class CombinedUpdateEvent(object):
 
     def __init__(self, identifier):
-        self._update_events = SortedSet()
         self._identifier = identifier
+        self._update_events = SortedSet()
+        self._fields = {}
 
     def add_update_event(self, update):
         self._update_events.add(update)
+        if update.field_names:
+            for field_name in update.field_names:
+                if field_name not in self._fields:
+                    self._fields[field_name] = UpdateEventField(field_name, update.timestamp)
+                elif update.timestamp > self._fields[field_name].timestamp:
+                        self._fields[field_name] = UpdateEventField(field_name, update.timestamp)
+
+    @property
+    def fields(self):
+        return self._fields.values()
 
     @property
     def field_names(self):
-        field_names = set()
-        for update in self._update_events:
-            if update.field_names is not None:
-                for field_name in update.field_names:
-                    field_names.add(field_name)
-        return field_names
+        return self._fields.keys()
+
+    def get_field(self, name):
+        return self._fields[name]
 
     @property
     def is_delete(self):

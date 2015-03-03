@@ -11,6 +11,7 @@ class FixtureProduct:
         self.description = description
 
 
+# noinspection PyShadowingNames
 def create_fixture_product(cassandra_client, product):
     statement = cassandra_client.prepare_statement(
         """

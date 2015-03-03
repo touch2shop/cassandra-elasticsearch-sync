@@ -10,6 +10,10 @@ class EntityUpdate(object):
         return self._event.identifier
 
     @property
+    def is_delete(self):
+        return self._event.is_delete
+
+    @property
     def timestamp(self):
         return self._event.timestamp
 

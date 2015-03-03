@@ -1,4 +1,4 @@
-from app.CassandraUpdateFetcher import CassandraUpdateFetcher
+from app.cassandra.CassandraUpdateFetcher import CassandraUpdateFetcher
 from app.cassandra.CassandraLogEntryStore import CassandraLogEntryStore
 
 class CassandraToElasticSearchPropagator:

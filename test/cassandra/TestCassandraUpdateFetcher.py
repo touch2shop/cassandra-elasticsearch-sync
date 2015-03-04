@@ -7,7 +7,7 @@ from app.cassandra.CassandraUpdateFetcher import CassandraUpdateFetcher
 
 
 @pytest.fixture(scope="module")
-def setup(product_fixture_store, cassandra_log_entry_store):
+def setup(cassandra_log_entry_store):
     cassandra_log_entry_store.delete_all()
 
 
@@ -138,7 +138,7 @@ class TestCassandraUpdateFetcher:
     def check_update_fields(update, expected_fields):
         actual_fields = {}
         for field in update.fields:
-            assert not field.name in actual_fields
+            assert field.name not in actual_fields
             actual_fields[field.name] = field.value
 
         for (expected_name, expected_value) in expected_fields.items():
@@ -149,6 +149,6 @@ class TestCassandraUpdateFetcher:
         updates_by_key = {}
         for update in updates:
             key = update.identifier.key
-            assert not key in updates_by_key
+            assert key not in updates_by_key
             updates_by_key[key] = update
         return updates_by_key

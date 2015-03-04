@@ -1,7 +1,8 @@
+from app.core.AbstractDataObject import AbstractDataObject
 from app.sync.FieldUpdate import FieldUpdate
 
 
-class EntityUpdate(object):
+class EntityUpdate(AbstractDataObject):
 
     def __init__(self, event):
         self._event = event
@@ -25,3 +26,13 @@ class EntityUpdate(object):
     @property
     def get_fields(self):
         return self._fields
+
+    def _deep_equals(self, other):
+        return self._event == other._event and \
+               self._fields == other._fields
+
+    def _deep_hash(self):
+        if self._fields:
+            return hash((self._event, frozenset(self._fields)))
+        else:
+            return hash(self._event)

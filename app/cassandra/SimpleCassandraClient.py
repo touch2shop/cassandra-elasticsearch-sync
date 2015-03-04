@@ -45,7 +45,7 @@ class SimpleCassandraClient(object):
 
         statement = self.prepare_statement(
             """
-            SELECT %s FROM %s.%s WHERE %s=?
-            """ % (columns_string, keyspace, table, id_column_name)
+            SELECT %s FROM %s.%s WHERE %s=%s
+            """ % (columns_string, keyspace, table, id_column_name, _id)
         )
-        return self.execute(statement, [_id])
+        return self.execute(statement)

@@ -3,12 +3,12 @@ import pytest
 
 from app.sync.UpdateEvent import UpdateEvent
 from app.sync.CombinedUpdateEvent import CombinedUpdateEvent
-from app.sync.EntityIdentifier import EntityIdentifier
+from app.sync.Identifier import Identifier
 
 
 @pytest.fixture
 def identifier():
-    return EntityIdentifier("shop", "order", 123)
+    return Identifier("shop", "order", 123)
 
 
 # noinspection PyClassHasNoInit,PyShadowingNames,PyMethodMayBeStatic

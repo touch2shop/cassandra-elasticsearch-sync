@@ -1,5 +1,5 @@
 from hamcrest import assert_that, contains_inanyorder
-from app.sync.EntityIdentifier import EntityIdentifier
+from app.sync.Identifier import Identifier
 from app.sync.UpdateEvent import UpdateEvent
 from app.sync.UpdateEventCombiner import UpdateEventCombiner
 
@@ -11,13 +11,13 @@ class TestUpdateEventCombiner:
         base_timestamp = 1425324825.630933
 
         combined_events = [
-            UpdateEvent(EntityIdentifier("test", "product", 1), base_timestamp + 1, field_names={"a", "b", "c"}),
-            UpdateEvent(EntityIdentifier("test", "product", 1), base_timestamp + 2, field_names={"a", "b"}),
-            UpdateEvent(EntityIdentifier("test", "product", 2), base_timestamp + 2, field_names={"c", "d"}),
-            UpdateEvent(EntityIdentifier("test", "product", 2), base_timestamp + 4, field_names={"c", "d"}),
-            UpdateEvent(EntityIdentifier("test", "product", 1), base_timestamp + 5, is_delete=True),
-            UpdateEvent(EntityIdentifier("test", "product", 2), base_timestamp + 6, field_names={"e"}),
-            UpdateEvent(EntityIdentifier("test", "product", 3), base_timestamp + 7, field_names={"e"})]
+            UpdateEvent(Identifier("test", "product", 1), base_timestamp + 1, field_names={"a", "b", "c"}),
+            UpdateEvent(Identifier("test", "product", 1), base_timestamp + 2, field_names={"a", "b"}),
+            UpdateEvent(Identifier("test", "product", 2), base_timestamp + 2, field_names={"c", "d"}),
+            UpdateEvent(Identifier("test", "product", 2), base_timestamp + 4, field_names={"c", "d"}),
+            UpdateEvent(Identifier("test", "product", 1), base_timestamp + 5, is_delete=True),
+            UpdateEvent(Identifier("test", "product", 2), base_timestamp + 6, field_names={"e"}),
+            UpdateEvent(Identifier("test", "product", 3), base_timestamp + 7, field_names={"e"})]
 
         combined_events = UpdateEventCombiner.combine(combined_events)
         combined_events_by_identifier = {}
@@ -26,16 +26,16 @@ class TestUpdateEventCombiner:
             assert identifier not in combined_events_by_identifier
             combined_events_by_identifier[identifier] = combined_event
 
-        combined_event_1 = combined_events_by_identifier[EntityIdentifier("test", "product", 1)]
+        combined_event_1 = combined_events_by_identifier[Identifier("test", "product", 1)]
         assert combined_event_1.is_delete is True
         assert combined_event_1.timestamp == base_timestamp + 5
 
-        combined_event_2 = combined_events_by_identifier[EntityIdentifier("test", "product", 2)]
+        combined_event_2 = combined_events_by_identifier[Identifier("test", "product", 2)]
         assert combined_event_2.is_delete is False
         assert_that(combined_event_2.field_names, contains_inanyorder("c", "d", "e"))
         assert combined_event_2.timestamp == base_timestamp + 6
 
-        combined_event_3 = combined_events_by_identifier[EntityIdentifier("test", "product", 3)]
+        combined_event_3 = combined_events_by_identifier[Identifier("test", "product", 3)]
         assert combined_event_3.is_delete is False
         assert_that(combined_event_3.field_names, contains_inanyorder("e"))
         assert combined_event_3.timestamp == base_timestamp + 7

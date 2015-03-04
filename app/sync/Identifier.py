@@ -1,7 +1,7 @@
 from app.core.AbstractDataObject import AbstractDataObject
 
 
-class EntityIdentifier(AbstractDataObject):
+class Identifier(AbstractDataObject):
 
     def __init__(self, namespace, table, key):
         self._namespace = namespace

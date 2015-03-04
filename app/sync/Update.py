@@ -2,7 +2,7 @@ from app.core.AbstractDataObject import AbstractDataObject
 from app.sync.FieldUpdate import FieldUpdate
 
 
-class EntityUpdate(AbstractDataObject):
+class Update(AbstractDataObject):
 
     def __init__(self, event):
         self._event = event

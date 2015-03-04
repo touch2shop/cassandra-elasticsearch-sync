@@ -1,7 +1,7 @@
 from time import sleep
 import pytest
 from time_uuid import TimeUUID
-from app.sync.EntityIdentifier import EntityIdentifier
+from app.sync.Identifier import Identifier
 from app.sync.UpdateEvent import UpdateEvent
 
 
@@ -11,7 +11,7 @@ def generate_timestamp():
 
 @pytest.fixture
 def identifier():
-    return EntityIdentifier("shop", "product", 123)
+    return Identifier("shop", "product", 123)
 
 
 # noinspection PyShadowingNames
@@ -37,7 +37,7 @@ def slightly_different_update_event(identifier):
 
 @pytest.fixture
 def very_different_update_event():
-    different_identifier = EntityIdentifier("shop", "product", 456)
+    different_identifier = Identifier("shop", "product", 456)
     return UpdateEvent(identifier=different_identifier, timestamp=generate_timestamp(),
                        is_delete=True, field_names={})
 

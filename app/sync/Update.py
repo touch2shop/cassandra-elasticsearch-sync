@@ -9,12 +9,12 @@ class Update(AbstractDataObject):
         self._fields = []
 
     @property
-    def identifier(self):
-        return self._event.identifier
-
-    @property
     def event(self):
         return self._event
+
+    @property
+    def identifier(self):
+        return self._event.identifier
 
     @property
     def is_delete(self):
@@ -43,8 +43,9 @@ class Update(AbstractDataObject):
 
     def __repr__(self):
         return repr({
+            "identifier": repr(self.identifier),
             "is_delete": self.is_delete,
             "timestamp": self.timestamp,
-            "fields": self.fields,
-            "event": self.event
+            "fields": repr(self.fields),
+            "event": repr(self.event)
         })

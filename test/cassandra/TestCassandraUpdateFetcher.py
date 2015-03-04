@@ -6,9 +6,9 @@ from test.cassandra.fixtures import ProductFixture
 from app.cassandra.CassandraUpdateFetcher import CassandraUpdateFetcher
 
 
-@pytest.fixture(scope="function")
-def setup(product_fixture_store):
-    product_fixture_store.delete_all()
+@pytest.fixture(scope="module")
+def setup(product_fixture_store, cassandra_log_entry_store):
+    cassandra_log_entry_store.delete_all()
 
 
 @pytest.fixture(scope="function")
@@ -19,6 +19,7 @@ def product_fixtures_creation_time():
 # noinspection PyUnusedLocal,PyShadowingNames
 @pytest.fixture(scope="function")
 def product_fixtures(product_fixture_store, product_fixtures_creation_time):
+    product_fixture_store.delete_all()
     products = [ProductFixture(uuid.uuid4(), "navy polo shirt", 5, "great shirt, great price!"),
                 ProductFixture(uuid.uuid4(), "cool red shorts", 7, "perfect to go to the beach"),
                 ProductFixture(uuid.uuid4(), "black DC skater shoes", 10, "yo!")]
@@ -38,25 +39,78 @@ def cassandra_update_fetcher(cassandra_log_entry_store):
 @pytest.mark.usefixtures("create_product_fixture_schema", "setup")
 class TestCassandraUpdateFetcher:
 
-    def test_fetch_updates_for_product_fixtures_creation_from_beggining_of_time(self, cassandra_update_fetcher,
-                                                         product_fixtures, product_fixture_table,
-                                                         cassandra_fixture_keyspace,
-                                                         product_fixtures_creation_time):
+    def test_fetch_updates_for_product_fixtures_creation_from_beginning_of_time(
+            self, cassandra_update_fetcher, product_fixtures, product_fixture_table,
+            cassandra_fixture_keyspace, product_fixtures_creation_time):
 
         updates = cassandra_update_fetcher.fetch_updates()
-        updates_by_key = self.group_updates_by_key(updates)
+        updates_by_key = self.sort_updates_by_key(updates)
 
-        assert len(updates_by_key) >= 3
+        assert len(updates_by_key) == 3
         for product_fixture in product_fixtures:
             key = str(product_fixture.id_)
             assert key in updates_by_key
-            updates = updates_by_key[key]
-            assert len(updates) == 1
-            update = updates[0]
+            update = updates_by_key[key]
 
             self.check_update_timestamp(update, product_fixtures_creation_time)
             self.check_update_identifier(update, cassandra_fixture_keyspace, product_fixture_table)
             self.check_update_matches_product_fixture_creation(update, product_fixture)
+
+    def test_fetch_updates_for_product_fixtures_creation_with_minimum_time_in_utc(
+            self, cassandra_update_fetcher, product_fixtures, product_fixture_table,
+            cassandra_fixture_keyspace, product_fixtures_creation_time):
+
+        updates = cassandra_update_fetcher.fetch_updates(product_fixtures_creation_time)
+        updates_by_key = self.sort_updates_by_key(updates)
+
+        assert len(updates_by_key) == 3
+        for product_fixture in product_fixtures:
+            assert product_fixture.key in updates_by_key
+            update = updates_by_key[product_fixture.key]
+
+            self.check_update_timestamp(update, product_fixtures_creation_time)
+            self.check_update_identifier(update, cassandra_fixture_keyspace, product_fixture_table)
+            self.check_update_matches_product_fixture_creation(update, product_fixture)
+
+    def test_fetch_updates_for_product_fixtures_updates(
+            self, cassandra_update_fetcher, product_fixtures, product_fixture_store, product_fixture_table,
+            cassandra_fixture_keyspace):
+
+        update_time = datetime.now()
+
+        product_fixtures[0].name = "new name"
+        product_fixture_store.update(product_fixtures[0])
+        product_fixture_store.update(product_fixtures[0])
+        product_fixtures[0].description = "new description"
+        product_fixture_store.update(product_fixtures[0])
+
+        product_fixtures[1].description = "new description"
+        product_fixture_store.update(product_fixtures[1])
+        product_fixture_store.delete(product_fixtures[1])
+
+        product_fixtures[2].quantity = 100
+        product_fixture_store.update(product_fixtures[2])
+
+        updates = cassandra_update_fetcher.fetch_updates(update_time)
+
+        updates_by_key = self.sort_updates_by_key(updates)
+        assert len(updates_by_key) == 3
+
+        for product_fixture in product_fixtures:
+            assert product_fixture.key in updates_by_key
+            update = updates_by_key[product_fixture.key]
+
+            self.check_update_timestamp(update, update_time)
+            self.check_update_identifier(update, cassandra_fixture_keyspace, product_fixture_table)
+
+        assert updates_by_key[product_fixtures[0].key].is_delete is False
+        self.check_update_fields(updates_by_key[product_fixtures[0].key],
+                                 {"name": "new name", "description": "new description"})
+
+        assert updates_by_key[product_fixtures[1].key].is_delete is True
+
+        self.check_update_fields(updates_by_key[product_fixtures[2].key], {"quantity": 100})
+        assert updates_by_key[product_fixtures[2].key].is_delete is False
 
     @staticmethod
     def check_update_identifier(update, keyspace, product_fixture_table):
@@ -80,11 +134,21 @@ class TestCassandraUpdateFetcher:
         for field in update.fields:
             assert attrgetter(field.name)(product_fixture) == field.value
 
-    def group_updates_by_key(self, updates):
+    @staticmethod
+    def check_update_fields(update, expected_fields):
+        actual_fields = {}
+        for field in update.fields:
+            assert not field.name in actual_fields
+            actual_fields[field.name] = field.value
+
+        for (expected_name, expected_value) in expected_fields.items():
+            assert actual_fields[expected_name] == expected_value
+
+    @staticmethod
+    def sort_updates_by_key(updates):
         updates_by_key = {}
         for update in updates:
             key = update.identifier.key
-            if key not in updates_by_key:
-                updates_by_key[key] = list()
-            updates_by_key[key].append(update)
+            assert not key in updates_by_key
+            updates_by_key[key] = update
         return updates_by_key

@@ -7,6 +7,10 @@ class ProductFixture:
         self.quantity = quantity
         self.description = description
 
+    @property
+    def key(self):
+        return str(self.id_)
+
 
 class ProductFixtureStore(AbstractCassandraStore):
 
@@ -29,6 +33,14 @@ class ProductFixtureStore(AbstractCassandraStore):
             WHERE id=?
             """ % self.table)
         self.execute(statement, [product.name, product.quantity, product.description, product.id_])
+
+    def delete(self, product):
+        statement = self.prepare_statement(
+            """
+            DELETE FROM %s
+            WHERE id=?
+            """ % self.table)
+        self.execute(statement, [product.id_])
 
     def delete_all(self):
         self.execute("TRUNCATE %s" % self.table)

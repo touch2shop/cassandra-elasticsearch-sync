@@ -4,13 +4,15 @@ from app.core.AbstractDataObject import AbstractDataObject
 
 class CassandraLogEntry(AbstractDataObject):
 
-    def __init__(self):
-        self._logged_keyspace = None
-        self._logged_table = None
-        self._logged_key = None
-        self._time_uuid = None
-        self._operation = None
-        self._updated_columns = None
+    def __init__(self, logged_keyspace=None, logged_table=None, logged_key=None,
+                 time_uuid=None, operation=None, updated_columns=None):
+
+        self._logged_keyspace = logged_keyspace
+        self._logged_table = logged_table
+        self._logged_key = logged_key
+        self._time_uuid = time_uuid
+        self._operation = operation
+        self._updated_columns = updated_columns
 
     @property
     def time_uuid(self):
@@ -71,7 +73,15 @@ class CassandraLogEntry(AbstractDataObject):
 
     @property
     def is_delete(self):
-        return self._operation.lower() == "delete"
+        if self._operation:
+            return self._operation.lower() == "delete"
+        return False
+
+    @property
+    def is_save(self):
+        if self._operation:
+            return self._operation.lower() == "save"
+        return False
 
     @property
     def updated_columns(self):

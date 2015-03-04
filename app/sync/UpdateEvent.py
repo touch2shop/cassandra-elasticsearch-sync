@@ -43,3 +43,11 @@ class UpdateEvent(AbstractDataObject):
             self.timestamp == other.timestamp and \
             self.is_delete == other.is_delete and \
             self.field_names == other.field_names
+
+    def __repr__(self):
+        return repr({
+            "identifier": self.identifier,
+            "timestamp": self.timestamp,
+            "is_delete": self.is_delete,
+            "field_names": repr(self.field_names)
+        })

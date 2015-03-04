@@ -13,6 +13,10 @@ class Update(AbstractDataObject):
         return self._event.identifier
 
     @property
+    def event(self):
+        return self._event
+
+    @property
     def is_delete(self):
         return self._event.is_delete
 
@@ -24,7 +28,7 @@ class Update(AbstractDataObject):
         self._fields.append(FieldUpdate(name, value, timestamp))
 
     @property
-    def get_fields(self):
+    def fields(self):
         return self._fields
 
     def _deep_equals(self, other):
@@ -36,3 +40,11 @@ class Update(AbstractDataObject):
             return hash((self._event, frozenset(self._fields)))
         else:
             return hash(self._event)
+
+    def __repr__(self):
+        return repr({
+            "is_delete": self.is_delete,
+            "timestamp": self.timestamp,
+            "fields": self.fields,
+            "event": self.event
+        })

@@ -27,3 +27,10 @@ class FieldUpdate(AbstractDataObject):
 
     def _deep_hash(self):
         return hash((self.name, self.value, self.timestamp))
+
+    def __repr__(self):
+        return repr({
+            "name": self.name,
+            "value": self.value,
+            "timestamp": self.timestamp
+        })

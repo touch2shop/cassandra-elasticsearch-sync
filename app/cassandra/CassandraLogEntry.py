@@ -117,10 +117,10 @@ class CassandraLogEntry(AbstractDataObject):
 
     def __repr__(self):
         return repr({
-            "time_uuid": repr(self.time_uuid),
-            "logged_keyspace": repr(self.logged_keyspace),
-            "logged_table": repr(self.logged_table),
-            "logged_key": repr(self.logged_key),
-            "operation": repr(self.operation),
+            "time_uuid": self.time_uuid,
+            "logged_keyspace": self.logged_keyspace,
+            "logged_table": self.logged_table,
+            "logged_key": self.logged_key,
+            "operation": self.operation,
             "updated_columns": repr(self.updated_columns),
         })

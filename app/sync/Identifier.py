@@ -28,7 +28,7 @@ class Identifier(AbstractDataObject):
 
     def __repr__(self):
         return repr({
-            "namespace": repr(self.namespace),
-            "table": repr(self.table),
-            "key": repr(self.key)
+            "namespace": self.namespace,
+            "table": self.table,
+            "key": self.key
         })

@@ -45,6 +45,7 @@ class CassandraUpdateFetcher(object):
             update = self._fetch_update(update_event)
             if update:
                 updates.append(update)
+        return updates
 
     def _fetch_update(self, update_event):
         if update_event.is_delete:

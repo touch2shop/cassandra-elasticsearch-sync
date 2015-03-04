@@ -1,6 +1,8 @@
 import uuid
+
 import pytest
-from app.cassandra.SimpleCassandraClient import SimpleCassandraClient
+
+from app.cassandra.store.SimpleCassandraClient import SimpleCassandraClient
 from test.cassandra.fixtures import ProductFixture
 
 

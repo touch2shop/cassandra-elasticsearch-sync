@@ -1,8 +1,9 @@
 # py.test configuration file.
 
 import pytest
-from app.cassandra.CassandraLogEntryStore import CassandraLogEntryStore
-from app.cassandra.SimpleCassandraClient import SimpleCassandraClient
+
+from app.cassandra.store.CassandraLogEntryStore import CassandraLogEntryStore
+from app.cassandra.store.SimpleCassandraClient import SimpleCassandraClient
 
 
 @pytest.fixture(scope="session")

@@ -1,4 +1,4 @@
-from app.cassandra.AbstractCassandraStore import AbstractCassandraStore
+from app.cassandra.store.AbstractCassandraStore import AbstractCassandraStore
 from app.cassandra.CassandraLogEntry import CassandraLogEntry
 
 

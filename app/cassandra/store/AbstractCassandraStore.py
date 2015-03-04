@@ -1,4 +1,4 @@
-from app.cassandra.SimpleCassandraClient import SimpleCassandraClient
+from app.cassandra.store.SimpleCassandraClient import SimpleCassandraClient
 
 
 class AbstractCassandraStore(SimpleCassandraClient):

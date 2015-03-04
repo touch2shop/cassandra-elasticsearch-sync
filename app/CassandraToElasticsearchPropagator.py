@@ -1,5 +1,6 @@
 from app.cassandra.CassandraUpdateFetcher import CassandraUpdateFetcher
-from app.cassandra.CassandraLogEntryStore import CassandraLogEntryStore
+from app.cassandra.store.CassandraLogEntryStore import CassandraLogEntryStore
+
 
 class CassandraToElasticSearchPropagator:
 
@@ -9,4 +10,5 @@ class CassandraToElasticSearchPropagator:
         self._cassandra_update_fetcher = CassandraUpdateFetcher(cassandra_log_entry_store)
 
     def propagate_updates(self, minimum_time=None):
-        cassandra_updates = self._cassandra_update_fetcher.fetch_updates(minimum_time)
+        updates = self._cassandra_update_fetcher.fetch_updates(minimum_time)
+

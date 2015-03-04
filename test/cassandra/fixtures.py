@@ -1,4 +1,5 @@
-from app.cassandra.AbstractCassandraStore import AbstractCassandraStore
+from app.cassandra.store.AbstractCassandraStore import AbstractCassandraStore
+
 
 class ProductFixture:
     def __init__(self, id_, name, quantity, description):

@@ -64,13 +64,12 @@ class CassandraUpdateFetcher(object):
                                                    _id.namespace, self._id_column_name)
 
         if len(rows) > 1:
-            self._logger.error("More than one row found for log entry %s. " +
-                               "Please make sure this table schema has a single primary key with name %s. " +
-                               "No action performed.", _id, self._id_column_name)
-            return None
+            raise Exception(("More than one row found for entity %s on Cassandra. " +
+                             "Please make sure the schema has a single primary key with name %s. " +
+                             "No actions performed.") % (_id, self._id_column_name))
         elif len(rows) == 0:
             # If the entity was deleted, a delete event will be will be available in the next log fetch.
-            self._logger.info("No row found for log entry %s. No action performed.", _id)
+            self._logger.info("No row found for entity %s on Cassandra. No actions performed.", _id)
             return None
 
         return self._to_update(rows[0], update_event)

@@ -11,51 +11,51 @@ from app.sync.UpdateEvent import UpdateEvent
 class TestUpdateContainer:
 
     def test_updates_are_sorted_correctly(self):
-        from_keyspace1_table1 = [
-            Update(UpdateEvent(Identifier("keyspace1", "table1", uuid.uuid4()), timestamp=1)),
-            Update(UpdateEvent(Identifier("keyspace1", "table1", uuid.uuid4()), timestamp=2)),
-            Update(UpdateEvent(Identifier("keyspace1", "table1", uuid.uuid4()), timestamp=3)),
-            Update(UpdateEvent(Identifier("keyspace1", "table1", uuid.uuid4()), timestamp=4))
+        from_namespace1_table1 = [
+            Update(UpdateEvent(Identifier("namespace1", "table1", uuid.uuid4()), timestamp=1)),
+            Update(UpdateEvent(Identifier("namespace1", "table1", uuid.uuid4()), timestamp=2)),
+            Update(UpdateEvent(Identifier("namespace1", "table1", uuid.uuid4()), timestamp=3)),
+            Update(UpdateEvent(Identifier("namespace1", "table1", uuid.uuid4()), timestamp=4))
         ]
 
-        from_keyspace1_table2 = [
-            Update(UpdateEvent(Identifier("keyspace1", "table2", uuid.uuid4()), timestamp=1)),
-            Update(UpdateEvent(Identifier("keyspace1", "table2", uuid.uuid4()), timestamp=2)),
-            Update(UpdateEvent(Identifier("keyspace1", "table2", uuid.uuid4()), timestamp=3)),
-            Update(UpdateEvent(Identifier("keyspace1", "table2", uuid.uuid4()), timestamp=4))
+        from_namespace1_table2 = [
+            Update(UpdateEvent(Identifier("namespace1", "table2", uuid.uuid4()), timestamp=1)),
+            Update(UpdateEvent(Identifier("namespace1", "table2", uuid.uuid4()), timestamp=2)),
+            Update(UpdateEvent(Identifier("namespace1", "table2", uuid.uuid4()), timestamp=3)),
+            Update(UpdateEvent(Identifier("namespace1", "table2", uuid.uuid4()), timestamp=4))
         ]
 
-        from_keyspace2_table3 = [
-            Update(UpdateEvent(Identifier("keyspace2", "table3", uuid.uuid4()), timestamp=1)),
-            Update(UpdateEvent(Identifier("keyspace2", "table3", uuid.uuid4()), timestamp=2)),
-            Update(UpdateEvent(Identifier("keyspace2", "table3", uuid.uuid4()), timestamp=3)),
-            Update(UpdateEvent(Identifier("keyspace2", "table3", uuid.uuid4()), timestamp=4))
+        from_namespace2_table3 = [
+            Update(UpdateEvent(Identifier("namespace2", "table3", uuid.uuid4()), timestamp=1)),
+            Update(UpdateEvent(Identifier("namespace2", "table3", uuid.uuid4()), timestamp=2)),
+            Update(UpdateEvent(Identifier("namespace2", "table3", uuid.uuid4()), timestamp=3)),
+            Update(UpdateEvent(Identifier("namespace2", "table3", uuid.uuid4()), timestamp=4))
         ]
 
-        from_keyspace2_table4 = [
-            Update(UpdateEvent(Identifier("keyspace2", "table4", uuid.uuid4()), timestamp=1)),
-            Update(UpdateEvent(Identifier("keyspace2", "table4", uuid.uuid4()), timestamp=2)),
-            Update(UpdateEvent(Identifier("keyspace2", "table4", uuid.uuid4()), timestamp=3)),
-            Update(UpdateEvent(Identifier("keyspace2", "table4", uuid.uuid4()), timestamp=4))
+        from_namespace2_table4 = [
+            Update(UpdateEvent(Identifier("namespace2", "table4", uuid.uuid4()), timestamp=1)),
+            Update(UpdateEvent(Identifier("namespace2", "table4", uuid.uuid4()), timestamp=2)),
+            Update(UpdateEvent(Identifier("namespace2", "table4", uuid.uuid4()), timestamp=3)),
+            Update(UpdateEvent(Identifier("namespace2", "table4", uuid.uuid4()), timestamp=4))
         ]
 
         all_updates = list()
-        all_updates.extend(from_keyspace1_table1)
-        all_updates.extend(from_keyspace1_table2)
-        all_updates.extend(from_keyspace2_table3)
-        all_updates.extend(from_keyspace2_table4)
+        all_updates.extend(from_namespace1_table1)
+        all_updates.extend(from_namespace1_table2)
+        all_updates.extend(from_namespace2_table3)
+        all_updates.extend(from_namespace2_table4)
         random.shuffle(all_updates)
 
         container = UpdateContainer(all_updates)
-        assert_that(container.get_namespaces(), contains_inanyorder("keyspace1", "keyspace2"))
+        assert_that(container.get_namespaces(), contains_inanyorder("namespace1", "namespace2"))
 
-        assert_that(container.get_tables("keyspace1"), contains_inanyorder("table1", "table2"))
-        assert_that(container.get_updates("keyspace1", "table1"), contains_inanyorder(*from_keyspace1_table1))
-        assert_that(container.get_updates("keyspace1", "table2"), contains_inanyorder(*from_keyspace1_table2))
+        assert_that(container.get_tables("namespace1"), contains_inanyorder("table1", "table2"))
+        assert_that(container.get_updates("namespace1", "table1"), contains_inanyorder(*from_namespace1_table1))
+        assert_that(container.get_updates("namespace1", "table2"), contains_inanyorder(*from_namespace1_table2))
 
-        assert_that(container.get_tables("keyspace2"), contains_inanyorder("table3", "table4"))
-        assert_that(container.get_updates("keyspace2", "table3"), contains_inanyorder(*from_keyspace2_table3))
-        assert_that(container.get_updates("keyspace2", "table4"), contains_inanyorder(*from_keyspace2_table4))
+        assert_that(container.get_tables("namespace2"), contains_inanyorder("table3", "table4"))
+        assert_that(container.get_updates("namespace2", "table3"), contains_inanyorder(*from_namespace2_table3))
+        assert_that(container.get_updates("namespace2", "table4"), contains_inanyorder(*from_namespace2_table4))
 
         assert_that(container.get_all_updates(), contains_inanyorder(*all_updates))
 

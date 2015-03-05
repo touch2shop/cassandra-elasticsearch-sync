@@ -3,11 +3,23 @@
 class UpdateContainer(object):
 
     def __init__(self, updates):
-        self._update_map = self.__build_update_map(updates)
-        self._updates = frozenset(updates)
+        if updates:
+            self._update_map = self.__build_update_map(updates)
+            self._updates = frozenset(updates)
+        else:
+            self._update_map = {}
+            self._updates = frozenset()
+
+    def has_namespace(self, namespace):
+        return namespace in self._update_map
 
     def get_namespaces(self):
         return self._update_map.keys()
+
+    def has_table(self, namespace, table):
+        if not self.has_namespace(namespace):
+            return False
+        return table in self._update_map[namespace]
 
     def get_tables(self, namespace):
         return self._update_map[namespace].keys()

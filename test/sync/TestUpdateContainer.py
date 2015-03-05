@@ -86,3 +86,26 @@ class TestUpdateContainer:
 
         container = UpdateContainer(updates)
         assert len(container) == len(updates)
+
+    def test_has_namespace(self):
+        updates = [
+            Update(UpdateEvent(Identifier("foo", "lollipop", uuid.uuid4()), timestamp=1)),
+            Update(UpdateEvent(Identifier("foo", "cookies", uuid.uuid4()), timestamp=2)),
+            Update(UpdateEvent(Identifier("bar", "waffles", uuid.uuid4()), timestamp=3)),
+            Update(UpdateEvent(Identifier("bar", "ice_cream", uuid.uuid4()), timestamp=4)),
+        ]
+        container = UpdateContainer(updates)
+        assert container.has_namespace("foo")
+        assert container.has_namespace("bar")
+        assert not container.has_namespace("bananas")
+
+    def test_has_table(self):
+        updates = [
+            Update(UpdateEvent(Identifier("foo", "lollipop", uuid.uuid4()), timestamp=1)),
+            Update(UpdateEvent(Identifier("bar", "waffles", uuid.uuid4()), timestamp=3)),
+        ]
+        container = UpdateContainer(updates)
+        assert container.has_table("bar", "waffles")
+        assert container.has_table("foo", "lollipop")
+        assert not container.has_table("foo", "bananas")
+        assert not container.has_table("what", "bananas")

@@ -2,6 +2,7 @@ from operator import attrgetter
 
 from app.sync.Identifier import Identifier
 from app.sync.Update import Update
+from app.sync.UpdateContainer import UpdateContainer
 from app.sync.UpdateEvent import UpdateEvent
 from app.sync.UpdateEventCombiner import UpdateEventCombiner
 
@@ -18,7 +19,8 @@ class CassandraUpdateFetcher(object):
     def fetch_updates(self, minimum_log_entry_time=None):
         log_entries = self._fetch_log_entries(minimum_log_entry_time)
         combined_update_events = self._combine_update_events(log_entries)
-        return self._fetch_updates(combined_update_events)
+        updates = self._fetch_updates(combined_update_events)
+        return UpdateContainer(updates)
 
     def _fetch_log_entries(self, minimum_time):
         if minimum_time is None:

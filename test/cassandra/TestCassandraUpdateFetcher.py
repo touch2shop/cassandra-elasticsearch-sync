@@ -144,6 +144,9 @@ class TestCassandraUpdateFetcher:
         for (expected_name, expected_value) in expected_fields.items():
             assert actual_fields[expected_name] == expected_value
 
+        assert "created_at" not in actual_fields
+        assert "updated_at" not in actual_fields
+
     @staticmethod
     def sort_updates_by_key(updates):
         updates_by_key = {}

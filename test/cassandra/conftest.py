@@ -19,7 +19,9 @@ def create_product_fixture_schema(cassandra_fixture_client, product_fixture_tabl
           id uuid PRIMARY KEY,
           name text,
           quantity int,
-          description text
+          description text,
+          created_at timestamp,
+          updated_at timestamp
         )
         """ % product_fixture_table)
 

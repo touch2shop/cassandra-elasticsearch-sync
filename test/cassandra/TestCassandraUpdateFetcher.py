@@ -117,15 +117,19 @@ class TestCassandraUpdateFetcher:
         assert update.identifier.namespace == keyspace
         assert update.identifier.table == product_fixture_table
 
-    @staticmethod
-    def check_update_timestamp(update, operation_time):
-        update_time = datetime.utcfromtimestamp(update.timestamp)
+    @classmethod
+    def check_update_timestamp(cls, update, operation_time):
+        update_time = cls.utc_datetime_from_timestamp(update.timestamp)
         assert datetime.utcnow() >= update_time
         assert update_time >= operation_time
         if update.fields:
             for field in update.fields:
                 assert field.timestamp <= update.timestamp
-                assert datetime.utcfromtimestamp(field.timestamp) >= operation_time
+                assert cls.utc_datetime_from_timestamp(field.timestamp) >= operation_time
+
+    @staticmethod
+    def utc_datetime_from_timestamp(timestamp):
+        return datetime.utcfromtimestamp(timestamp / 1000.0)
 
     @staticmethod
     def check_update_matches_product_fixture_creation(update, product_fixture):

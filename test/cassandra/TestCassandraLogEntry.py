@@ -1,3 +1,5 @@
+from datetime import datetime
+from time_uuid import TimeUUID
 from app.cassandra.CassandraLogEntry import CassandraLogEntry
 
 
@@ -17,3 +19,9 @@ class TestCassandraLogEntry:
         assert CassandraLogEntry(operation="bananas").is_save is False
         assert CassandraLogEntry(operation="delete").is_save is False
         assert CassandraLogEntry(operation=None).is_save is False
+
+    def test_get_timestamp(self):
+        utc_time = datetime.utcnow()
+        log_entry = CassandraLogEntry(time_uuid=TimeUUID.convert(utc_time))
+
+        assert datetime.utcfromtimestamp(log_entry.timestamp/1000.0) == utc_time

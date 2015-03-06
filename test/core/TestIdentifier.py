@@ -1,6 +1,6 @@
 import pytest
 
-from app.sync.Identifier import Identifier
+from app.core.Identifier import Identifier
 
 
 @pytest.fixture

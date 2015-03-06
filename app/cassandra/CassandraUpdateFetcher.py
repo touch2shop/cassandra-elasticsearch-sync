@@ -1,11 +1,11 @@
 import logging
 from operator import attrgetter
 
-from app.sync.Identifier import Identifier
-from app.sync.Update import Update
-from app.sync.UpdateContainer import UpdateContainer
-from app.sync.UpdateEvent import UpdateEvent
-from app.sync.UpdateEventCombiner import UpdateEventCombiner
+from app.core.Identifier import Identifier
+from app.core.Update import Update
+from app.core.UpdateContainer import UpdateContainer
+from app.core.UpdateEvent import UpdateEvent
+from app.core.UpdateEventCombiner import UpdateEventCombiner
 
 
 _DEFAULT_ID_COLUMN_NAME = "id"

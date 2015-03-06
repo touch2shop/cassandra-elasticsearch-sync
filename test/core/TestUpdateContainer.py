@@ -1,10 +1,10 @@
 import random
 import uuid
 from hamcrest import contains_inanyorder, assert_that
-from app.sync.Identifier import Identifier
-from app.sync.Update import Update
-from app.sync.UpdateContainer import UpdateContainer
-from app.sync.UpdateEvent import UpdateEvent
+from app.core.Identifier import Identifier
+from app.core.Update import Update
+from app.core.UpdateContainer import UpdateContainer
+from app.core.UpdateEvent import UpdateEvent
 
 
 # noinspection PyMethodMayBeStatic,PyClassHasNoInit

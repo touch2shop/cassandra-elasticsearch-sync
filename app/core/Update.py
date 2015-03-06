@@ -1,5 +1,5 @@
 from app.core.AbstractDataObject import AbstractDataObject
-from app.sync.FieldUpdate import FieldUpdate
+from app.core.FieldUpdate import FieldUpdate
 
 
 class Update(AbstractDataObject):

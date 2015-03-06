@@ -1,6 +1,7 @@
 from sortedcontainers import SortedSet
+
 from app.core.AbstractDataObject import AbstractDataObject
-from app.sync.UpdateEventField import UpdateEventField
+from app.core.UpdateEventField import UpdateEventField
 
 
 class CombinedUpdateEvent(AbstractDataObject):

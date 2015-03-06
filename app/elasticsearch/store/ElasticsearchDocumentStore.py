@@ -3,8 +3,8 @@ import logging
 from uuid import UUID
 from app.elasticsearch.ElasticsearchDocument import ElasticsearchDocument
 from app.elasticsearch.store.SimpleElasticsearchClient import SimpleElasticsearchClient
-from app.sync.Identifier import Identifier
-from app.sync.ValueField import ValueField
+from app.core.Identifier import Identifier
+from app.core.ValueField import ValueField
 
 
 _WRITE_CONSISTENCY = "quorum"

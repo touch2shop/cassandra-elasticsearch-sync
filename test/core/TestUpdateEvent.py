@@ -1,8 +1,8 @@
 from time import sleep
 import pytest
 from time_uuid import TimeUUID
-from app.sync.Identifier import Identifier
-from app.sync.UpdateEvent import UpdateEvent
+from app.core.Identifier import Identifier
+from app.core.UpdateEvent import UpdateEvent
 
 
 def generate_timestamp():

@@ -1,4 +1,5 @@
 from time_uuid import TimeUUID
+
 from app.core.AbstractDataObject import AbstractDataObject
 
 

@@ -35,7 +35,7 @@ class CassandraLogEntry(AbstractDataObject):
     @property
     def timestamp(self):
         if self.time_uuid is not None:
-            return self.time_uuid.get_timestamp() * 1000
+            return self.time_uuid.get_timestamp()
         else:
             return None
 

@@ -24,4 +24,10 @@ class TestCassandraLogEntry:
         utc_time = datetime.utcnow()
         log_entry = CassandraLogEntry(time_uuid=TimeUUID.convert(utc_time))
 
-        assert datetime.utcfromtimestamp(log_entry.timestamp/1000.0) == utc_time
+        assert datetime.utcfromtimestamp(log_entry.timestamp) == utc_time
+
+    def test_get_time(self):
+        utc_time = datetime.utcnow()
+        log_entry = CassandraLogEntry(time_uuid=TimeUUID.convert(utc_time))
+
+        assert log_entry.time == utc_time

@@ -21,8 +21,8 @@ class UpdateEventField(AbstractDataObject):
     def _deep_hash(self):
         return hash((self.name, self.timestamp))
 
-    def __repr__(self):
-        return repr({
+    def _deep_string(self):
+        return {
             "name": self.name,
             "timestamp": self.timestamp
-        })
+        }

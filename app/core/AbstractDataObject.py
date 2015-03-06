@@ -25,3 +25,10 @@ class AbstractDataObject(object):
 
     def __hash__(self):
         return self._deep_hash()
+
+    @abstractmethod
+    def _deep_string(self):
+        pass
+
+    def __repr__(self):
+        return repr(self._deep_string)

@@ -59,10 +59,10 @@ class CombinedUpdateEvent(AbstractDataObject):
         else:
             return hash(self._identifier)
 
-    def __repr__(self):
-        return repr({
+    def _deep_string(self):
+        return {
             "identifier": repr(self.identifier),
             "timestamp": self.timestamp,
             "is_delete": self.is_delete,
             "fields": repr(self.fields)
-        })
+        }

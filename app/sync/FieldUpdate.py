@@ -1,36 +1,30 @@
-from app.core.AbstractDataObject import AbstractDataObject
+from app.sync.ValueField import ValueField
 
 
-class FieldUpdate(AbstractDataObject):
+class FieldUpdate(ValueField):
 
     def __init__(self, name, value, timestamp):
-        self._name = name
-        self._value = value
+        super(FieldUpdate, self).__init__(name, value)
         self._timestamp = timestamp
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def value(self):
-        return self._value
 
     @property
     def timestamp(self):
         return self._timestamp
 
+    # FIXME: couldn't find a way to call ValueField super method without causing an infinite recursion
     def _deep_equals(self, other):
         return self.name == other.name and \
             self.value == other.value and \
             self.timestamp == other.timestamp
 
+    # FIXME: couldn't find a way to call ValueField super method without causing an infinite recursion
     def _deep_hash(self):
         return hash((self.name, self.value, self.timestamp))
 
-    def __repr__(self):
-        return repr({
+    # FIXME: couldn't find a way to call ValueField super method without causing an infinite recursion
+    def _deep_string(self):
+        return {
             "name": self.name,
             "value": self.value,
             "timestamp": self.timestamp
-        })
+        }

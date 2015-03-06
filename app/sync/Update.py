@@ -41,11 +41,11 @@ class Update(AbstractDataObject):
         else:
             return hash(self._event)
 
-    def __repr__(self):
-        return repr({
+    def _deep_string(self):
+        return {
             "identifier": repr(self.identifier),
             "is_delete": self.is_delete,
             "timestamp": self.timestamp,
             "fields": repr(self.fields),
             "event": repr(self.event)
-        })
+        }

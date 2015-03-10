@@ -1,13 +1,13 @@
 cassandra <> elasticsearch sync
 ===============================
 
-**WORK IN PROGRESS**
+**Still a work in progress, but please feel free to look around**
 
-Daemon job to automatically sync data between Cassandra and elasticsearch. 
+Daemon job to automatically sync data between Cassandra and elasticsearch.  Synchronization is done in an incremental, bidirectional way.
 
-Synchronization is done in a bidirectional way.
+It uses my [Cassandra Logger](http://github.com/felipead/cassandra-logger) trigger to log changes in the Cassandra database.
 
-ASSUMPTIONS ABOUT YOUR DATA MODEL
+Assumptions About Your Data Model
 ---------------------------------
 
 - Cassandra schema must mirror the Elasticsearch mapping of all tables and document types to be synchronized. This means the following must be the same:

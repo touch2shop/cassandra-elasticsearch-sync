@@ -3,18 +3,18 @@ import uuid
 import pytest
 
 from app.cassandra.store.SimpleCassandraClient import SimpleCassandraClient
-from test.cassandra.fixtures import ProductFixture
+from test.fixture.product import ProductFixture
 
 
 @pytest.fixture(scope="module")
-def product_fixtures(product_fixture_store):
+def product_fixtures(product_fixture_cassandra_store):
     products = list()
     products.append(ProductFixture(uuid.uuid4(), "navy polo shirt", 5, "great shirt, great price!"))
     products.append(ProductFixture(uuid.uuid4(), "cool red shorts", 7, "perfect to go to the beach"))
     products.append(ProductFixture(uuid.uuid4(), "black DC skater shoes", 10, "yo!"))
 
     for product in products:
-        product_fixture_store.create(product)
+        product_fixture_cassandra_store.create(product)
 
     return products
 
@@ -26,7 +26,6 @@ def cassandra_client(cassandra_nodes):
 
 # noinspection PyClassHasNoInit,PyShadowingNames,PyMethodMayBeStatic
 @pytest.mark.slow
-@pytest.mark.usefixtures("create_product_fixture_schema")
 class TestSimpleCassandraClient:
 
     def test_select_specific_columns_by_id(self, cassandra_client, cassandra_fixture_keyspace,

@@ -4,7 +4,7 @@ import uuid
 
 import pytest
 
-from test.cassandra.fixtures import ProductFixture
+from test.fixture.product import ProductFixture
 from app.cassandra.CassandraUpdateFetcher import CassandraUpdateFetcher
 
 
@@ -20,14 +20,14 @@ def product_fixtures_creation_time():
 
 # noinspection PyUnusedLocal,PyShadowingNames
 @pytest.fixture(scope="function")
-def product_fixtures(product_fixture_store, product_fixtures_creation_time):
-    product_fixture_store.delete_all()
+def product_fixtures(product_fixture_cassandra_store, product_fixtures_creation_time):
+    product_fixture_cassandra_store.delete_all()
     products = [ProductFixture(uuid.uuid4(), "navy polo shirt", 5, "great shirt, great price!"),
                 ProductFixture(uuid.uuid4(), "cool red shorts", 7, "perfect to go to the beach"),
                 ProductFixture(uuid.uuid4(), "black DC skater shoes", 10, "yo!")]
 
     for product in products:
-        product_fixture_store.create(product)
+        product_fixture_cassandra_store.create(product)
     return products
 
 
@@ -38,7 +38,7 @@ def cassandra_update_fetcher(cassandra_log_entry_store):
 
 # noinspection PyShadowingNames,PyMethodMayBeStatic,PyClassHasNoInit
 @pytest.mark.slow
-@pytest.mark.usefixtures("create_product_fixture_schema", "setup")
+@pytest.mark.usefixtures("setup")
 class TestCassandraUpdateFetcher:
 
     def test_fetch_updates_for_product_fixtures_creation_from_beginning_of_time(
@@ -75,23 +75,23 @@ class TestCassandraUpdateFetcher:
             self.check_update_matches_product_fixture_creation(update, product_fixture)
 
     def test_fetch_updates_for_product_fixtures_updates(
-            self, cassandra_update_fetcher, product_fixtures, product_fixture_store, product_fixture_table,
+            self, cassandra_update_fetcher, product_fixtures, product_fixture_cassandra_store, product_fixture_table,
             cassandra_fixture_keyspace):
 
         update_time = datetime.now()
 
         product_fixtures[0].name = "new name"
-        product_fixture_store.update(product_fixtures[0])
-        product_fixture_store.update(product_fixtures[0])
+        product_fixture_cassandra_store.update(product_fixtures[0])
+        product_fixture_cassandra_store.update(product_fixtures[0])
         product_fixtures[0].description = "new description"
-        product_fixture_store.update(product_fixtures[0])
+        product_fixture_cassandra_store.update(product_fixtures[0])
 
         product_fixtures[1].description = "new description"
-        product_fixture_store.update(product_fixtures[1])
-        product_fixture_store.delete(product_fixtures[1])
+        product_fixture_cassandra_store.update(product_fixtures[1])
+        product_fixture_cassandra_store.delete(product_fixtures[1])
 
         product_fixtures[2].quantity = 100
-        product_fixture_store.update(product_fixtures[2])
+        product_fixture_cassandra_store.update(product_fixtures[2])
 
         updates = cassandra_update_fetcher.fetch_updates(update_time)
 

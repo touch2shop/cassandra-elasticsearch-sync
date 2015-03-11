@@ -1,4 +1,5 @@
 from datetime import datetime
+import pytest
 from app.cassandra.store.AbstractCassandraStore import AbstractCassandraStore
 
 
@@ -21,10 +22,10 @@ class ProductFixture:
         return str(self._id)
 
 
-class ProductFixtureStore(AbstractCassandraStore):
+class ProductFixtureCassandraStore(AbstractCassandraStore):
 
     def __init__(self, nodes, keyspace, table):
-        super(ProductFixtureStore, self).__init__(nodes, keyspace, table)
+        super(ProductFixtureCassandraStore, self).__init__(nodes, keyspace, table)
 
     def create(self, product):
         product.created_at = datetime.utcnow()
@@ -57,3 +58,35 @@ class ProductFixtureStore(AbstractCassandraStore):
 
     def delete_all(self):
         self.execute("TRUNCATE %s" % self.table)
+
+
+@pytest.fixture(scope="session")
+def product_fixture_table():
+    return "product_fixture"
+
+
+# noinspection PyShadowingNames
+@pytest.fixture(scope="session")
+def product_fixture_cassandra_store(cassandra_nodes, cassandra_fixture_keyspace, product_fixture_table):
+    return ProductFixtureCassandraStore(cassandra_nodes, cassandra_fixture_keyspace, product_fixture_table)
+
+
+# noinspection PyShadowingNames
+@pytest.fixture(scope="session", autouse=True)
+def create_product_fixture_cassandra_schema(cassandra_fixture_client,
+                                            product_fixture_table, cassandra_log_trigger_name):
+    cassandra_fixture_client.execute("DROP TABLE IF EXISTS product")
+    cassandra_fixture_client.execute(
+        """
+        CREATE TABLE %s (
+          id uuid PRIMARY KEY,
+          name text,
+          quantity int,
+          description text,
+          created_at timestamp,
+          updated_at timestamp
+        )
+        """ % product_fixture_table)
+
+    cassandra_fixture_client.execute("CREATE TRIGGER logger ON %s USING '%s'" %
+                                     (product_fixture_table, cassandra_log_trigger_name))

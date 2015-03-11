@@ -1,9 +1,13 @@
 # py.test configuration file.
 
+# noinspection PyUnresolvedReferences
 import pytest
 
+from app.elasticsearch.store.ElasticsearchDocumentStore import ElasticsearchDocumentStore
 from app.cassandra.store.CassandraLogEntryStore import CassandraLogEntryStore
 from app.cassandra.store.SimpleCassandraClient import SimpleCassandraClient
+
+from test.fixture.product import *
 
 
 @pytest.fixture(scope="session")
@@ -55,3 +59,27 @@ def create_cassandra_fixture_keyspace(cassandra_fixture_client, cassandra_fixtur
         % cassandra_fixture_keyspace
     )
     cassandra_fixture_client.keyspace = cassandra_fixture_keyspace
+
+
+@pytest.fixture(scope="session")
+def elasticsearch_nodes():
+    return [{"host": "localhost", "port": 9200}]
+
+
+# noinspection PyShadowingNames
+@pytest.fixture(scope="session")
+def elasticsearch_document_store(elasticsearch_nodes):
+    return ElasticsearchDocumentStore(elasticsearch_nodes)
+
+
+@pytest.fixture(scope="session")
+def elasticsearch_fixture_index():
+    return "test_fixture"
+
+
+# noinspection PyShadowingNames
+@pytest.fixture(scope="session", autouse=True)
+def create_elasticsearch_fixture_index(elasticsearch_document_store, elasticsearch_fixture_index):
+    if elasticsearch_document_store.index_exists(elasticsearch_fixture_index):
+        elasticsearch_document_store.delete_index(index=elasticsearch_fixture_index)
+    elasticsearch_document_store.create_index(index=elasticsearch_fixture_index)

@@ -1,7 +1,9 @@
 from datetime import datetime
 from operator import attrgetter
 import uuid
+
 import pytest
+
 from test.cassandra.fixtures import ProductFixture
 from app.cassandra.CassandraUpdateFetcher import CassandraUpdateFetcher
 
@@ -48,7 +50,7 @@ class TestCassandraUpdateFetcher:
 
         assert len(updates_by_key) == 3
         for product_fixture in product_fixtures:
-            key = str(product_fixture.id_)
+            key = str(product_fixture.key)
             assert key in updates_by_key
             update = updates_by_key[key]
 

@@ -1,6 +1,7 @@
 # py.test configuration file.
 
 import pytest
+
 from test.cassandra.fixtures import ProductFixtureStore
 
 

@@ -33,7 +33,7 @@ class TestSimpleCassandraClient:
                                            product_fixtures, product_fixture_table):
 
         for product in product_fixtures:
-            rows = cassandra_client.select_by_id(product_fixture_table, product.id_,
+            rows = cassandra_client.select_by_id(product_fixture_table, product.id,
                                                  columns=("quantity", "description", "name"),
                                                  keyspace=cassandra_fixture_keyspace)
 
@@ -47,27 +47,27 @@ class TestSimpleCassandraClient:
                                       product_fixtures, product_fixture_table):
 
         for product in product_fixtures:
-            rows = cassandra_client.select_by_id(product_fixture_table, product.id_,
+            rows = cassandra_client.select_by_id(product_fixture_table, product.id,
                                                  keyspace=cassandra_fixture_keyspace)
 
             assert len(rows) == 1
             row = rows[0]
-            assert row.id == product.id_
+            assert row.id == product.id
             assert row.quantity == product.quantity
             assert row.description == product.description
             assert row.name == product.name
 
     def test_select_by_uuid_encoded_as_string(self, cassandra_client, cassandra_fixture_keyspace,
-                                      product_fixtures, product_fixture_table):
+                                              product_fixtures, product_fixture_table):
 
         for product in product_fixtures:
-            encoded_uuid = str(product.id_)
+            encoded_uuid = str(product.id)
             rows = cassandra_client.select_by_id(product_fixture_table, encoded_uuid,
                                                  keyspace=cassandra_fixture_keyspace)
 
             assert len(rows) == 1
             row = rows[0]
-            assert row.id == product.id_
+            assert row.id == product.id
             assert row.quantity == product.quantity
             assert row.description == product.description
             assert row.name == product.name
@@ -77,11 +77,11 @@ class TestSimpleCassandraClient:
 
         cassandra_client.execute("USE %s" % cassandra_fixture_keyspace)
         for product in product_fixtures:
-            rows = cassandra_client.select_by_id(product_fixture_table, product.id_, keyspace=None)
+            rows = cassandra_client.select_by_id(product_fixture_table, product.id, keyspace=None)
 
             assert len(rows) == 1
             row = rows[0]
-            assert row.id == product.id_
+            assert row.id == product.id
             assert row.quantity == product.quantity
             assert row.description == product.description
             assert row.name == product.name

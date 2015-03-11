@@ -2,7 +2,7 @@ import uuid
 
 import pytest
 
-from app.cassandra_domain.store.SimpleCassandraClient import SimpleCassandraClient
+from app.cassandra_domain.store.CassandraClient import CassandraClient
 from test.fixture.product import ProductFixture
 
 
@@ -20,8 +20,8 @@ def product_fixtures(product_fixture_cassandra_store):
 
 
 @pytest.fixture(scope="module")
-def cassandra_client(cassandra_nodes):
-    return SimpleCassandraClient(cassandra_nodes)
+def cassandra_client(cassandra_cluster):
+    return CassandraClient(cassandra_cluster)
 
 
 # noinspection PyClassHasNoInit,PyShadowingNames,PyMethodMayBeStatic

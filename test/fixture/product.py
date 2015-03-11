@@ -65,8 +65,8 @@ class ProductFixtureCassandraStore(AbstractCassandraStore):
 
 # noinspection PyShadowingNames
 @pytest.fixture(scope="session")
-def product_fixture_cassandra_store(cassandra_nodes, cassandra_fixture_keyspace):
-    return ProductFixtureCassandraStore(cassandra_nodes, cassandra_fixture_keyspace)
+def product_fixture_cassandra_store(cassandra_cluster, cassandra_fixture_keyspace):
+    return ProductFixtureCassandraStore(cassandra_cluster, cassandra_fixture_keyspace)
 
 
 @pytest.fixture(scope="session", autouse=True)

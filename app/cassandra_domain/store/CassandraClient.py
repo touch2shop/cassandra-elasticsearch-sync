@@ -1,13 +1,9 @@
 import string
-from cassandra.cluster import Cluster
-
-_DEFAULT_ID_COLUMN_NAME = "id"
 
 
-class SimpleCassandraClient(object):
+class CassandraClient(object):
 
-    def __init__(self, nodes, keyspace=None):
-        cluster = Cluster(nodes)
+    def __init__(self, cluster, keyspace=None):
         if keyspace:
             self._session = cluster.connect(keyspace)
         else:
@@ -34,7 +30,7 @@ class SimpleCassandraClient(object):
         else:
             return self._session.execute(query_or_statement, parameters, timeout)
 
-    def select_by_id(self, table, _id, columns=None, keyspace=None, id_column_name=_DEFAULT_ID_COLUMN_NAME):
+    def select_by_id(self, table, _id, columns=None, keyspace=None, id_column_name="id"):
         if columns and len(columns) > 0:
             columns_string = string.join(columns, ",")
         else:

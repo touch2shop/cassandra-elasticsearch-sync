@@ -4,8 +4,8 @@ from app.cassandra_domain.CassandraLogEntry import CassandraLogEntry
 
 class CassandraLogEntryStore(AbstractCassandraStore):
 
-    def __init__(self, nodes, log_keyspace, log_table):
-        super(CassandraLogEntryStore, self).__init__(nodes, log_keyspace, log_table)
+    def __init__(self, cluster, log_keyspace, log_table):
+        super(CassandraLogEntryStore, self).__init__(cluster, log_keyspace, log_table)
 
     def _build_select_query(self, where=None, allow_filtering=False):
         query = """
@@ -43,7 +43,7 @@ class CassandraLogEntryStore(AbstractCassandraStore):
         statement = self.prepare_statement(
             self._build_select_query(where="logged_keyspace = ? AND logged_table = ? AND logged_key = ?"))
 
-        rows = self.execute(statement, [logged_keyspace, logged_table, logged_key], timeout)
+        rows = self.execute(statement, (logged_keyspace, logged_table, logged_key), timeout)
         return self._to_log_entries(rows)
 
     def find_by_time_greater_or_equal_than(self, minimum_time, timeout=None):

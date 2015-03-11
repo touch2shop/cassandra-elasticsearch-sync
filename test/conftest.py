@@ -1,4 +1,5 @@
 # py.test configuration file.
+from cassandra.cluster import Cluster
 
 from elasticsearch import Elasticsearch
 
@@ -6,7 +7,7 @@ from elasticsearch import Elasticsearch
 import pytest
 
 from app.cassandra_domain.store.CassandraLogEntryStore import CassandraLogEntryStore
-from app.cassandra_domain.store.SimpleCassandraClient import SimpleCassandraClient
+from app.cassandra_domain.store.CassandraClient import CassandraClient
 
 from test.fixture.product import *
 
@@ -31,12 +32,6 @@ def cassandra_nodes():
     return ['127.0.0.1']
 
 
-# noinspection PyShadowingNames
-@pytest.fixture(scope="session")
-def cassandra_log_entry_store(cassandra_nodes, cassandra_log_keyspace, cassandra_log_table):
-    return CassandraLogEntryStore(cassandra_nodes, cassandra_log_keyspace, cassandra_log_table)
-
-
 @pytest.fixture(scope="session")
 def cassandra_log_trigger_name():
     return "com.felipead.cassandra.logger.LogTrigger"
@@ -44,8 +39,20 @@ def cassandra_log_trigger_name():
 
 # noinspection PyShadowingNames
 @pytest.fixture(scope="session")
-def cassandra_fixture_client(cassandra_nodes):
-    return SimpleCassandraClient(cassandra_nodes)
+def cassandra_cluster(cassandra_nodes):
+    return Cluster(cassandra_nodes)
+
+
+# noinspection PyShadowingNames
+@pytest.fixture(scope="session")
+def cassandra_fixture_client(cassandra_cluster):
+    return CassandraClient(cassandra_cluster)
+
+
+# noinspection PyShadowingNames
+@pytest.fixture(scope="session")
+def cassandra_log_entry_store(cassandra_cluster, cassandra_log_keyspace, cassandra_log_table):
+    return CassandraLogEntryStore(cassandra_cluster, cassandra_log_keyspace, cassandra_log_table)
 
 
 # noinspection PyShadowingNames

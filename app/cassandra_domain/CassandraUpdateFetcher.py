@@ -7,16 +7,16 @@ from app.core.UpdateEvent import UpdateEvent
 from app.core.UpdateEventCombiner import UpdateEventCombiner
 
 
-_DEFAULT_ID_COLUMN_NAME = "id"
+_CASSANDRA_ID_COLUMN_NAME = "id"
 
 
 class CassandraUpdateFetcher(object):
 
-    def __init__(self, log_entry_store, id_column_name=_DEFAULT_ID_COLUMN_NAME):
-        self._id_column_name = id_column_name
-        self._log_entry_store = log_entry_store
-        self._cassandra_client = log_entry_store
+    def __init__(self, log_entry_store):
+
         self._logger = logging.getLogger(__name__)
+        self._log_entry_store = log_entry_store
+        self._cassandra_client = log_entry_store.client
 
     def fetch_updates(self, minimum_log_entry_time=None):
         log_entries = self._fetch_log_entries(minimum_log_entry_time)
@@ -60,12 +60,12 @@ class CassandraUpdateFetcher(object):
     def _fetch_save_update(self, update_event):
         _id = update_event.identifier
         rows = self._cassandra_client.select_by_id(_id.table, _id.key, update_event.field_names,
-                                                   _id.namespace, self._id_column_name)
+                                                   _id.namespace, id_column_name=_CASSANDRA_ID_COLUMN_NAME)
 
         if len(rows) > 1:
             raise Exception(("More than one row found for entity %s on Cassandra. " +
                              "Please make sure the schema has a single primary key with name %s. " +
-                             "No actions performed.") % (_id, self._id_column_name))
+                             "No actions performed.") % (_id, _CASSANDRA_ID_COLUMN_NAME))
         elif len(rows) == 0:
             # If the entity was deleted, a delete event will be will be available in the next log fetch.
             self._logger.info("No row found for entity %s on Cassandra. No actions performed.", _id)

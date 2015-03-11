@@ -1,12 +1,26 @@
-from app.cassandra_domain.store.SimpleCassandraClient import SimpleCassandraClient
+from app.cassandra_domain.store.CassandraClient import CassandraClient
 
 
-class AbstractCassandraStore(SimpleCassandraClient):
+class AbstractCassandraStore(object):
 
-    def __init__(self, nodes, keyspace, table):
-        super(AbstractCassandraStore, self).__init__(nodes, keyspace)
+    def __init__(self, cluster, keyspace, table):
+        self._client = CassandraClient(cluster, keyspace)
         self._table = table
 
     @property
     def table(self):
         return self._table
+
+    @property
+    def keyspace(self):
+        return self._client.keyspace
+
+    @property
+    def client(self):
+        return self._client
+
+    def prepare_statement(self, query):
+        return self._client.prepare_statement(query)
+
+    def execute(self, query_or_statement, parameters=None, timeout=None):
+        return self._client.execute(query_or_statement, parameters, timeout)

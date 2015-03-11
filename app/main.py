@@ -1,17 +1,19 @@
 from datetime import datetime
 from time import sleep
+
+from cassandra.cluster import Cluster
 from elasticsearch import Elasticsearch
+
 from app.CassandraToElasticsearchPropagator import CassandraToElasticSearchPropagator
-from app.cassandra_domain.store.CassandraLogEntryStore import CassandraLogEntryStore
 
 
 _INTERVAL_BETWEEN_SYNCS = 10  # seconds
 
 
 def run():
-    cassandra_log_entry_store = CassandraLogEntryStore(["localhost"], "logger", "log")
-    elasticsearch = Elasticsearch()
-    cassandra_to_elastic_search = CassandraToElasticSearchPropagator(cassandra_log_entry_store, elasticsearch)
+    cassandra_cluster = Cluster()
+    elasticsearch_client = Elasticsearch()
+    cassandra_to_elastic_search = CassandraToElasticSearchPropagator(cassandra_cluster, elasticsearch_client)
 
     # noinspection PyBroadException
     try:

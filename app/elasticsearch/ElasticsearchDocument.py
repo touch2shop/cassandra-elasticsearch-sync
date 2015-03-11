@@ -23,10 +23,6 @@ class ElasticsearchDocument(AbstractDataObject):
     def fields(self):
         return self._fields
 
-    @classmethod
-    def from_update(cls, update):
-        return ElasticsearchDocument(update.identifier, update.timestamp, list(update.fields))
-
     def _deep_equals(self, other):
         return self.identifier == other.identifier and \
                self.timestamp == other.timestamp and \

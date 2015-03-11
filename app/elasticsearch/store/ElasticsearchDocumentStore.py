@@ -12,8 +12,8 @@ _WRITE_CONSISTENCY = "quorum"
 
 class ElasticsearchDocumentStore(SimpleElasticsearchClient):
 
-    def __init__(self, elasticsearch):
-        SimpleElasticsearchClient.__init__(self, elasticsearch)
+    def __init__(self, nodes):
+        SimpleElasticsearchClient.__init__(self, nodes)
         self._logger = logging.getLogger(__name__)
 
     def read(self, identifier):

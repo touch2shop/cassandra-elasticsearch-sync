@@ -1,8 +1,8 @@
 from datetime import datetime
 import logging
 from uuid import UUID
-from app.elasticsearch.ElasticsearchDocument import ElasticsearchDocument
-from app.elasticsearch.store.SimpleElasticsearchClient import SimpleElasticsearchClient
+
+from app.elasticsearch_domain.ElasticsearchDocument import ElasticsearchDocument
 from app.core.Identifier import Identifier
 from app.core.ValueField import ValueField
 
@@ -10,10 +10,10 @@ from app.core.ValueField import ValueField
 _WRITE_CONSISTENCY = "quorum"
 
 
-class ElasticsearchDocumentStore(SimpleElasticsearchClient):
+class ElasticsearchDocumentStore:
 
-    def __init__(self, nodes):
-        SimpleElasticsearchClient.__init__(self, nodes)
+    def __init__(self, elasticsearch):
+        self._elasticsearch = elasticsearch
         self._logger = logging.getLogger(__name__)
 
     def read(self, identifier):

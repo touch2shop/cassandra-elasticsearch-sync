@@ -5,7 +5,7 @@ import uuid
 import pytest
 
 from test.fixture.product import ProductFixture
-from app.cassandra.CassandraUpdateFetcher import CassandraUpdateFetcher
+from app.cassandra_domain.CassandraUpdateFetcher import CassandraUpdateFetcher
 
 
 @pytest.fixture(scope="module")
@@ -42,7 +42,7 @@ def cassandra_update_fetcher(cassandra_log_entry_store):
 class TestCassandraUpdateFetcher:
 
     def test_fetch_updates_for_product_fixtures_creation_from_beginning_of_time(
-            self, cassandra_update_fetcher, product_fixtures, product_fixture_table,
+            self, cassandra_update_fetcher, product_fixtures, 
             cassandra_fixture_keyspace, product_fixtures_creation_time):
 
         updates = cassandra_update_fetcher.fetch_updates()
@@ -55,11 +55,11 @@ class TestCassandraUpdateFetcher:
             update = updates_by_key[key]
 
             self.check_update_timestamp(update, product_fixtures_creation_time)
-            self.check_update_identifier(update, cassandra_fixture_keyspace, product_fixture_table)
+            self.check_update_identifier(update, cassandra_fixture_keyspace, ProductFixture.TABLE_NAME)
             self.check_update_matches_product_fixture_creation(update, product_fixture)
 
     def test_fetch_updates_for_product_fixtures_creation_with_minimum_time_in_utc(
-            self, cassandra_update_fetcher, product_fixtures, product_fixture_table,
+            self, cassandra_update_fetcher, product_fixtures, 
             cassandra_fixture_keyspace, product_fixtures_creation_time):
 
         updates = cassandra_update_fetcher.fetch_updates(product_fixtures_creation_time)
@@ -71,11 +71,11 @@ class TestCassandraUpdateFetcher:
             update = updates_by_key[product_fixture.key]
 
             self.check_update_timestamp(update, product_fixtures_creation_time)
-            self.check_update_identifier(update, cassandra_fixture_keyspace, product_fixture_table)
+            self.check_update_identifier(update, cassandra_fixture_keyspace, ProductFixture.TABLE_NAME)
             self.check_update_matches_product_fixture_creation(update, product_fixture)
 
     def test_fetch_updates_for_product_fixtures_updates(
-            self, cassandra_update_fetcher, product_fixtures, product_fixture_cassandra_store, product_fixture_table,
+            self, cassandra_update_fetcher, product_fixtures, product_fixture_cassandra_store, 
             cassandra_fixture_keyspace):
 
         update_time = datetime.now()
@@ -103,7 +103,7 @@ class TestCassandraUpdateFetcher:
             update = updates_by_key[product_fixture.key]
 
             self.check_update_timestamp(update, update_time)
-            self.check_update_identifier(update, cassandra_fixture_keyspace, product_fixture_table)
+            self.check_update_identifier(update, cassandra_fixture_keyspace, ProductFixture.TABLE_NAME)
 
         assert updates_by_key[product_fixtures[0].key].is_delete is False
         self.check_update_fields(updates_by_key[product_fixtures[0].key],
@@ -115,9 +115,9 @@ class TestCassandraUpdateFetcher:
         assert updates_by_key[product_fixtures[2].key].is_delete is False
 
     @staticmethod
-    def check_update_identifier(update, keyspace, product_fixture_table):
+    def check_update_identifier(update, keyspace, table):
         assert update.identifier.namespace == keyspace
-        assert update.identifier.table == product_fixture_table
+        assert update.identifier.table == table
 
     @staticmethod
     def check_update_timestamp(update, operation_time):

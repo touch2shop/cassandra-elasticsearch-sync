@@ -2,7 +2,7 @@ from datetime import datetime
 from time import sleep
 from elasticsearch import Elasticsearch
 from app.CassandraToElasticsearchPropagator import CassandraToElasticSearchPropagator
-from app.cassandra.store.CassandraLogEntryStore import CassandraLogEntryStore
+from app.cassandra_domain.store.CassandraLogEntryStore import CassandraLogEntryStore
 
 
 _INTERVAL_BETWEEN_SYNCS = 10  # seconds

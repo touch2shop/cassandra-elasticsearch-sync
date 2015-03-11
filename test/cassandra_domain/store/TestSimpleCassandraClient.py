@@ -2,7 +2,7 @@ import uuid
 
 import pytest
 
-from app.cassandra.store.SimpleCassandraClient import SimpleCassandraClient
+from app.cassandra_domain.store.SimpleCassandraClient import SimpleCassandraClient
 from test.fixture.product import ProductFixture
 
 
@@ -28,11 +28,10 @@ def cassandra_client(cassandra_nodes):
 @pytest.mark.slow
 class TestSimpleCassandraClient:
 
-    def test_select_specific_columns_by_id(self, cassandra_client, cassandra_fixture_keyspace,
-                                           product_fixtures, product_fixture_table):
+    def test_select_specific_columns_by_id(self, cassandra_client, cassandra_fixture_keyspace, product_fixtures):
 
         for product in product_fixtures:
-            rows = cassandra_client.select_by_id(product_fixture_table, product.id,
+            rows = cassandra_client.select_by_id(ProductFixture.TABLE_NAME, product.id,
                                                  columns=("quantity", "description", "name"),
                                                  keyspace=cassandra_fixture_keyspace)
 
@@ -42,11 +41,10 @@ class TestSimpleCassandraClient:
             assert row[1] == product.description
             assert row[2] == product.name
 
-    def test_select_all_columns_by_id(self, cassandra_client, cassandra_fixture_keyspace,
-                                      product_fixtures, product_fixture_table):
+    def test_select_all_columns_by_id(self, cassandra_client, cassandra_fixture_keyspace, product_fixtures):
 
         for product in product_fixtures:
-            rows = cassandra_client.select_by_id(product_fixture_table, product.id,
+            rows = cassandra_client.select_by_id(ProductFixture.TABLE_NAME, product.id,
                                                  keyspace=cassandra_fixture_keyspace)
 
             assert len(rows) == 1
@@ -56,12 +54,11 @@ class TestSimpleCassandraClient:
             assert row.description == product.description
             assert row.name == product.name
 
-    def test_select_by_uuid_encoded_as_string(self, cassandra_client, cassandra_fixture_keyspace,
-                                              product_fixtures, product_fixture_table):
+    def test_select_by_uuid_encoded_as_string(self, cassandra_client, cassandra_fixture_keyspace, product_fixtures):
 
         for product in product_fixtures:
             encoded_uuid = str(product.id)
-            rows = cassandra_client.select_by_id(product_fixture_table, encoded_uuid,
+            rows = cassandra_client.select_by_id(ProductFixture.TABLE_NAME, encoded_uuid,
                                                  keyspace=cassandra_fixture_keyspace)
 
             assert len(rows) == 1
@@ -71,12 +68,11 @@ class TestSimpleCassandraClient:
             assert row.description == product.description
             assert row.name == product.name
 
-    def test_select_by_id_on_default_keyspace(self, cassandra_client, cassandra_fixture_keyspace,
-                                              product_fixtures, product_fixture_table):
+    def test_select_by_id_on_default_keyspace(self, cassandra_client, cassandra_fixture_keyspace, product_fixtures):
 
         cassandra_client.execute("USE %s" % cassandra_fixture_keyspace)
         for product in product_fixtures:
-            rows = cassandra_client.select_by_id(product_fixture_table, product.id, keyspace=None)
+            rows = cassandra_client.select_by_id(ProductFixture.TABLE_NAME, product.id, keyspace=None)
 
             assert len(rows) == 1
             row = rows[0]

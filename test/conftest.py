@@ -1,11 +1,12 @@
 # py.test configuration file.
 
+from elasticsearch import Elasticsearch
+
 # noinspection PyUnresolvedReferences
 import pytest
 
-from app.elasticsearch.store.ElasticsearchDocumentStore import ElasticsearchDocumentStore
-from app.cassandra.store.CassandraLogEntryStore import CassandraLogEntryStore
-from app.cassandra.store.SimpleCassandraClient import SimpleCassandraClient
+from app.cassandra_domain.store.CassandraLogEntryStore import CassandraLogEntryStore
+from app.cassandra_domain.store.SimpleCassandraClient import SimpleCassandraClient
 
 from test.fixture.product import *
 
@@ -68,8 +69,8 @@ def elasticsearch_nodes():
 
 # noinspection PyShadowingNames
 @pytest.fixture(scope="session")
-def elasticsearch_document_store(elasticsearch_nodes):
-    return ElasticsearchDocumentStore(elasticsearch_nodes)
+def elasticsearch_client(elasticsearch_nodes):
+    return Elasticsearch(elasticsearch_nodes)
 
 
 @pytest.fixture(scope="session")
@@ -79,7 +80,7 @@ def elasticsearch_fixture_index():
 
 # noinspection PyShadowingNames
 @pytest.fixture(scope="session", autouse=True)
-def create_elasticsearch_fixture_index(elasticsearch_document_store, elasticsearch_fixture_index):
-    if elasticsearch_document_store.index_exists(elasticsearch_fixture_index):
-        elasticsearch_document_store.delete_index(index=elasticsearch_fixture_index)
-    elasticsearch_document_store.create_index(index=elasticsearch_fixture_index)
+def create_elasticsearch_fixture_index(elasticsearch_client, elasticsearch_fixture_index):
+    if elasticsearch_client.indices.exists(elasticsearch_fixture_index):
+        elasticsearch_client.indices.delete(index=elasticsearch_fixture_index)
+    elasticsearch_client.indices.create(index=elasticsearch_fixture_index)

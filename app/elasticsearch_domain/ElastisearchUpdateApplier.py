@@ -1,11 +1,13 @@
 import logging
-from app.elasticsearch.ElasticsearchDocument import ElasticsearchDocument
+from app.elasticsearch_domain.ElasticsearchDocument import ElasticsearchDocument
+from app.elasticsearch_domain.store.ElasticsearchDocumentStore import ElasticsearchDocumentStore
 
 
 class ElasticsearchUpdateApplier:
 
-    def __init__(self, document_store):
-        self._document_store = document_store
+    def __init__(self, elasticsearch):
+        self._elasticsearch = elasticsearch
+        self._document_store = ElasticsearchDocumentStore(elasticsearch)
         self._logger = logging.getLogger(__name__)
 
     def apply_updates(self, updates):
@@ -55,12 +57,12 @@ class ElasticsearchUpdateApplier:
             self._document_store.create(self._build_document(update))
 
     def _check_index_exists(self, index):
-        if not self._document_store.index_exists(index=index):
+        if not self._elasticsearch.indices.exists(index=index):
             raise Exception(("Index %s does not exist on elasticsearch. " +
                              "No action performed.") % index)
 
     def _check_type_exists(self, index, _type):
-        if not self._document_store.type_exists(index=index, doc_type=_type):
+        if not self._elasticsearch.indices.exists_type(index=index, doc_type=_type):
             raise Exception(("Type %s does not exist at index %s on Elasticsearch. " +
                              "No action performed.") % (_type, index))
 

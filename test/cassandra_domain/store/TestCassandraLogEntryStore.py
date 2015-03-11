@@ -5,7 +5,7 @@ import pytest
 from time_uuid import TimeUUID
 from hamcrest import *
 
-from app.cassandra.CassandraLogEntry import CassandraLogEntry
+from app.cassandra_domain.CassandraLogEntry import CassandraLogEntry
 
 
 @pytest.mark.slow

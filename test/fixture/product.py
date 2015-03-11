@@ -1,9 +1,12 @@
 from datetime import datetime
 import pytest
-from app.cassandra.store.AbstractCassandraStore import AbstractCassandraStore
+
+from app.cassandra_domain.store.AbstractCassandraStore import AbstractCassandraStore
 
 
 class ProductFixture:
+
+    TABLE_NAME = "product"
 
     def __init__(self, _id, name, quantity, description):
         self._id = _id
@@ -24,8 +27,8 @@ class ProductFixture:
 
 class ProductFixtureCassandraStore(AbstractCassandraStore):
 
-    def __init__(self, nodes, keyspace, table):
-        super(ProductFixtureCassandraStore, self).__init__(nodes, keyspace, table)
+    def __init__(self, nodes, keyspace):
+        super(ProductFixtureCassandraStore, self).__init__(nodes, keyspace, ProductFixture.TABLE_NAME)
 
     def create(self, product):
         product.created_at = datetime.utcnow()
@@ -60,22 +63,15 @@ class ProductFixtureCassandraStore(AbstractCassandraStore):
         self.execute("TRUNCATE %s" % self.table)
 
 
-@pytest.fixture(scope="session")
-def product_fixture_table():
-    return "product_fixture"
-
-
 # noinspection PyShadowingNames
 @pytest.fixture(scope="session")
-def product_fixture_cassandra_store(cassandra_nodes, cassandra_fixture_keyspace, product_fixture_table):
-    return ProductFixtureCassandraStore(cassandra_nodes, cassandra_fixture_keyspace, product_fixture_table)
+def product_fixture_cassandra_store(cassandra_nodes, cassandra_fixture_keyspace):
+    return ProductFixtureCassandraStore(cassandra_nodes, cassandra_fixture_keyspace)
 
 
-# noinspection PyShadowingNames
 @pytest.fixture(scope="session", autouse=True)
-def create_product_fixture_cassandra_schema(cassandra_fixture_client,
-                                            product_fixture_table, cassandra_log_trigger_name):
-    cassandra_fixture_client.execute("DROP TABLE IF EXISTS product")
+def setup_product_fixture_cassandra_schema(cassandra_fixture_client, cassandra_log_trigger_name):
+    cassandra_fixture_client.execute("DROP TABLE IF EXISTS %s" % ProductFixture.TABLE_NAME)
     cassandra_fixture_client.execute(
         """
         CREATE TABLE %s (
@@ -86,7 +82,7 @@ def create_product_fixture_cassandra_schema(cassandra_fixture_client,
           created_at timestamp,
           updated_at timestamp
         )
-        """ % product_fixture_table)
+        """ % ProductFixture.TABLE_NAME)
 
     cassandra_fixture_client.execute("CREATE TRIGGER logger ON %s USING '%s'" %
-                                     (product_fixture_table, cassandra_log_trigger_name))
+                                     (ProductFixture.TABLE_NAME, cassandra_log_trigger_name))

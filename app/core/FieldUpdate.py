@@ -22,7 +22,7 @@ class FieldUpdate(ValueField):
         return hash((self.name, self.value, self.timestamp))
 
     # FIXME: couldn't find a way to call ValueField super method without causing an infinite recursion
-    def _deep_string(self):
+    def _deep_string_dictionary(self):
         return {
             "name": self.name,
             "value": self.value,

@@ -1,4 +1,6 @@
 import logging
+
+from app.core.exception.InvalidElasticsearchSchemaException import InvalidElasticsearchSchemaException
 from app.elasticsearch_domain.GenericElasticsearchDocument import GenericElasticsearchDocument
 from app.elasticsearch_domain.store.GenericElasticsearchStore import GenericElasticsearchStore
 
@@ -13,6 +15,7 @@ class ElasticsearchUpdateApplier:
     def apply_updates(self, updates):
         if updates:
             for update in updates:
+                self._check_index_and_type_exist(update.identifier)
                 self._apply_update(update)
 
     def _apply_update(self, update):
@@ -56,15 +59,13 @@ class ElasticsearchUpdateApplier:
         else:
             self._generic_store.create(self._build_document(update))
 
-    def _check_index_exists(self, index):
-        if not self._elasticsearch.indices.exists(index=index):
-            raise Exception(("Index %s does not exist on elasticsearch. " +
-                             "No action performed.") % index)
-
-    def _check_type_exists(self, index, _type):
-        if not self._elasticsearch.indices.exists_type(index=index, doc_type=_type):
-            raise Exception(("Type %s does not exist at index %s on Elasticsearch. " +
-                             "No action performed.") % (_type, index))
+    def _check_index_and_type_exist(self, identifier):
+        if not self._elasticsearch.indices.exists(index=identifier.namespace):
+            raise InvalidElasticsearchSchemaException(identifier=identifier,
+                message="Index does not exist on elasticsearch. No action performed.")
+        if not self._elasticsearch.indices.exists_type(index=identifier.namespace, doc_type=identifier.table):
+            raise InvalidElasticsearchSchemaException(identifier=identifier,
+                message="Type does not exist on elasticsearch. No action performed.")
 
     @staticmethod
     def _build_document(update):
@@ -73,5 +74,5 @@ class ElasticsearchUpdateApplier:
     @staticmethod
     def _validate_document(document):
         if not document.timestamp:
-            raise Exception("Could not retrieve timestamp for Elasticsearch document %s. Please check your mapping."
-                            % document.identifier)
+            raise InvalidElasticsearchSchemaException(identifier=document.identifier,
+                message="Could not retrieve timestamp for Elasticsearch document. Please check your mapping.")

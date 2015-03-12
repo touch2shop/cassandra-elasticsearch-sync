@@ -31,9 +31,10 @@ class Update(AbstractDataObject):
     def fields(self):
         return self._fields
 
+    # noinspection PyProtectedMember
     def _deep_equals(self, other):
         return self._event == other._event and \
-               self._fields == other._fields
+            self._fields == other._fields
 
     def _deep_hash(self):
         if self._fields:
@@ -41,7 +42,7 @@ class Update(AbstractDataObject):
         else:
             return hash(self._event)
 
-    def _deep_string(self):
+    def _deep_string_dictionary(self):
         return {
             "identifier": repr(self.identifier),
             "is_delete": self.is_delete,

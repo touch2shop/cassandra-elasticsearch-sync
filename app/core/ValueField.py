@@ -22,7 +22,7 @@ class ValueField(AbstractDataObject):
     def _deep_hash(self):
         return hash((self.name, self.value))
 
-    def _deep_string(self):
+    def _deep_string_dictionary(self):
         return {
             "name": self.name,
             "value": self.value

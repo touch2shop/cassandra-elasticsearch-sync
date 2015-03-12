@@ -26,9 +26,15 @@ class AbstractDataObject(object):
     def __hash__(self):
         return self._deep_hash()
 
-    @abstractmethod
-    def _deep_string(self):
-        pass
+    def _deep_string_dictionary(self):
+        return None
 
     def __repr__(self):
-        return repr(self._deep_string())
+        deep_string_dictionary = self._deep_string_dictionary()
+        if deep_string_dictionary:
+            return repr(deep_string_dictionary)
+        else:
+            return super(AbstractDataObject, self).__repr__()
+
+    def __str__(self):
+        return repr(self)

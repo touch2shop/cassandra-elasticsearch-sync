@@ -44,7 +44,7 @@ class UpdateEvent(AbstractDataObject):
             self.is_delete == other.is_delete and \
             self.field_names == other.field_names
 
-    def _deep_string(self):
+    def _deep_string_dictionary(self):
         return {
             "identifier": self.identifier,
             "timestamp": self.timestamp,

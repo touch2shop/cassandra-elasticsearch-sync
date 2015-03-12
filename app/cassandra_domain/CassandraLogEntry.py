@@ -116,7 +116,7 @@ class CassandraLogEntry(AbstractDataObject):
         else:
             return hash((current_hash, frozenset(self.updated_columns)))
 
-    def _deep_string(self):
+    def _deep_string_dictionary(self):
         return {
             "time_uuid": self.time_uuid,
             "logged_keyspace": self.logged_keyspace,

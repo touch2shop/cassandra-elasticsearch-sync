@@ -62,7 +62,7 @@ class GenericElasticsearchDocument(AbstractDataObject):
         else:
             return hash((self._identifier, self._timestamp))
 
-    def _deep_string(self):
+    def _deep_string_dictionary(self):
         return {
             "identifier": self.identifier,
             "fields": self.fields,

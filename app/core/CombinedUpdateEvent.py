@@ -60,7 +60,7 @@ class CombinedUpdateEvent(AbstractDataObject):
         else:
             return hash(self._identifier)
 
-    def _deep_string(self):
+    def _deep_string_dictionary(self):
         return {
             "identifier": repr(self.identifier),
             "timestamp": self.timestamp,

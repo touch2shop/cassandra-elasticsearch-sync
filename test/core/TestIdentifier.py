@@ -49,3 +49,7 @@ class TestIdentifier:
         assert entity != different
         assert not (entity == different)
         assert hash(entity) != hash(different)
+
+    def test_to_string(self, identifier):
+        assert repr(identifier) == str(identifier)
+        assert repr(identifier) == "(%s, %s, %s)" % (identifier.namespace, identifier.table, identifier.key)

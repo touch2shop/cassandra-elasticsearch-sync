@@ -26,9 +26,5 @@ class Identifier(AbstractDataObject):
     def _deep_hash(self):
         return hash((self.namespace, self.table, self.key))
 
-    def _deep_string(self):
-        return {
-            "namespace": self.namespace,
-            "table": self.table,
-            "key": self.key
-        }
+    def __repr__(self):
+        return "(%s, %s, %s)" % (self.namespace, self.table, self.key)

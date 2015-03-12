@@ -3,13 +3,12 @@ from app.core.ValueField import ValueField
 
 
 class GenericElasticsearchDocument(AbstractDataObject):
+
     def __init__(self, identifier=None, timestamp=None, fields=None):
         self._identifier = identifier
         self._timestamp = timestamp
         self._fields = dict()
-        if fields:
-            for field in fields:
-                self._fields[field.name] = field
+        self.fields = fields
 
     @property
     def identifier(self):
@@ -31,6 +30,13 @@ class GenericElasticsearchDocument(AbstractDataObject):
     def fields(self):
         return self._fields.values()
 
+    @fields.setter
+    def fields(self, value):
+        self._fields.clear()
+        if value:
+            for field in value:
+                self._fields[field.name] = field
+
     def add_field(self, name, value):
         self._fields[name] = ValueField(name, value)
 
@@ -47,8 +53,8 @@ class GenericElasticsearchDocument(AbstractDataObject):
     # noinspection PyProtectedMember
     def _deep_equals(self, other):
         return self._identifier == other._identifier and \
-            self._timestamp == other._timestamp and \
-            self._fields == other._fields
+               self._timestamp == other._timestamp and \
+               self._fields == other._fields
 
     def _deep_hash(self):
         if self._fields:

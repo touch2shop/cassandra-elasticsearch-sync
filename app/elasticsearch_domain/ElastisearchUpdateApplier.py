@@ -1,13 +1,13 @@
 import logging
-from app.elasticsearch_domain.ElasticsearchDocument import ElasticsearchDocument
-from app.elasticsearch_domain.store.ElasticsearchDocumentStore import ElasticsearchDocumentStore
+from app.elasticsearch_domain.GenericElasticsearchDocument import GenericElasticsearchDocument
+from app.elasticsearch_domain.store.GenericElasticsearchStore import GenericElasticsearchStore
 
 
 class ElasticsearchUpdateApplier:
 
     def __init__(self, elasticsearch):
         self._elasticsearch = elasticsearch
-        self._document_store = ElasticsearchDocumentStore(elasticsearch)
+        self._generic_store = GenericElasticsearchStore(elasticsearch)
         self._logger = logging.getLogger(__name__)
 
     def apply_updates(self, updates):
@@ -16,7 +16,7 @@ class ElasticsearchUpdateApplier:
                 self._apply_update(update)
 
     def _apply_update(self, update):
-        document = self._document_store.read(update.identifier)
+        document = self._generic_store.read(update.identifier)
         if document:
             self._validate_document(document)
             self._apply_update_to_existing_document(update, document)
@@ -28,13 +28,13 @@ class ElasticsearchUpdateApplier:
             self._logger.info("Elasticsearch document %s is newer than update. No action performed.", update.identifier)
         else:
             if update.is_delete:
-                self._document_store.delete(update)
+                self._generic_store.delete(update)
             else:
                 # in order to avoid deadlocks and break cycles, a document is updated only if there are differences.
                 update_document = self._build_document(update)
 
                 if self._documents_are_different(existing_document, update_document):
-                    self._document_store.update(update_document)
+                    self._generic_store.update(update_document)
 
     @classmethod
     def _documents_are_different(cls, document1, document2):
@@ -54,7 +54,7 @@ class ElasticsearchUpdateApplier:
             self._logger.info(
                 "Document %s already deleted from Elasticsearch. No action performed.", update.identifier)
         else:
-            self._document_store.create(self._build_document(update))
+            self._generic_store.create(self._build_document(update))
 
     def _check_index_exists(self, index):
         if not self._elasticsearch.indices.exists(index=index):
@@ -68,7 +68,7 @@ class ElasticsearchUpdateApplier:
 
     @staticmethod
     def _build_document(update):
-        return ElasticsearchDocument(update.identifier, update.timestamp, list(update.fields))
+        return GenericElasticsearchDocument(update.identifier, update.timestamp, list(update.fields))
 
     @staticmethod
     def _validate_document(document):

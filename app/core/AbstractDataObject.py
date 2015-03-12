@@ -31,4 +31,4 @@ class AbstractDataObject(object):
         pass
 
     def __repr__(self):
-        return repr(self._deep_string)
+        return repr(self._deep_string())

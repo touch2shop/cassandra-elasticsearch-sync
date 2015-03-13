@@ -20,17 +20,17 @@ class CassandraUpdateFetcher(object):
         self._id_column_name = id_column_name
         self._cassandra_client = log_entry_store.client
 
-    def fetch_updates(self, minimum_time=None):
-        log_entries = self._fetch_log_entries(minimum_time)
+    def fetch_updates(self, minimum_timestamp=None):
+        log_entries = self._fetch_log_entries(minimum_timestamp)
         combined_update_events = self._combine_update_events(log_entries)
         updates = self._fetch_updates(combined_update_events)
         return updates
 
-    def _fetch_log_entries(self, minimum_time):
-        if minimum_time is None:
+    def _fetch_log_entries(self, minimum_timestamp):
+        if minimum_timestamp is None:
             return self._log_entry_store.find_all()
         else:
-            return self._log_entry_store.find_by_time_greater_or_equal_than(minimum_time)
+            return self._log_entry_store.find_by_time_greater_or_equal_than(minimum_timestamp)
 
     @classmethod
     def _combine_update_events(cls, log_entries):

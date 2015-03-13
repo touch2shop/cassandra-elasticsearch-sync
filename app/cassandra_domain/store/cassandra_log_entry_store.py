@@ -46,11 +46,11 @@ class CassandraLogEntryStore(AbstractCassandraStore):
         rows = self.execute(statement, (logged_keyspace, logged_table, logged_key), timeout)
         return self._to_log_entries(rows)
 
-    def find_by_time_greater_or_equal_than(self, minimum_time, timeout=None):
+    def find_by_time_greater_or_equal_than(self, minimum_timestamp, timeout=None):
         statement = self.prepare_statement(
             self._build_select_query(where="time_uuid >= minTimeuuid(?)", allow_filtering=True))
 
-        rows = self.execute(statement, [minimum_time], timeout)
+        rows = self.execute(statement, [minimum_timestamp], timeout)
         return self._to_log_entries(rows)
 
     def delete_all(self):

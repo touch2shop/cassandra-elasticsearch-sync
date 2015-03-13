@@ -35,7 +35,7 @@ class TestCassandraToElasticsearchPropagator:
         for product in product_fixtures:
             product_fixture_cassandra_store.create(product)
 
-        propagator.propagate_updates(minimum_time=None)
+        propagator.propagate_updates(minimum_timestamp=None)
 
         for product in product_fixtures:
             read_from_cassandra = product_fixture_cassandra_store.read(product.id)
@@ -54,7 +54,7 @@ class TestCassandraToElasticsearchPropagator:
             product.timestamp = time()
             product_fixture_cassandra_store.update(product)
 
-        propagator.propagate_updates(minimum_time=None)
+        propagator.propagate_updates(minimum_timestamp=None)
 
         for product in product_fixtures:
             read_from_cassandra = product_fixture_cassandra_store.read(product.id)
@@ -76,7 +76,7 @@ class TestCassandraToElasticsearchPropagator:
         deleted = product_fixtures.pop(0)
         product_fixture_cassandra_store.delete(deleted)
 
-        propagator.propagate_updates(minimum_time=None)
+        propagator.propagate_updates(minimum_timestamp=None)
 
         for product in product_fixtures:
             read_from_cassandra = product_fixture_cassandra_store.read(product.id)
@@ -112,7 +112,7 @@ class TestCassandraToElasticsearchPropagator:
             product.timestamp = time()
             product_fixture_cassandra_store.update(product)
 
-        propagator.propagate_updates(minimum_time=datetime.utcfromtimestamp(minimum_timestamp))
+        propagator.propagate_updates(minimum_timestamp=datetime.utcfromtimestamp(minimum_timestamp))
 
         for product in products_created_after:
             read_from_cassandra = product_fixture_cassandra_store.read(product.id)
@@ -146,5 +146,5 @@ class TestCassandraToElasticsearchPropagator:
         product_fixture_cassandra_store.create(
             ProductFixture(uuid4(), "navy polo shirt", 5, "great shirt, great price!", timestamp=most_recent_timestamp))
 
-        actual_most_recent_timestamp = propagator.propagate_updates(minimum_time=None)
+        actual_most_recent_timestamp = propagator.propagate_updates(minimum_timestamp=None)
         assert abs(actual_most_recent_timestamp - most_recent_timestamp) < 0.01

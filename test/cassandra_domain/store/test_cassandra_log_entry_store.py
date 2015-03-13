@@ -51,8 +51,8 @@ class TestCassandraLogEntryStore(object):
         assert_that(found, has_length(greater_than_or_equal_to(len(entries))))
         assert_that(found, has_items(*entries))
 
-    def test_find_log_entries_filtering_by_minimum_time_at_utc(self, cassandra_log_entry_store):
-        minimum_time = arrow.get("2015-01-02T16:00:00.000000-0000")
+    def test_find_log_entries_filtering_by_minimum_time(self, cassandra_log_entry_store):
+        minimum_timestamp = arrow.get("2015-01-02T16:00:00.000000-0000").float_timestamp
         entries = list()
 
         # These entries SHOULD NOT be included in the results
@@ -112,74 +112,7 @@ class TestCassandraLogEntryStore(object):
         for entry in shuffled_entries:
             cassandra_log_entry_store.create(entry)
 
-        found_entries = cassandra_log_entry_store.find_by_time_greater_or_equal_than(minimum_time)
-
-        assert_that(found_entries, has_length(greater_than_or_equal_to(5)))
-        assert_that(found_entries, not(has_items(entries[0], entries[1], entries[2])))
-        assert_that(found_entries, has_items(entries[3], entries[4], entries[5], entries[6], entries[7]))
-
-    def test_find_log_entries_filtering_by_minimum_time_with_timezone(self, cassandra_log_entry_store):
-        minimum_time = arrow.get("2015-01-02T13:00:00.000000-0300")
-        entries = list()
-
-        # These entries SHOULD NOT be included in the results
-        entries.append(self.build_log_entry(time_uuid=self._create_time_uuid("2015-01-01T00:00:00.000000-0000"),
-                                            logged_keyspace="test_keyspace",
-                                            logged_table="test_table",
-                                            logged_key=str(uuid.uuid4()),
-                                            operation="save",
-                                            updated_columns={"a", "b", "c"}))
-        entries.append(self.build_log_entry(time_uuid=self._create_time_uuid("2015-01-02T00:00:00.000000-0000"),
-                                            logged_keyspace="test_keyspace",
-                                            logged_table="test_table",
-                                            logged_key=str(uuid.uuid4()),
-                                            operation="save",
-                                            updated_columns={"a", "b", "c"}))
-        entries.append(self.build_log_entry(time_uuid=self._create_time_uuid("2015-01-02T15:59:59.999999-0000"),
-                                            logged_keyspace="test_keyspace",
-                                            logged_table="test_table",
-                                            logged_key=str(uuid.uuid4()),
-                                            operation="save",
-                                            updated_columns={"a", "b", "c"}))
-
-        # These entries SHOULD be included in the results
-        entries.append(self.build_log_entry(time_uuid=self._create_time_uuid("2015-01-02T16:00:00.000000-0000"),
-                                            logged_keyspace="test_keyspace",
-                                            logged_table="test_table",
-                                            logged_key=str(uuid.uuid4()),
-                                            operation="save",
-                                            updated_columns={"a", "b", "c"}))
-        entries.append(self.build_log_entry(time_uuid=self._create_time_uuid("2015-01-02T16:00:00.000001-0000"),
-                                            logged_keyspace="test_keyspace",
-                                            logged_table="test_table",
-                                            logged_key=str(uuid.uuid4()),
-                                            operation="save",
-                                            updated_columns={"a", "b", "c"}))
-        entries.append(self.build_log_entry(time_uuid=self._create_time_uuid("2015-01-04T00:00:00.000000-0000"),
-                                            logged_keyspace="test_keyspace",
-                                            logged_table="test_table",
-                                            logged_key=str(uuid.uuid4()),
-                                            operation="save",
-                                            updated_columns={"a", "b", "c"}))
-        entries.append(self.build_log_entry(time_uuid=self._create_time_uuid("2015-01-05T00:00:00.000000-0000"),
-                                            logged_keyspace="test_keyspace",
-                                            logged_table="test_table",
-                                            logged_key=str(uuid.uuid4()),
-                                            operation="save",
-                                            updated_columns={"a", "b", "c"}))
-        entries.append(self.build_log_entry(time_uuid=self._create_time_uuid("2015-01-05T15:00:00.000000-0000"),
-                                            logged_keyspace="test_keyspace",
-                                            logged_table="test_table",
-                                            logged_key=str(uuid.uuid4()),
-                                            operation="save",
-                                            updated_columns={"a", "b", "c"}))
-
-        shuffled_entries = list(entries)
-        random.shuffle(shuffled_entries)
-        for entry in shuffled_entries:
-            cassandra_log_entry_store.create(entry)
-
-        found_entries = cassandra_log_entry_store.find_by_time_greater_or_equal_than(minimum_time)
+        found_entries = cassandra_log_entry_store.find_by_time_greater_or_equal_than(minimum_timestamp)
 
         assert_that(found_entries, has_length(greater_than_or_equal_to(5)))
         assert_that(found_entries, not(has_items(entries[0], entries[1], entries[2])))

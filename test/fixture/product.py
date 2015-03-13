@@ -1,6 +1,6 @@
-from datetime import datetime
 from uuid import UUID
 
+import arrow
 import pytest
 
 from app.cassandra_domain.store.abstract_cassandra_store import AbstractCassandraStore
@@ -62,12 +62,12 @@ class ProductFixtureCassandraStore(AbstractCassandraStore):
         if len(rows) == 1:
             row = rows[0]
             return ProductFixture(_id=row.id, name=row.name, description=row.description, quantity=row.quantity,
-                                  timestamp=row.timestamp)
+                                  timestamp=arrow.get(row.timestamp).float_timestamp)
         else:
             return None
 
     def create(self, product):
-        product.timestamp = datetime.utcnow()
+        product.timestamp = arrow.utcnow().float_timestamp
         statement = self.prepare_statement(
             """
             INSERT INTO %s (id, name, quantity, description, timestamp)
@@ -76,7 +76,7 @@ class ProductFixtureCassandraStore(AbstractCassandraStore):
         self.execute(statement, (product.id, product.name, product.quantity, product.description, product.timestamp))
 
     def update(self, product):
-        product.timestamp = datetime.utcnow()
+        product.timestamp = arrow.utcnow().float_timestamp
         statement = self.prepare_statement(
             """
             UPDATE %s

@@ -1,4 +1,5 @@
 # py.test configuration file.
+import os
 from cassandra.cluster import Cluster
 
 from elasticsearch import Elasticsearch
@@ -8,18 +9,28 @@ import pytest
 
 from app.cassandra_domain.store.cassandra_log_entry_store import CassandraLogEntryStore
 from app.cassandra_domain.store.cassandra_client import CassandraClient
+from app.settings import Settings
 
 from test.fixture.product import *
 
 
 @pytest.fixture(scope="session")
-def cassandra_log_keyspace():
-    return "logger"
+def settings():
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    settings_file = os.path.join(current_directory, "..", "test_settings.yaml")
+    return Settings.load_from_file(settings_file)
 
 
+# noinspection PyShadowingNames
 @pytest.fixture(scope="session")
-def cassandra_log_table():
-    return "log"
+def cassandra_log_keyspace(settings):
+    return settings.cassandra_log_keyspace
+
+
+# noinspection PyShadowingNames
+@pytest.fixture(scope="session")
+def cassandra_log_table(settings):
+    return settings.cassandra_log_table
 
 
 @pytest.fixture(scope="session")

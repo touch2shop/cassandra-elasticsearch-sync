@@ -12,9 +12,8 @@ def setup(cassandra_log_entry_store):
 
 
 @pytest.fixture(scope="module")
-def propagator(cassandra_cluster, elasticsearch_client, cassandra_log_keyspace, cassandra_log_table):
-    return CassandraToElasticsearchPropagator(cassandra_cluster, elasticsearch_client,
-                                              cassandra_log_keyspace, cassandra_log_table)
+def propagator(cassandra_cluster, elasticsearch_client, settings):
+    return CassandraToElasticsearchPropagator(cassandra_cluster, elasticsearch_client, settings)
 
 
 @pytest.fixture(scope="function")

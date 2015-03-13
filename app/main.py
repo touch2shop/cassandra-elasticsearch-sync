@@ -1,31 +1,11 @@
-from datetime import datetime
-from time import sleep
-
-from cassandra.cluster import Cluster
-from elasticsearch import Elasticsearch
-
-from app.cassandra_to_elasticsearch_propagator import CassandraToElasticsearchPropagator
+from app.settings import Settings
 
 
-_INTERVAL_BETWEEN_SYNCS = 10  # seconds
+_SETTINGS_FILE_NAME = "settings.yaml"
 
 
 def run():
-    cassandra_cluster = Cluster()
-    elasticsearch_client = Elasticsearch()
-    cassandra_to_elastic_search = CassandraToElasticsearchPropagator(cassandra_cluster, elasticsearch_client, "logger", "log")
-
-    # noinspection PyBroadException
-    try:
-        cassandra_to_elastic_search.propagate_updates()
-        while True:
-            time = datetime.utcnow()
-            sleep(_INTERVAL_BETWEEN_SYNCS)
-            cassandra_to_elastic_search.propagate_updates(time)
-
-    except Exception as e:
-        print e
-
+    settings = Settings.load_from_file(_SETTINGS_FILE_NAME)
 
 if __name__ == "__main__":
     run()

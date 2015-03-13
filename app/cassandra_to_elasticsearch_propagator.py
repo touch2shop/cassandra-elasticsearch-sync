@@ -5,9 +5,10 @@ from app.elasticsearch_domain.elasticsearch_update_applier import ElasticsearchU
 
 class CassandraToElasticsearchPropagator:
 
-    def __init__(self, cassandra_cluster, elasticsearch_client, cassandra_log_keyspace, cassandra_log_table):
-        log_entry_store = CassandraLogEntryStore(cassandra_cluster, cassandra_log_keyspace, cassandra_log_table)
-        self._cassandra_update_fetcher = CassandraUpdateFetcher(log_entry_store)
+    def __init__(self, cassandra_cluster, elasticsearch_client, settings):
+        log_entry_store = CassandraLogEntryStore(cassandra_cluster,
+                                                 settings.cassandra_log_keyspace, settings.cassandra_log_table)
+        self._cassandra_update_fetcher = CassandraUpdateFetcher(log_entry_store, settings.cassandra_id_column_name)
         self._elasticsearch_update_applier = ElasticsearchUpdateApplier(elasticsearch_client)
 
     def propagate_updates(self, minimum_time=None):

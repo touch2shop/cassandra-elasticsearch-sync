@@ -1,0 +1,5 @@
+interval_between_runs: 60 # seconds
+cassandra_log_keyspace: test_logger
+cassandra_log_table: test_log
+cassandra_id_column_name: test_id
+cassandra_timestamp_column_name: test_timestamp

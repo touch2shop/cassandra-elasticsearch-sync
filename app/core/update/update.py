@@ -7,9 +7,9 @@ class Update(AbstractDataObject):
     def __init__(self, event, fields=None):
         self._event = event
         if fields:
-            self._fields = fields
+            self._fields = set(fields)
         else:
-            self._fields = []
+            self._fields = set()
 
     @property
     def event(self):
@@ -28,22 +28,30 @@ class Update(AbstractDataObject):
         return self._event.timestamp
 
     def add_field(self, name, value, timestamp):
-        self._fields.append(FieldUpdate(name, value, timestamp))
+        self._fields.add(FieldUpdate(name, value, timestamp))
 
     @property
     def fields(self):
         return self._fields
 
+    def __lt__(self, other):
+        return self.timestamp < other.timestamp
+
+    def __le__(self, other):
+        return self.timestamp <= other.timestamp
+
+    def __gt__(self, other):
+        return self.timestamp > other.timestamp
+
+    def __ge__(self, other):
+        return self.timestamp >= other.timestamp
+
     # noinspection PyProtectedMember
     def _deep_equals(self, other):
-        return self._event == other._event and \
-            self._fields == other._fields
+        return self._event == other._event and self._fields == other._fields
 
     def _deep_hash(self):
-        if self._fields:
-            return hash((self._event, frozenset(self._fields)))
-        else:
-            return hash(self._event)
+        return hash((self._event, frozenset(self._fields)))
 
     def _deep_string_dictionary(self):
         return {

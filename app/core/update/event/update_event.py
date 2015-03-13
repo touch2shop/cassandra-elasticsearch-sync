@@ -25,6 +25,7 @@ class UpdateEvent(AbstractDataObject):
     def field_names(self):
         return self._field_names
 
+    # FIXME: migrate to python 3 rich comparisons
     def __cmp__(self, other):
         if self.timestamp != other.timestamp:
             return cmp(self.timestamp, other.timestamp)

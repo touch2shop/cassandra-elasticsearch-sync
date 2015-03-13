@@ -11,7 +11,7 @@ class ElasticsearchUpdateApplier:
     def __init__(self, elasticsearch):
         self._elasticsearch = elasticsearch
         self._generic_store = GenericElasticsearchStore(elasticsearch)
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger()
 
     def apply_updates(self, updates):
         if updates:

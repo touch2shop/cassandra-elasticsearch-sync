@@ -1,3 +1,4 @@
+import logging
 import yaml
 
 
@@ -40,5 +41,7 @@ class Settings(object):
 
     @classmethod
     def load_from_file(cls, filename):
+        logger = logging.getLogger()
+        logger.info("Loading settings from file %s", filename)
         stream = open(filename, 'r')
         return Settings(yaml.load(stream))

@@ -15,7 +15,7 @@ class CassandraUpdateFetcher(object):
 
     def __init__(self, log_entry_store, id_column_name=_DEFAULT_CASSANDRA_ID_COLUMN_NAME):
 
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger()
         self._log_entry_store = log_entry_store
         self._id_column_name = id_column_name
         self._cassandra_client = log_entry_store.client

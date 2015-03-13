@@ -24,11 +24,13 @@ def setup_logger():
     log_stream_handler.setFormatter(formatter)
     root_logger.addHandler(log_stream_handler)
 
+
 def run():
     setup_logger()
     settings = Settings.load_from_file(_SETTINGS_FILE_NAME)
     sync_loop = SyncLoop(settings)
     sync_loop.run()
+
 
 if __name__ == "__main__":
     run()

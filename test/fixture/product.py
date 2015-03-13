@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import UUID
 
 import pytest
 
@@ -103,7 +104,7 @@ class ProductFixtureElasticsearchStore(AbstractEntityElasticsearchStore):
 
     def _from_response(self, body, timestamp, index, _type, _id):
         product = ProductFixture()
-        product._id = _id
+        product._id = UUID(_id)
         product.timestamp = timestamp
         product.name = body.get("name", None)
         product.quantity = body.get("quantity", None)

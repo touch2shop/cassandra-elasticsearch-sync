@@ -79,3 +79,8 @@ class TestUpdateEvent:
 
         assert cmp(save_event, delete_event) < 0
         assert cmp(delete_event, save_event) > 0
+
+    def test_default_is_delete_is_false(self, identifier):
+        timestamp = generate_timestamp()
+        update = UpdateEvent(identifier=identifier, timestamp=timestamp)
+        assert not update.is_delete

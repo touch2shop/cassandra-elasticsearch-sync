@@ -47,6 +47,11 @@ def build_elasticsearch_document(index, _type, product_fixture):
 @pytest.mark.slow
 class TestGenericElasticsearchStore:
 
+    def test_read_non_existent(self, generic_elasticsearch_store, elasticsearch_fixture_index, product_fixture_table):
+        identifier = Identifier(elasticsearch_fixture_index, product_fixture_table, uuid.uuid4())
+        read = generic_elasticsearch_store.read(identifier)
+        assert read is None
+
     def test_create_and_read(self, product_fixtures, elasticsearch_documents, generic_elasticsearch_store,
                              elasticsearch_fixture_index, product_fixture_table):
 
@@ -62,9 +67,7 @@ class TestGenericElasticsearchStore:
             assert read_document.get_field_value("description") == product_fixture.description
             assert read_document.get_field_value("quantity") == product_fixture.quantity
 
-    def test_update(self, product_fixtures, elasticsearch_documents, generic_elasticsearch_store,
-                               elasticsearch_fixture_index, product_fixture_elasticsearch_store,
-                               product_fixture_table):
+    def test_full_update(self, elasticsearch_documents, generic_elasticsearch_store):
 
         for document in elasticsearch_documents:
             generic_elasticsearch_store.create(document)
@@ -85,8 +88,27 @@ class TestGenericElasticsearchStore:
             assert read_document.get_field_value("description") == new_description
             assert read_document.get_field_value("quantity") == new_quantity
 
-    def test_delete(self, product_fixtures, elasticsearch_documents, generic_elasticsearch_store,
-                               elasticsearch_fixture_index, product_fixture_elasticsearch_store, elasticsearch_client):
+    def test_partial_update(self, elasticsearch_documents, generic_elasticsearch_store):
+
+        for document in elasticsearch_documents:
+            generic_elasticsearch_store.create(document)
+
+        new_description = "updated_description"
+        new_quantity = 99
+
+        for document in elasticsearch_documents:
+            document.set_field_value("description", new_description)
+            document.set_field_value("quantity", new_quantity)
+            generic_elasticsearch_store.update(document)
+
+        for document in elasticsearch_documents:
+            read_document = generic_elasticsearch_store.read(document.identifier)
+            assert read_document.get_field_value("name")
+            assert read_document.get_field_value("name") != ""
+            assert read_document.get_field_value("description") == new_description
+            assert read_document.get_field_value("quantity") == new_quantity
+
+    def test_delete(self, elasticsearch_documents, generic_elasticsearch_store, elasticsearch_client):
 
         for document in elasticsearch_documents:
             generic_elasticsearch_store.create(document)

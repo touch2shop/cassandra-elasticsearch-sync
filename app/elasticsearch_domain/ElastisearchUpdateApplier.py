@@ -31,7 +31,7 @@ class ElasticsearchUpdateApplier:
             self._logger.info("Elasticsearch document %s is newer than update. No action performed.", update.identifier)
         else:
             if update.is_delete:
-                self._generic_store.delete(update)
+                self._generic_store.delete(update.identifier)
             else:
                 # in order to avoid deadlocks and break cycles, a document is updated only if there are differences.
                 update_document = self._build_document(update)

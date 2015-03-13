@@ -108,6 +108,7 @@ class ProductFixtureElasticsearchStore(AbstractEntityElasticsearchStore):
         product.name = body.get("name", None)
         product.quantity = body.get("quantity", None)
         product.description = body.get("description", None)
+        return product
 
     def _to_request_body(self, document):
         return {"name": document.name, "quantity": document.quantity, "description": document.description}

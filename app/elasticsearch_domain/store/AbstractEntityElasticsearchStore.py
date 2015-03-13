@@ -1,6 +1,7 @@
 from app.elasticsearch_domain.store.AbstractElasticsearchStore import AbstractElasticsearchStore
 
 
+# noinspection PyAbstractClass
 class AbstractEntityElasticsearchStore(AbstractElasticsearchStore):
 
     def __init__(self, client, index, _type):
@@ -15,7 +16,7 @@ class AbstractEntityElasticsearchStore(AbstractElasticsearchStore):
         self._base_delete(self._index, self._type, _id)
 
     def create(self, document):
-        return self._base_create(self._index, self._type, document.id, document)
+        self._base_create(self._index, self._type, document.id, document)
 
     def update(self, document):
-        return self._base_update(self._index, self._type, document.id, document)
+        self._base_update(self._index, self._type, document.id, document)

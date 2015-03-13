@@ -4,9 +4,12 @@ from app.core.FieldUpdate import FieldUpdate
 
 class Update(AbstractDataObject):
 
-    def __init__(self, event):
+    def __init__(self, event, fields=None):
         self._event = event
-        self._fields = []
+        if fields:
+            self._fields = fields
+        else:
+            self._fields = []
 
     @property
     def event(self):

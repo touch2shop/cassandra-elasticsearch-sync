@@ -1,6 +1,7 @@
 from abc import abstractmethod
 import abc
 from datetime import datetime
+from elasticsearch import TransportError
 
 
 class AbstractElasticsearchStore(object):
@@ -11,8 +12,14 @@ class AbstractElasticsearchStore(object):
         self._client = elasticsearch_client
 
     def _base_read(self, index, _type, _id):
-        response = self._client.get(index=index, doc_type=_type, id=_id, fields="_source,_timestamp")
-        return self._process_response(response)
+        try:
+            response = self._client.get(index=index, doc_type=_type, id=_id, fields="_source,_timestamp")
+            return self._process_response(response)
+        except TransportError as e:
+            if e.status_code == 404:
+                return None
+            else:
+                raise
 
     def _base_create(self, index, _type, _id, document):
         time = self._get_time(document)
@@ -22,7 +29,7 @@ class AbstractElasticsearchStore(object):
     def _base_update(self, index, _type, _id, document):
         time = self._get_time(document)
         body = self._to_request_body(document)
-        self._client.index(index=index, doc_type=_type, id=_id, body=body, timestamp=time)
+        self._client.update(index=index, doc_type=_type, id=_id, body={"doc": body}, timestamp=time)
 
     def _base_delete(self, index, _type, _id):
         return self._client.delete(index=index, doc_type=_type, id=_id)

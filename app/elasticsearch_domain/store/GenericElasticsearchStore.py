@@ -19,11 +19,11 @@ class GenericElasticsearchStore(AbstractElasticsearchStore):
 
     def create(self, document):
         identifier = document.identifier
-        return self._base_create(identifier.namespace, identifier.table, identifier.key, document)
+        self._base_create(identifier.namespace, identifier.table, identifier.key, document)
 
     def update(self, document):
         identifier = document.identifier
-        return self._base_update(identifier.namespace, identifier.table, identifier.key, document)
+        self._base_update(identifier.namespace, identifier.table, identifier.key, document)
 
     def _from_response(self, body, timestamp, index, _type, _id):
         identifier = Identifier(index, _type, _id)

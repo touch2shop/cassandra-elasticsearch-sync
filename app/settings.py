@@ -39,6 +39,6 @@ class Settings(object):
         return self._cassandra_timestamp_column_name
 
     @classmethod
-    def load_from_file(cls, file_name):
-        stream = open(file_name, 'r')
+    def load_from_file(cls, filename):
+        stream = open(filename, 'r')
         return Settings(yaml.load(stream))

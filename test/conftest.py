@@ -15,8 +15,19 @@ from test.fixture.product import *
 
 
 @pytest.fixture(scope="session")
-def settings():
-    current_directory = os.path.dirname(os.path.abspath(__file__))
+def current_directory():
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+# noinspection PyShadowingNames
+@pytest.fixture(scope="session")
+def resources_directory(current_directory):
+    return os.path.join(current_directory, "resources")
+
+
+# noinspection PyShadowingNames
+@pytest.fixture(scope="session")
+def settings(current_directory):
     settings_file = os.path.join(current_directory, "..", "test_settings.yaml")
     return Settings.load_from_file(settings_file)
 

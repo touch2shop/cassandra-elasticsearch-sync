@@ -1,8 +1,9 @@
-PyYAML==3.11
-cassandra-driver==2.1.4
-elasticsearch==1.4.0
-time-uuid==0.1.1
+cassandra-driver>=2.1
+elasticsearch>=1.4
+time-uuid
+PyYAML
 arrow
-sortedcontainers==0.9.4
-pytest==2.6.4
-PyHamcrest==1.8.2
+blist
+sortedcontainers
+pytest
+PyHamcrest

@@ -6,21 +6,14 @@ from app.settings import Settings
 
 # noinspection PyShadowingNames
 @pytest.fixture(scope="module")
-def fixture_directory():
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(current_directory, "fixture")
+def full_settings_file_name(resources_directory):
+    return os.path.join(resources_directory, "full_settings.yaml")
 
 
 # noinspection PyShadowingNames
 @pytest.fixture(scope="module")
-def full_settings_file_name(fixture_directory):
-    return os.path.join(fixture_directory, "full_settings.yaml")
-
-
-# noinspection PyShadowingNames
-@pytest.fixture(scope="module")
-def empty_settings_file_name(fixture_directory):
-    return os.path.join(fixture_directory, "empty_settings.yaml")
+def empty_settings_file_name(resources_directory):
+    return os.path.join(resources_directory, "empty_settings.yaml")
 
 
 # noinspection PyMethodMayBeStatic,PyClassHasNoInit,PyShadowingNames

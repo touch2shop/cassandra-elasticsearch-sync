@@ -1,5 +1,7 @@
+from app.core.exception.unrecoverable_error import UnrecoverableError
 
-class SyncException(Exception):
+
+class SyncException(UnrecoverableError):
 
     def __init__(self, message, identifier=None):
         if identifier:

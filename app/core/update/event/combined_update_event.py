@@ -1,7 +1,7 @@
 from sortedcontainers import SortedSet
 
 from app.core.abstract_data_object import AbstractDataObject
-from app.core.update_event_field import UpdateEventField
+from app.core.update.event.update_event_field import UpdateEventField
 
 
 class CombinedUpdateEvent(AbstractDataObject):

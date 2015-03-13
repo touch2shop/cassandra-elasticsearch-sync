@@ -1,4 +1,4 @@
-from app.core.combined_update_event import CombinedUpdateEvent
+from app.core.update.event.combined_update_event import CombinedUpdateEvent
 
 
 class UpdateEventCombiner(object):

@@ -4,8 +4,8 @@ from time import time, sleep
 import pytest
 
 from app.core.identifier import Identifier
-from app.core.update import Update
-from app.core.update_event import UpdateEvent
+from app.core.update.update import Update
+from app.core.update.event.update_event import UpdateEvent
 from app.core.value_field import ValueField
 from app.elasticsearch_domain.invalid_elasticsearch_schema_exception import InvalidElasticsearchSchemaException
 from app.elasticsearch_domain.elasticsearch_update_applier import ElasticsearchUpdateApplier

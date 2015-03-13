@@ -1,7 +1,9 @@
 from hamcrest import assert_that, contains_inanyorder
+
 from app.core.identifier import Identifier
-from app.core.update_event import UpdateEvent
-from app.core.update_event_combiner import UpdateEventCombiner
+from app.core.update.event.update_event import UpdateEvent
+from app.core.update.event.update_event_combiner import UpdateEventCombiner
+
 
 
 # noinspection PyMethodMayBeStatic,PyClassHasNoInit

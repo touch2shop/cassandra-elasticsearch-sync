@@ -1,4 +1,4 @@
-from app.core.ValueField import ValueField
+from app.core.value_field import ValueField
 
 
 class FieldUpdate(ValueField):

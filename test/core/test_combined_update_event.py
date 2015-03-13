@@ -1,9 +1,9 @@
 from hamcrest import *
 import pytest
 
-from app.core.UpdateEvent import UpdateEvent
-from app.core.CombinedUpdateEvent import CombinedUpdateEvent
-from app.core.Identifier import Identifier
+from app.core.update_event import UpdateEvent
+from app.core.combined_update_event import CombinedUpdateEvent
+from app.core.identifier import Identifier
 
 
 @pytest.fixture

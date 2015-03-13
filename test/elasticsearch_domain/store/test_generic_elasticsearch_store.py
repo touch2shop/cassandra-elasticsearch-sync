@@ -3,9 +3,9 @@ import time
 
 import pytest
 
-from app.core.Identifier import Identifier
-from app.elasticsearch_domain.GenericElasticsearchDocument import GenericElasticsearchDocument
-from app.elasticsearch_domain.store.GenericElasticsearchStore import GenericElasticsearchStore
+from app.core.identifier import Identifier
+from app.elasticsearch_domain.generic_elasticsearch_document import GenericElasticsearchDocument
+from app.elasticsearch_domain.store.generic_elasticsearch_store import GenericElasticsearchStore
 from test.fixture.product import ProductFixture
 
 

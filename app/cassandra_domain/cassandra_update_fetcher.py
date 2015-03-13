@@ -1,10 +1,10 @@
 import logging
 from operator import attrgetter
 
-from app.core.Identifier import Identifier
-from app.core.Update import Update
-from app.core.UpdateEvent import UpdateEvent
-from app.core.UpdateEventCombiner import UpdateEventCombiner
+from app.core.identifier import Identifier
+from app.core.update import Update
+from app.core.update_event import UpdateEvent
+from app.core.update_event_combiner import UpdateEventCombiner
 
 
 _CASSANDRA_ID_COLUMN_NAME = "id"

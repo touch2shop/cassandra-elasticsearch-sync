@@ -1,12 +1,12 @@
 from uuid import uuid4
 import pytest
 from time import time, sleep
-from app.core.Identifier import Identifier
-from app.core.Update import Update
-from app.core.UpdateEvent import UpdateEvent
-from app.core.ValueField import ValueField
-from app.core.exception.InvalidElasticsearchSchemaException import InvalidElasticsearchSchemaException
-from app.elasticsearch_domain.ElastisearchUpdateApplier import ElasticsearchUpdateApplier
+from app.core.identifier import Identifier
+from app.core.update import Update
+from app.core.update_event import UpdateEvent
+from app.core.value_field import ValueField
+from app.core.exception.invalid_elasticsearch_schema_exception import InvalidElasticsearchSchemaException
+from app.elasticsearch_domain.elasticsearch_update_applier import ElasticsearchUpdateApplier
 from test.fixture.product import ProductFixture
 
 

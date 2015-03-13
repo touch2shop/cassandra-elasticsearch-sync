@@ -1,4 +1,4 @@
-from app.elasticsearch_domain.store.AbstractElasticsearchStore import AbstractElasticsearchStore
+from app.elasticsearch_domain.store.abstract_elasticsearch_store import AbstractElasticsearchStore
 
 
 # noinspection PyAbstractClass

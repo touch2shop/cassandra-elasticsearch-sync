@@ -1,8 +1,8 @@
 import logging
 
-from app.core.exception.InvalidElasticsearchSchemaException import InvalidElasticsearchSchemaException
-from app.elasticsearch_domain.GenericElasticsearchDocument import GenericElasticsearchDocument
-from app.elasticsearch_domain.store.GenericElasticsearchStore import GenericElasticsearchStore
+from app.core.exception.invalid_elasticsearch_schema_exception import InvalidElasticsearchSchemaException
+from app.elasticsearch_domain.generic_elasticsearch_document import GenericElasticsearchDocument
+from app.elasticsearch_domain.store.generic_elasticsearch_store import GenericElasticsearchStore
 
 
 class ElasticsearchUpdateApplier:

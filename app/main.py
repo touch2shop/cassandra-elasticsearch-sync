@@ -4,7 +4,7 @@ from time import sleep
 from cassandra.cluster import Cluster
 from elasticsearch import Elasticsearch
 
-from app.CassandraToElasticsearchPropagator import CassandraToElasticSearchPropagator
+from app.cassandra_to_elasticsearch_propagator import CassandraToElasticSearchPropagator
 
 
 _INTERVAL_BETWEEN_SYNCS = 10  # seconds

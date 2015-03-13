@@ -1,5 +1,5 @@
-from app.cassandra_domain.store.AbstractCassandraStore import AbstractCassandraStore
-from app.cassandra_domain.CassandraLogEntry import CassandraLogEntry
+from app.cassandra_domain.store.abstract_cassandra_store import AbstractCassandraStore
+from app.cassandra_domain.cassandra_log_entry import CassandraLogEntry
 
 
 class CassandraLogEntryStore(AbstractCassandraStore):

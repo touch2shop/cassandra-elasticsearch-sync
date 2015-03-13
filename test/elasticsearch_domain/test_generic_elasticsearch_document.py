@@ -1,9 +1,9 @@
 from time import time
 from uuid import uuid4
 from hamcrest import assert_that, contains_inanyorder
-from app.core.Identifier import Identifier
-from app.core.ValueField import ValueField
-from app.elasticsearch_domain.GenericElasticsearchDocument import GenericElasticsearchDocument
+from app.core.identifier import Identifier
+from app.core.value_field import ValueField
+from app.elasticsearch_domain.generic_elasticsearch_document import GenericElasticsearchDocument
 
 
 # noinspection PyClassHasNoInit,PyMethodMayBeStatic

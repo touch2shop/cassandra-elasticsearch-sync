@@ -1,6 +1,6 @@
-from app.cassandra_domain.CassandraUpdateFetcher import CassandraUpdateFetcher
-from app.cassandra_domain.store.CassandraLogEntryStore import CassandraLogEntryStore
-from app.elasticsearch_domain.ElastisearchUpdateApplier import ElasticsearchUpdateApplier
+from app.cassandra_domain.cassandra_update_fetcher import CassandraUpdateFetcher
+from app.cassandra_domain.store.cassandra_log_entry_store import CassandraLogEntryStore
+from app.elasticsearch_domain.elasticsearch_update_applier import ElasticsearchUpdateApplier
 
 _DEFAULT_LOG_KEYSPACE = "logger"
 _DEFAULT_LOG_TABLE = "log"

@@ -1,5 +1,5 @@
-from app.core.AbstractDataObject import AbstractDataObject
-from app.core.ValueField import ValueField
+from app.core.abstract_data_object import AbstractDataObject
+from app.core.value_field import ValueField
 
 
 class GenericElasticsearchDocument(AbstractDataObject):

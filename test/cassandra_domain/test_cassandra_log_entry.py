@@ -1,6 +1,6 @@
 from datetime import datetime
 from time_uuid import TimeUUID
-from app.cassandra_domain.CassandraLogEntry import CassandraLogEntry
+from app.cassandra_domain.cassandra_log_entry import CassandraLogEntry
 
 
 # noinspection PyMethodMayBeStatic,PyClassHasNoInit

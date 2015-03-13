@@ -5,7 +5,7 @@ import uuid
 import pytest
 
 from test.fixture.product import ProductFixture
-from app.cassandra_domain.CassandraUpdateFetcher import CassandraUpdateFetcher
+from app.cassandra_domain.cassandra_update_fetcher import CassandraUpdateFetcher
 
 
 @pytest.fixture(scope="module")

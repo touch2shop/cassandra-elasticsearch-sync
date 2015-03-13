@@ -1,9 +1,9 @@
 from uuid import UUID
 
-from app.elasticsearch_domain.GenericElasticsearchDocument import GenericElasticsearchDocument
-from app.core.Identifier import Identifier
-from app.core.ValueField import ValueField
-from app.elasticsearch_domain.store.AbstractElasticsearchStore import AbstractElasticsearchStore
+from app.elasticsearch_domain.generic_elasticsearch_document import GenericElasticsearchDocument
+from app.core.identifier import Identifier
+from app.core.value_field import ValueField
+from app.elasticsearch_domain.store.abstract_elasticsearch_store import AbstractElasticsearchStore
 
 
 class GenericElasticsearchStore(AbstractElasticsearchStore):

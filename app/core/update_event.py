@@ -1,4 +1,4 @@
-from app.core.AbstractDataObject import AbstractDataObject
+from app.core.abstract_data_object import AbstractDataObject
 
 
 class UpdateEvent(AbstractDataObject):

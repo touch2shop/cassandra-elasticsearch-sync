@@ -6,8 +6,8 @@ from elasticsearch import Elasticsearch
 # noinspection PyUnresolvedReferences
 import pytest
 
-from app.cassandra_domain.store.CassandraLogEntryStore import CassandraLogEntryStore
-from app.cassandra_domain.store.CassandraClient import CassandraClient
+from app.cassandra_domain.store.cassandra_log_entry_store import CassandraLogEntryStore
+from app.cassandra_domain.store.cassandra_client import CassandraClient
 
 from test.fixture.product import *
 

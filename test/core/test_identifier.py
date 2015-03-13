@@ -1,6 +1,6 @@
 import pytest
 
-from app.core.Identifier import Identifier
+from app.core.identifier import Identifier
 
 
 @pytest.fixture

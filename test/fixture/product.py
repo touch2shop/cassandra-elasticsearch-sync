@@ -2,8 +2,8 @@ from datetime import datetime
 
 import pytest
 
-from app.cassandra_domain.store.AbstractCassandraStore import AbstractCassandraStore
-from app.elasticsearch_domain.store.AbstractEntityElasticsearchStore import AbstractEntityElasticsearchStore
+from app.cassandra_domain.store.abstract_cassandra_store import AbstractCassandraStore
+from app.elasticsearch_domain.store.abstract_entity_elasticsearch_store import AbstractEntityElasticsearchStore
 
 
 class ProductFixture:

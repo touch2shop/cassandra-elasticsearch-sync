@@ -1,6 +1,7 @@
 import logging
 
 from app.core.exception.invalid_elasticsearch_schema_exception import InvalidElasticsearchSchemaException
+from app.core.value_field import ValueField
 from app.elasticsearch_domain.generic_elasticsearch_document import GenericElasticsearchDocument
 from app.elasticsearch_domain.store.generic_elasticsearch_store import GenericElasticsearchStore
 
@@ -36,21 +37,8 @@ class ElasticsearchUpdateApplier:
                 # in order to avoid deadlocks and break cycles, a document is updated only if there are differences.
                 update_document = self._build_document(update)
 
-                if self._documents_are_different(existing_document, update_document):
+                if not ValueField.fields_are_identical(existing_document.fields, update_document.fields):
                     self._generic_store.update(update_document)
-
-    @classmethod
-    def _documents_are_different(cls, document1, document2):
-        for field1 in document1.fields:
-            for field2 in document2.fields:
-                if field1.name == field2.name:
-                    if cls._fields_are_different(field1, field2):
-                        return True
-        return False
-
-    @staticmethod
-    def _fields_are_different(field1, field2):
-        return str(field1) != str(field2)
 
     def _apply_update_to_nonexistent_document(self, update):
         if update.is_delete:

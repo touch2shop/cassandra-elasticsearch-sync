@@ -53,8 +53,8 @@ class GenericElasticsearchDocument(AbstractDataObject):
     # noinspection PyProtectedMember
     def _deep_equals(self, other):
         return self._identifier == other._identifier and \
-               self._timestamp == other._timestamp and \
-               self._fields == other._fields
+            self._timestamp == other._timestamp and \
+            self._fields == other._fields
 
     def _deep_hash(self):
         if self._fields:

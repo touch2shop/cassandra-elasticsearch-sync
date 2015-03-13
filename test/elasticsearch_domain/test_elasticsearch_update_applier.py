@@ -209,3 +209,36 @@ class TestElasticsearchUpdateApplier:
         # no exceptions...
         update_applier.apply_updates(None)
         update_applier.apply_updates([])
+
+    def only_update_if_fields_are_different(self, update_applier, elasticsearch_fixture_index,
+                                            product_fixture_table, product_fixture_elasticsearch_store):
+
+        _index = elasticsearch_fixture_index
+        _type = product_fixture_table
+        _id = uuid4()
+
+        original_name = "jeans"
+        original_description = "cool jeans"
+        original_quantity = 5
+
+        original_timestamp = time()
+
+        product = ProductFixture(_id=_id, timestamp=original_timestamp,
+                                 name=original_name, description=original_description, quantity=original_quantity)
+        product_fixture_elasticsearch_store.create(product)
+
+        sleep(0.001)
+
+        update_timestamp = time()
+        useless_update = build_update(namespace=_index, table=_type, key=str(_id), timestamp=update_timestamp,
+                                      fields=build_fields(name=original_name,
+                                                          description=original_description,
+                                                          quantity=original_quantity))
+
+        update_applier.apply_updates([useless_update])
+
+        read_product = product_fixture_elasticsearch_store.read(product)
+        assert read_product.name == original_name
+        assert read_product.description == original_description
+        assert read_product.quantity == original_quantity
+        assert read_product.timestamp == original_timestamp

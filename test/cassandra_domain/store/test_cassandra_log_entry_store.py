@@ -1,6 +1,6 @@
 import random
 import uuid
-import iso8601
+import arrow
 import pytest
 from time_uuid import TimeUUID
 from hamcrest import *
@@ -52,7 +52,7 @@ class TestCassandraLogEntryStore(object):
         assert_that(found, has_items(*entries))
 
     def test_find_log_entries_filtering_by_minimum_time_at_utc(self, cassandra_log_entry_store):
-        minimum_time = iso8601.parse_date("2015-01-02T16:00:00.000000-0000")
+        minimum_time = arrow.get("2015-01-02T16:00:00.000000-0000")
         entries = list()
 
         # These entries SHOULD NOT be included in the results
@@ -119,7 +119,7 @@ class TestCassandraLogEntryStore(object):
         assert_that(found_entries, has_items(entries[3], entries[4], entries[5], entries[6], entries[7]))
 
     def test_find_log_entries_filtering_by_minimum_time_with_timezone(self, cassandra_log_entry_store):
-        minimum_time = iso8601.parse_date("2015-01-02T13:00:00.000000-0300")
+        minimum_time = arrow.get("2015-01-02T13:00:00.000000-0300")
         entries = list()
 
         # These entries SHOULD NOT be included in the results
@@ -187,7 +187,7 @@ class TestCassandraLogEntryStore(object):
 
     @staticmethod
     def _create_time_uuid(date_time_string):
-        return TimeUUID.convert(iso8601.parse_date(date_time_string))
+        return TimeUUID.convert(arrow.get(date_time_string).datetime)
 
     @staticmethod
     def build_log_entry(time_uuid, logged_keyspace, logged_table, logged_key, operation, updated_columns):

@@ -1,4 +1,4 @@
-from app.core.exception.sync_exception import SyncException
+from app.core.sync_exception import SyncException
 
 
 class InvalidElasticsearchSchemaException(SyncException):

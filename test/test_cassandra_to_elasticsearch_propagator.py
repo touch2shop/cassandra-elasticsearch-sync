@@ -121,3 +121,30 @@ class TestCassandraToElasticsearchPropagator:
 
         assert product_fixture_cassandra_store.read(product_created_before.id)
         assert not product_fixture_elasticsearch_store.read(product_created_before.id)
+
+    def test_does_nothing_if_no_updates(self, propagator):
+        assert propagator.propagate_updates() is None
+
+    def test_returns_timestamp_of_the_most_recent_update(self, propagator, product_fixtures,
+                                                         product_fixture_cassandra_store):
+
+        for product in product_fixtures:
+            product_fixture_cassandra_store.create(product)
+
+        for product in product_fixtures:
+            product.name = "new_name"
+            product.description = "new_description"
+            product.timestamp = time()
+            product_fixture_cassandra_store.update(product)
+
+        deleted = product_fixtures.pop(0)
+        product_fixture_cassandra_store.delete(deleted)
+
+        sleep(1)
+
+        most_recent_timestamp = time()
+        product_fixture_cassandra_store.create(
+            ProductFixture(uuid4(), "navy polo shirt", 5, "great shirt, great price!", timestamp=most_recent_timestamp))
+
+        actual_most_recent_timestamp = propagator.propagate_updates(minimum_time=None)
+        assert abs(actual_most_recent_timestamp - most_recent_timestamp) < 0.01

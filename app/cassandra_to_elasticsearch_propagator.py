@@ -13,4 +13,13 @@ class CassandraToElasticsearchPropagator:
 
     def propagate_updates(self, minimum_time=None):
         updates = self._cassandra_update_fetcher.fetch_updates(minimum_time)
-        self._elasticsearch_update_applier.apply_updates(updates)
+        if updates:
+            updates = sorted(updates)
+            self._elasticsearch_update_applier.apply_updates(updates)
+            return self.__get_most_recent_update_time(updates)
+        else:
+            return None
+
+    @staticmethod
+    def __get_most_recent_update_time(updates_sorted_by_timestamp_in_ascending_order):
+        return updates_sorted_by_timestamp_in_ascending_order[-1].timestamp

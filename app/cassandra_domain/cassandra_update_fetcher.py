@@ -1,5 +1,6 @@
 import logging
 from operator import attrgetter
+from app.cassandra_domain.invalid_cassandra_schema_exception import InvalidCassandraSchemaException
 
 from app.core.identifier import Identifier
 from app.core.update.update import Update
@@ -63,12 +64,13 @@ class CassandraUpdateFetcher(object):
                                                    _id.namespace, id_column_name=_CASSANDRA_ID_COLUMN_NAME)
 
         if len(rows) > 1:
-            raise Exception(("More than one row found for entity %s on Cassandra. " +
+            raise InvalidCassandraSchemaException(identifier=_id,
+                    message=("More than one row found for entity on Cassandra. " +
                              "Please make sure the schema has a single primary key with name %s. " +
-                             "No actions performed.") % (_id, _CASSANDRA_ID_COLUMN_NAME))
+                             "No action performed.") % _CASSANDRA_ID_COLUMN_NAME)
         elif len(rows) == 0:
             # If the entity was deleted, a delete event will be will be available in the next log fetch.
-            self._logger.info("No row found for entity %s on Cassandra. No actions performed.", _id)
+            self._logger.info("No row found for entity %s on Cassandra. No action performed.", _id)
             return None
 
         return self._to_update(rows[0], update_event)

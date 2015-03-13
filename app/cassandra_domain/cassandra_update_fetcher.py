@@ -19,8 +19,8 @@ class CassandraUpdateFetcher(object):
         self._log_entry_store = log_entry_store
         self._cassandra_client = log_entry_store.client
 
-    def fetch_updates(self, minimum_log_entry_time=None):
-        log_entries = self._fetch_log_entries(minimum_log_entry_time)
+    def fetch_updates(self, minimum_time=None):
+        log_entries = self._fetch_log_entries(minimum_time)
         combined_update_events = self._combine_update_events(log_entries)
         updates = self._fetch_updates(combined_update_events)
         return updates

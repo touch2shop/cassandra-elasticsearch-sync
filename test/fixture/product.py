@@ -4,10 +4,19 @@ from uuid import UUID
 import pytest
 
 from app.cassandra_domain.store.abstract_cassandra_store import AbstractCassandraStore
+from app.core.abstract_data_object import AbstractDataObject
 from app.elasticsearch_domain.store.abstract_entity_elasticsearch_store import AbstractEntityElasticsearchStore
 
 
-class ProductFixture:
+class ProductFixture(AbstractDataObject):
+
+    def _deep_hash(self):
+        return hash((self._id, self.name, self.quantity, self.description))
+
+    # noinspection PyProtectedMember
+    def _deep_equals(self, other):
+        return self._id == other._id and self.name == other.name and \
+               self.quantity == other.quantity and self.description == other.description
 
     TABLE_NAME = "product"
 
@@ -39,6 +48,23 @@ class ProductFixtureCassandraStore(AbstractCassandraStore):
 
     def __init__(self, nodes, keyspace):
         super(ProductFixtureCassandraStore, self).__init__(nodes, keyspace, ProductFixture.TABLE_NAME)
+
+    def read(self, _id):
+        statement = self.prepare_statement(
+            """
+            SELECT id, name, quantity, description, timestamp FROM %s
+            WHERE id=?
+            """ % self.table)
+        rows = self.execute(statement, [_id])
+
+        assert len(rows) in (0, 1)
+
+        if len(rows) == 1:
+            row = rows[0]
+            return ProductFixture(_id=row.id, name=row.name, description=row.description, quantity=row.quantity,
+                                  timestamp=row.timestamp)
+        else:
+            return None
 
     def create(self, product):
         product.timestamp = datetime.utcnow()

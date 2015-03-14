@@ -12,7 +12,7 @@ def setup_logger():
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
 
-    formatter = logging.Formatter("'%(asctime)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter("[%(asctime)s] %(levelname)s - %(message)s")
 
     log_file_handler = logging.FileHandler(_LOG_FILE_NAME)
     log_file_handler.setLevel(logging.INFO)

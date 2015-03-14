@@ -21,5 +21,3 @@ Assumptions About Your Data Model
 - Every Cassandra table to be synchronized must have: 
     - A single primary key column named `id`.
     - A timestamp column with name and type `timestamp`. The timestamp must be updated whenever a row is updated.
-
-- All date and time columns must be saved in UTC time.

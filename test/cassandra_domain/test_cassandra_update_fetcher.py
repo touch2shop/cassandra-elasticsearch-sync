@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 from operator import attrgetter
 import uuid
 
@@ -22,9 +23,12 @@ def product_fixtures_creation_time():
 @pytest.fixture(scope="function")
 def product_fixtures(product_fixture_cassandra_store, product_fixtures_creation_time):
     product_fixture_cassandra_store.delete_all()
-    products = [ProductFixture(uuid.uuid4(), "navy polo shirt", 5, "great shirt, great price!"),
-                ProductFixture(uuid.uuid4(), "cool red shorts", 7, "perfect to go to the beach"),
-                ProductFixture(uuid.uuid4(), "black DC skater shoes", 10, "yo!")]
+    products = [ProductFixture(_id=uuid.uuid4(), name="navy polo shirt", quantity=5,
+                               description="great shirt, great price!", price=Decimal("99.99"), enabled=True),
+                ProductFixture(_id=uuid.uuid4(), name="cool red shorts", quantity=7,
+                               description="perfect to go to the beach", price=Decimal("49.99"), enabled=False),
+                ProductFixture(_id=uuid.uuid4(), name="black DC skater shoes", quantity=10,
+                               description="yo!", price=Decimal("149.99"), enabled=True)]
 
     for product in products:
         product_fixture_cassandra_store.create(product)
@@ -131,7 +135,7 @@ class TestCassandraUpdateFetcher:
     @staticmethod
     def check_update_matches_product_fixture_creation(update, product_fixture):
         assert update.is_delete is False
-        assert len(update.fields) == 3
+        assert len(update.fields) == 5
         for field in update.fields:
             assert attrgetter(field.name)(product_fixture) == field.value
 

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from uuid import uuid4
 from time import time, sleep
 
@@ -75,9 +76,12 @@ class TestElasticsearchUpdateApplier:
         name = "t-shirt"
         description = "cool red t-shirt"
         quantity = 5
+        price = Decimal("99.99")
+        enabled = True
 
         update = build_update(namespace=_index, table=_type, key=str(_id), timestamp=time(),
-                              fields=build_fields(name=name, description=description, quantity=quantity))
+                              fields=build_fields(name=name, enabled=True, description=description,
+                                                  quantity=quantity, price=price))
         update_applier.apply_updates([update])
 
         created = product_fixture_elasticsearch_store.read(_id)
@@ -106,17 +110,22 @@ class TestElasticsearchUpdateApplier:
         _type = product_fixture_table
         _id = uuid4()
 
-        product = ProductFixture(_id=_id, name="jeans", description="cool jeans", quantity=10)
+        product = ProductFixture(_id=_id, name="jeans", description="cool jeans", quantity=10,
+                                 price=Decimal("49.99"), enabled=True)
         product_fixture_elasticsearch_store.create(product)
 
         updated_name = "t-shirt"
         updated_description = "cool red t-shirt"
         updated_quantity = 5
+        updated_price = Decimal("69.99")
+        updated_enabled = False
 
         update = build_update(namespace=_index, table=_type, key=str(_id), timestamp=time(),
                               fields=build_fields(name=updated_name,
                                                   description=updated_description,
-                                                  quantity=updated_quantity))
+                                                  quantity=updated_quantity,
+                                                  price=updated_price,
+                                                  enabled=updated_enabled))
         update_applier.apply_updates([update])
 
         product = product_fixture_elasticsearch_store.read(_id)
@@ -134,9 +143,12 @@ class TestElasticsearchUpdateApplier:
         original_name = "jeans"
         original_description = "cool jeans"
         original_quantity = 5
+        original_price = Decimal("149.99")
+        original_enabled = True
 
         product = ProductFixture(_id=_id, name=original_name,
-                                 description=original_description, quantity=original_quantity)
+                                 description=original_description, quantity=original_quantity,
+                                 price=original_price, enabled=original_enabled)
         product_fixture_elasticsearch_store.create(product)
 
         updated_description = "cool red t-shirt"
@@ -149,6 +161,8 @@ class TestElasticsearchUpdateApplier:
 
         product = product_fixture_elasticsearch_store.read(_id)
         assert product.name == original_name
+        assert product.price == original_price
+        assert product.enabled == original_enabled
         assert product.description == updated_description
         assert product.quantity == updated_quantity
 
@@ -222,11 +236,14 @@ class TestElasticsearchUpdateApplier:
         original_name = "jeans"
         original_description = "cool jeans"
         original_quantity = 5
+        original_price = Decimal("149.99")
+        original_enabled = True
 
         original_timestamp = time()
 
-        product = ProductFixture(_id=_id, timestamp=original_timestamp,
-                                 name=original_name, description=original_description, quantity=original_quantity)
+        product = ProductFixture(_id=_id, timestamp=original_timestamp, name=original_name,
+                                 description=original_description, quantity=original_quantity,
+                                 price=original_price, enabled=original_enabled)
         product_fixture_elasticsearch_store.create(product)
 
         sleep(0.001)
@@ -235,7 +252,9 @@ class TestElasticsearchUpdateApplier:
         useless_update = build_update(namespace=_index, table=_type, key=str(_id), timestamp=update_timestamp,
                                       fields=build_fields(name=original_name,
                                                           description=original_description,
-                                                          quantity=original_quantity))
+                                                          quantity=original_quantity,
+                                                          enabled=original_enabled,
+                                                          price=original_price))
 
         update_applier.apply_updates([useless_update])
 

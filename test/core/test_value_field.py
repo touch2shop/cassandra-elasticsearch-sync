@@ -1,3 +1,4 @@
+from decimal import Decimal
 from time import sleep
 from uuid import uuid4
 from datetime import datetime
@@ -20,6 +21,19 @@ class TestValueField:
         assert ValueField.field_values_are_identical(10, 10)
         assert ValueField.field_values_are_identical(10, 10.0)
 
+    def test_numeric_field_values_are_not_identical(self):
+        assert not ValueField.field_values_are_identical(15.35, 15.36)
+        assert not ValueField.field_values_are_identical(10, 11)
+        assert not ValueField.field_values_are_identical(10, 10.0001)
+
+    def test_decimal_field_values_are_identical(self):
+        assert ValueField.field_values_are_identical("15.35", Decimal("15.35"))
+        assert ValueField.field_values_are_identical(Decimal("15.35"), Decimal("15.35"))
+
+    def test_decimal_field_values_are_not_identical(self):
+        assert not ValueField.field_values_are_identical("15.350", Decimal("15.35"))
+        assert not ValueField.field_values_are_identical(Decimal("15.350"), Decimal("15.35"))
+
     def test_datetime_fields_are_identical(self):
         now = datetime.now()
         assert ValueField.field_values_are_identical(now, now)
@@ -36,11 +50,6 @@ class TestValueField:
 
         assert not ValueField.field_values_are_identical(time1, time2)
         assert not ValueField.field_values_are_identical(time1, str(time2))
-
-    def test_numeric_field_values_are_not_identical(self):
-        assert not ValueField.field_values_are_identical(15.35, 15.36)
-        assert not ValueField.field_values_are_identical(10, 11)
-        assert not ValueField.field_values_are_identical(10, 10.0001)
 
     def test_boolean_field_values_are_identical(self):
         assert ValueField.field_values_are_identical(True, True)

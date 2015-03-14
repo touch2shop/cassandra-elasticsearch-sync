@@ -1,3 +1,4 @@
+from decimal import Decimal
 from uuid import UUID
 
 from app.elasticsearch_domain.generic_elasticsearch_document import GenericElasticsearchDocument
@@ -43,6 +44,8 @@ class GenericElasticsearchStore(AbstractElasticsearchStore):
         body = {}
         for field in document.fields:
             if isinstance(field.value, UUID):
+                serialized_value = str(field.value)
+            elif isinstance(field.value, Decimal):
                 serialized_value = str(field.value)
             else:
                 serialized_value = field.value

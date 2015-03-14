@@ -1,3 +1,4 @@
+from decimal import Decimal
 import uuid
 import time
 
@@ -12,10 +13,12 @@ from test.fixtures.product import ProductFixture
 @pytest.fixture(scope="function")
 def product_fixtures():
     now = time.time()
-    products = [ProductFixture(uuid.uuid4(), "navy polo shirt", 5, "great shirt, great price!", timestamp=now),
-                ProductFixture(uuid.uuid4(), "cool red shorts", 7, "perfect to go to the beach", timestamp=now),
-                ProductFixture(uuid.uuid4(), "black DC skater shoes", 10, "yo!", timestamp=now)]
-    return products
+    return [ProductFixture(_id=uuid.uuid4(), name="navy polo shirt", description="great shirt, great price!",
+                           quantity=5, price=Decimal("99.99"), enabled=True, timestamp=now),
+            ProductFixture(_id=uuid.uuid4(), name="cool red shorts", description="perfect to go to the beach",
+                           quantity=7, price=Decimal("49.99"), enabled=False, timestamp=now),
+            ProductFixture(_id=uuid.uuid4(), name="black DC skater shoes", description="yo!",
+                           quantity=10, price=Decimal("149.99"), enabled=True, timestamp=now)]
 
 
 @pytest.fixture(scope="module")
@@ -39,6 +42,8 @@ def build_elasticsearch_document(index, _type, product_fixture):
     document.add_field("name", product_fixture.name)
     document.add_field("description", product_fixture.description)
     document.add_field("quantity", product_fixture.quantity)
+    document.add_field("price", product_fixture.price)
+    document.add_field("enabled", product_fixture.enabled)
     document.timestamp = product_fixture.timestamp
     return document
 
@@ -65,6 +70,8 @@ class TestGenericElasticsearchStore:
             assert read_document.get_field_value("name") == product_fixture.name
             assert read_document.get_field_value("description") == product_fixture.description
             assert read_document.get_field_value("quantity") == product_fixture.quantity
+            assert read_document.get_field_value("enabled") == product_fixture.enabled
+            assert read_document.get_field_value("price") == str(product_fixture.price)
 
     def test_full_update(self, elasticsearch_documents, generic_elasticsearch_store):
 
@@ -74,11 +81,15 @@ class TestGenericElasticsearchStore:
         new_name = "updated_name"
         new_description = "updated_description"
         new_quantity = 99
+        new_enabled = False
+        new_price = Decimal("149.89")
 
         for document in elasticsearch_documents:
             document.set_field_value("name", new_name)
             document.set_field_value("description", new_description)
             document.set_field_value("quantity", new_quantity)
+            document.set_field_value("enabled", new_enabled)
+            document.set_field_value("price", new_price)
             generic_elasticsearch_store.update(document)
 
         for document in elasticsearch_documents:
@@ -86,6 +97,8 @@ class TestGenericElasticsearchStore:
             assert read_document.get_field_value("name") == new_name
             assert read_document.get_field_value("description") == new_description
             assert read_document.get_field_value("quantity") == new_quantity
+            assert read_document.get_field_value("enabled") == new_enabled
+            assert read_document.get_field_value("price") == str(new_price)
 
     def test_partial_update(self, elasticsearch_documents, generic_elasticsearch_store):
 
@@ -102,8 +115,9 @@ class TestGenericElasticsearchStore:
 
         for document in elasticsearch_documents:
             read_document = generic_elasticsearch_store.read(document.identifier)
-            assert read_document.get_field_value("name")
-            assert read_document.get_field_value("name") != ""
+            assert read_document.get_field_value("name") is not None
+            assert read_document.get_field_value("price") is not None
+            assert read_document.get_field_value("enabled") is not None
             assert read_document.get_field_value("description") == new_description
             assert read_document.get_field_value("quantity") == new_quantity
 

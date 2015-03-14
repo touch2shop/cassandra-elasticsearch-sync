@@ -24,3 +24,6 @@ class AbstractCassandraStore(object):
 
     def execute(self, query_or_statement, parameters=None, timeout=None):
         return self._client.execute(query_or_statement, parameters, timeout)
+
+    def delete_all(self):
+        self.execute("TRUNCATE %s" % self.table)

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from uuid import UUID
 
 import arrow
@@ -10,21 +11,15 @@ from app.elasticsearch_domain.store.abstract_entity_elasticsearch_store import A
 
 class ProductFixture(AbstractDataObject):
 
-    def _deep_hash(self):
-        return hash((self._id, self.name, self.quantity, self.description))
-
-    # noinspection PyProtectedMember
-    def _deep_equals(self, other):
-        return self._id == other._id and self.name == other.name and \
-               self.quantity == other.quantity and self.description == other.description
-
     TABLE_NAME = "product"
 
-    def __init__(self, _id=None, name=None, quantity=None, description=None, timestamp=None):
+    def __init__(self, _id=None, name=None, quantity=None, description=None, price=None, enabled=None, timestamp=None):
         self._id = _id
         self.name = name
         self.quantity = quantity
         self.description = description
+        self.price = price
+        self.enabled = enabled
         self.timestamp = timestamp
 
     @property
@@ -34,6 +29,15 @@ class ProductFixture(AbstractDataObject):
     @property
     def key(self):
         return unicode(self._id)
+
+    def _deep_hash(self):
+        return hash((self._id, self.name, self.quantity, self.description, self.price, self.enabled))
+
+    # noinspection PyProtectedMember
+    def _deep_equals(self, other):
+        return self._id == other._id and self.name == other.name and \
+               self.quantity == other.quantity and self.description == other.description and \
+               self.price == other.price and self.enabled == other.enabled
 
 
 @pytest.fixture(scope="session")
@@ -52,7 +56,7 @@ class ProductFixtureCassandraStore(AbstractCassandraStore):
     def read(self, _id):
         statement = self.prepare_statement(
             """
-            SELECT id, name, quantity, description, timestamp FROM %s
+            SELECT id, name, quantity, description, price, enabled, timestamp FROM %s
             WHERE id=?
             """ % self.table)
         rows = self.execute(statement, [_id])
@@ -61,7 +65,8 @@ class ProductFixtureCassandraStore(AbstractCassandraStore):
 
         if len(rows) == 1:
             row = rows[0]
-            return ProductFixture(_id=row.id, name=row.name, description=row.description, quantity=row.quantity,
+            return ProductFixture(_id=row.id, name=row.name, description=row.description,
+                                  quantity=row.quantity, price=row.price, enabled=row.enabled,
                                   timestamp=arrow.get(row.timestamp).float_timestamp)
         else:
             return None
@@ -70,20 +75,22 @@ class ProductFixtureCassandraStore(AbstractCassandraStore):
         product.timestamp = arrow.utcnow().float_timestamp
         statement = self.prepare_statement(
             """
-            INSERT INTO %s (id, name, quantity, description, timestamp)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO %s (id, name, quantity, description, price, enabled, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """ % self.table)
-        self.execute(statement, (product.id, product.name, product.quantity, product.description, product.timestamp))
+        self.execute(statement, (product.id, product.name, product.quantity, product.description,
+                                 product.price, product.enabled, product.timestamp))
 
     def update(self, product):
         product.timestamp = arrow.utcnow().float_timestamp
         statement = self.prepare_statement(
             """
             UPDATE %s
-            SET name=?, quantity=?, description=?, timestamp=?
+            SET name=?, quantity=?, description=?, price=?, enabled=?, timestamp=?
             WHERE id=?
             """ % self.table)
-        self.execute(statement, (product.name, product.quantity, product.description, product.timestamp, product.id))
+        self.execute(statement, (product.name, product.quantity, product.description,
+                                 product.price, product.enabled, product.timestamp, product.id))
 
     def delete(self, product):
         statement = self.prepare_statement(
@@ -92,9 +99,6 @@ class ProductFixtureCassandraStore(AbstractCassandraStore):
             WHERE id=?
             """ % self.table)
         self.execute(statement, [product.id])
-
-    def delete_all(self):
-        self.execute("TRUNCATE %s" % self.table)
 
 
 @pytest.fixture(scope="session")
@@ -112,6 +116,8 @@ def create_product_fixture_cassandra_schema(cassandra_fixture_client, cassandra_
           name text,
           quantity int,
           description text,
+          price decimal,
+          enabled boolean,
           timestamp timestamp
         )
         """ % ProductFixture.TABLE_NAME)
@@ -135,10 +141,17 @@ class ProductFixtureElasticsearchStore(AbstractEntityElasticsearchStore):
         product.name = body.get("name", None)
         product.quantity = body.get("quantity", None)
         product.description = body.get("description", None)
+        price = body.get("price", None)
+        product.price = Decimal(price) if price else None
+        product.enabled = body.get("enabled", None)
         return product
 
     def _to_request_body(self, document):
-        return {"name": document.name, "quantity": document.quantity, "description": document.description}
+        return {"name": document.name,
+                "quantity": document.quantity,
+                "description": document.description,
+                "price": str(document.price) if document.price else None,
+                "enabled": document.enabled}
 
 
 @pytest.fixture(scope="session")
@@ -150,6 +163,21 @@ def product_fixture_elasticsearch_store(elasticsearch_client, elasticsearch_fixt
 @pytest.fixture(scope="session", autouse=True)
 def create_product_fixture_elasticsearch_schema(elasticsearch_client,
                                                 elasticsearch_fixture_index, product_fixture_table):
-    mapping = {"_timestamp": {"enabled": True, "store": True}}
+
+    if elasticsearch_client.indices.exists_type(index=elasticsearch_fixture_index, doc_type=product_fixture_table):
+        elasticsearch_client.indices.delete_mapping(index=elasticsearch_fixture_index, doc_type=product_fixture_table)
+
+    mapping = {
+        "_timestamp": {
+            "enabled": True, "store": True
+        },
+        "properties": {
+            "name": {"type": "string"},
+            "description": {"type": "string"},
+            "quantity": {"type": "integer"},
+            "price": {"type": "string"},
+            "enabled": {"type": "boolean"}
+        }
+    }
     elasticsearch_client.indices.put_mapping(index=elasticsearch_fixture_index,
                                              doc_type=product_fixture_table, body=mapping)

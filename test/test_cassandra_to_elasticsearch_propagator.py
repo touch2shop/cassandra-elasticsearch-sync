@@ -26,7 +26,6 @@ def product_fixtures():
 
 
 # noinspection PyShadowingNames,PyClassHasNoInit,PyMethodMayBeStatic
-@pytest.mark.slow
 class TestCassandraToElasticsearchPropagator:
 
     def test_propagate_creation_updates_from_the_beginning_of_time(self, propagator,

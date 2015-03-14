@@ -25,7 +25,6 @@ def cassandra_client(cassandra_cluster):
 
 
 # noinspection PyClassHasNoInit,PyShadowingNames,PyMethodMayBeStatic
-@pytest.mark.slow
 class TestSimpleCassandraClient:
 
     def test_select_specific_columns_by_id(self, cassandra_client, cassandra_fixture_keyspace, product_fixtures):

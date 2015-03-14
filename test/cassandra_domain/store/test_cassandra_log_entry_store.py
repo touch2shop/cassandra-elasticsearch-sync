@@ -1,14 +1,13 @@
 import random
 import uuid
+
 import arrow
-import pytest
 from time_uuid import TimeUUID
 from hamcrest import *
 
 from app.cassandra_domain.cassandra_log_entry import CassandraLogEntry
 
 
-@pytest.mark.slow
 class TestCassandraLogEntryStore(object):
 
     def test_create_log_entry(self, cassandra_log_entry_store):

@@ -37,7 +37,6 @@ def cassandra_update_fetcher(cassandra_log_entry_store):
 
 
 # noinspection PyShadowingNames,PyMethodMayBeStatic,PyClassHasNoInit
-@pytest.mark.slow
 @pytest.mark.usefixtures("setup")
 class TestCassandraUpdateFetcher:
 

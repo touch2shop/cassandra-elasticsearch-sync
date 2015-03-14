@@ -44,7 +44,6 @@ def build_elasticsearch_document(index, _type, product_fixture):
 
 
 # noinspection PyClassHasNoInit,PyMethodMayBeStatic,PyShadowingNames
-@pytest.mark.slow
 class TestGenericElasticsearchStore:
 
     def test_read_non_existent(self, generic_elasticsearch_store, elasticsearch_fixture_index, product_fixture_table):

@@ -6,7 +6,7 @@ import pytest
 from app.core.identifier import Identifier
 from app.elasticsearch_domain.generic_elasticsearch_document import GenericElasticsearchDocument
 from app.elasticsearch_domain.store.generic_elasticsearch_store import GenericElasticsearchStore
-from test.fixture.product import ProductFixture
+from test.fixtures.product import ProductFixture
 
 
 @pytest.fixture(scope="function")

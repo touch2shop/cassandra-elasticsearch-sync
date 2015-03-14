@@ -1,6 +1,6 @@
 from time import time
 from uuid import uuid4
-from test.fixture.product import ProductFixture
+from test.fixtures.product import ProductFixture
 
 
 # noinspection PyMethodMayBeStatic, PyClassHasNoInit

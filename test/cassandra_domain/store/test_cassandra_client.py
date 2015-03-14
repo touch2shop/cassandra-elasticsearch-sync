@@ -3,7 +3,7 @@ import uuid
 import pytest
 
 from app.cassandra_domain.store.cassandra_client import CassandraClient
-from test.fixture.product import ProductFixture
+from test.fixtures.product import ProductFixture
 
 
 @pytest.fixture(scope="module")

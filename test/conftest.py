@@ -11,7 +11,7 @@ from app.cassandra_domain.store.cassandra_log_entry_store import CassandraLogEnt
 from app.cassandra_domain.store.cassandra_client import CassandraClient
 from app.settings import Settings
 
-from test.fixture.product import *
+from test.fixtures.product import *
 
 
 @pytest.fixture(scope="session")

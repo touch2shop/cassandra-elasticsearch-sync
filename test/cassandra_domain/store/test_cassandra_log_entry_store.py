@@ -20,8 +20,9 @@ class TestCassandraLogEntryStore(object):
         cassandra_log_entry_store.create(entry)
 
         rows = cassandra_log_entry_store.find_by_logged_row(entry.logged_keyspace, entry.logged_table, entry.logged_key)
-        assert len(rows) == 1
-        assert rows[0] == entry
+        log_entries = rows.to_list()
+        assert len(log_entries) == 1
+        assert log_entries[0] == entry
 
     def test_find_all(self, cassandra_log_entry_store):
         entries = list()
@@ -46,7 +47,7 @@ class TestCassandraLogEntryStore(object):
         for entry in entries:
             cassandra_log_entry_store.create(entry)
 
-        found = cassandra_log_entry_store.find_all()
+        found = cassandra_log_entry_store.find_all().to_list()
         assert_that(found, has_length(greater_than_or_equal_to(len(entries))))
         assert_that(found, has_items(*entries))
 
@@ -111,7 +112,7 @@ class TestCassandraLogEntryStore(object):
         for entry in shuffled_entries:
             cassandra_log_entry_store.create(entry)
 
-        found_entries = cassandra_log_entry_store.find_by_time_greater_or_equal_than(minimum_timestamp)
+        found_entries = cassandra_log_entry_store.find_by_time_greater_or_equal_than(minimum_timestamp).to_list()
 
         assert_that(found_entries, has_length(greater_than_or_equal_to(5)))
         assert_that(found_entries, not(has_items(entries[0], entries[1], entries[2])))

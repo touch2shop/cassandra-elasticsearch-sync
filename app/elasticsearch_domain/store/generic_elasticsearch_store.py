@@ -1,7 +1,7 @@
 from decimal import Decimal
 from uuid import UUID
 
-from app.elasticsearch_domain.generic_elasticsearch_document import GenericElasticsearchDocument
+from app.core.generic_entity import GenericEntity
 from app.core.identifier import Identifier
 from app.core.value_field import ValueField
 from app.elasticsearch_domain.store.abstract_elasticsearch_store import AbstractElasticsearchStore
@@ -31,7 +31,7 @@ class GenericElasticsearchStore(AbstractElasticsearchStore):
 
         fields = self._extract_fields(body)
 
-        return GenericElasticsearchDocument(identifier, timestamp, fields)
+        return GenericEntity(identifier, timestamp, fields)
 
     @staticmethod
     def _extract_fields(body):

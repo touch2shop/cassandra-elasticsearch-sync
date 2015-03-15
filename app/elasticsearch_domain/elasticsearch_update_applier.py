@@ -2,7 +2,7 @@ import logging
 
 from app.elasticsearch_domain.invalid_elasticsearch_schema_exception import InvalidElasticsearchSchemaException
 from app.core.value_field import ValueField
-from app.elasticsearch_domain.generic_elasticsearch_document import GenericElasticsearchDocument
+from app.core.generic_entity import GenericEntity
 from app.elasticsearch_domain.store.generic_elasticsearch_store import GenericElasticsearchStore
 
 
@@ -57,7 +57,7 @@ class ElasticsearchUpdateApplier:
 
     @staticmethod
     def _build_document(update):
-        return GenericElasticsearchDocument(update.identifier, update.timestamp, list(update.fields))
+        return GenericEntity(update.identifier, update.timestamp, list(update.fields))
 
     @staticmethod
     def _validate_document(document):

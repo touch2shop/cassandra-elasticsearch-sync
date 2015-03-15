@@ -2,7 +2,7 @@ from app.core.abstract_data_object import AbstractDataObject
 from app.core.value_field import ValueField
 
 
-class GenericElasticsearchDocument(AbstractDataObject):
+class GenericEntity(AbstractDataObject):
 
     def __init__(self, identifier=None, timestamp=None, fields=None):
         self._identifier = identifier

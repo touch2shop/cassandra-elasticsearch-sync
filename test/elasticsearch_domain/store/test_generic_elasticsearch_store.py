@@ -5,7 +5,7 @@ import time
 import pytest
 
 from app.core.identifier import Identifier
-from app.elasticsearch_domain.generic_elasticsearch_document import GenericElasticsearchDocument
+from app.core.generic_entity import GenericEntity
 from app.elasticsearch_domain.store.generic_elasticsearch_store import GenericElasticsearchStore
 from test.fixtures.product import ProductFixture
 
@@ -37,7 +37,7 @@ def elasticsearch_documents(product_fixtures, elasticsearch_fixture_index, produ
 
 
 def build_elasticsearch_document(index, _type, product_fixture):
-    document = GenericElasticsearchDocument()
+    document = GenericEntity()
     document.identifier = Identifier(index, _type, product_fixture.id)
     document.add_field("name", product_fixture.name)
     document.add_field("description", product_fixture.description)

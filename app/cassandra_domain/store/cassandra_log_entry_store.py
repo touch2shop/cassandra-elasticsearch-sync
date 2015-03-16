@@ -1,3 +1,4 @@
+import arrow
 from app.cassandra_domain.store.abstract_cassandra_store import AbstractCassandraStore
 from app.cassandra_domain.cassandra_log_entry import CassandraLogEntry
 from app.core.abstract_entity_iterable_result import AbstractEntityIterableResult
@@ -5,8 +6,8 @@ from app.core.abstract_entity_iterable_result import AbstractEntityIterableResul
 
 class CassandraLogEntryIterableResult(AbstractEntityIterableResult):
 
-    def __init__(self, iterator):
-        super(CassandraLogEntryIterableResult, self).__init__(iterator)
+    def __init__(self, result):
+        super(CassandraLogEntryIterableResult, self).__init__(result)
 
     def _to_entity(self, single_result):
         (logged_keyspace, logged_table, logged_key, time_uuid, operation, updated_columns) = single_result
@@ -68,7 +69,7 @@ class CassandraLogEntryStore(AbstractCassandraStore):
         statement = self.prepare_statement(
             self._build_select_query(where="time_uuid >= minTimeuuid(?)", allow_filtering=True))
 
-        rows = self.execute(statement, [minimum_timestamp], timeout)
+        rows = self.execute(statement, [arrow.get(minimum_timestamp)], timeout)
         return CassandraLogEntryIterableResult(rows)
 
     def delete_all(self):

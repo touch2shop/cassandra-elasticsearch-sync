@@ -1,6 +1,5 @@
 from decimal import Decimal
 from uuid import UUID
-
 import arrow
 import pytest
 
@@ -67,12 +66,11 @@ class ProductFixtureCassandraStore(AbstractCassandraStore):
             row = rows[0]
             return ProductFixture(_id=row.id, name=row.name, description=row.description,
                                   quantity=row.quantity, price=row.price, enabled=row.enabled,
-                                  timestamp=arrow.get(row.timestamp).float_timestamp)
+                                  timestamp=arrow.get(row.timestamp))
         else:
             return None
 
     def create(self, product):
-        product.timestamp = arrow.utcnow().float_timestamp
         statement = self.prepare_statement(
             """
             INSERT INTO %s (id, name, quantity, description, price, enabled, timestamp)
@@ -82,7 +80,6 @@ class ProductFixtureCassandraStore(AbstractCassandraStore):
                                  product.price, product.enabled, product.timestamp))
 
     def update(self, product):
-        product.timestamp = arrow.utcnow().float_timestamp
         statement = self.prepare_statement(
             """
             UPDATE %s

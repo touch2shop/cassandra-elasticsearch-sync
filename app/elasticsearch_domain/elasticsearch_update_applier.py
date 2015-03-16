@@ -1,7 +1,7 @@
 import logging
 
 from app.elasticsearch_domain.invalid_elasticsearch_schema_exception import InvalidElasticsearchSchemaException
-from app.core.value_field import ValueField
+from app.core.update_field import UpdateField
 from app.core.generic_entity import GenericEntity
 from app.elasticsearch_domain.store.generic_elasticsearch_store import GenericElasticsearchStore
 
@@ -13,13 +13,9 @@ class ElasticsearchUpdateApplier:
         self._generic_store = GenericElasticsearchStore(elasticsearch)
         self._logger = logging.getLogger()
 
-    def apply_updates(self, updates):
-        if updates:
-            for update in updates:
-                self._check_index_and_type_exist(update.identifier)
-                self._apply_update(update)
+    def apply_update(self, update):
+        self._check_index_and_type_exist(update.identifier)
 
-    def _apply_update(self, update):
         document = self._generic_store.read(update.identifier)
         if document:
             self._validate_document(document)
@@ -37,7 +33,7 @@ class ElasticsearchUpdateApplier:
                 # in order to avoid deadlocks and break cycles, a document is updated only if there are differences.
                 update_document = self._build_document(update)
 
-                if not ValueField.fields_are_identical(existing_document.fields, update_document.fields):
+                if not UpdateField.fields_are_identical(existing_document.fields, update_document.fields):
                     self._generic_store.update(update_document)
 
     def _apply_update_to_nonexistent_document(self, update):

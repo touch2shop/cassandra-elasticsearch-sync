@@ -31,7 +31,7 @@ class CassandraClient(object):
             return self._session.execute(query_or_statement, parameters, timeout)
 
     def select_by_id(self, table, _id, columns=None, keyspace=None, id_column_name="id"):
-        if columns and len(columns) > 0:
+        if columns:
             columns_string = string.join(columns, ",")
         else:
             columns_string = "*"

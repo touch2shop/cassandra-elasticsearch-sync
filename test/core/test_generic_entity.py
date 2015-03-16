@@ -4,7 +4,7 @@ from uuid import uuid4
 from hamcrest import assert_that, contains_inanyorder
 
 from app.core.identifier import Identifier
-from app.core.value_field import ValueField
+from app.core.update_field import UpdateField
 from app.core.generic_entity import GenericEntity
 
 
@@ -13,10 +13,10 @@ class TestGenericEntity:
 
     def test_set_fields(self):
         identifier = Identifier(namespace="test", table="test", key=uuid4())
-        document = GenericEntity(identifier, timestamp=time(), fields=[ValueField("foo", "bar")])
-        assert document.fields == [ValueField("foo", "bar")]
-        document.fields = [ValueField("one", 1), ValueField("two", 2)]
-        assert_that(document.fields, contains_inanyorder(ValueField("one", 1), ValueField("two", 2)))
+        document = GenericEntity(identifier, timestamp=time(), fields=[UpdateField("foo", "bar")])
+        assert document.fields == [UpdateField("foo", "bar")]
+        document.fields = [UpdateField("one", 1), UpdateField("two", 2)]
+        assert_that(document.fields, contains_inanyorder(UpdateField("one", 1), UpdateField("two", 2)))
 
     def test_get_field_value(self):
         identifier = Identifier(namespace="test", table="test", key=uuid4())
@@ -31,7 +31,7 @@ class TestGenericEntity:
     def test_set_field_value(self):
         identifier = Identifier(namespace="test", table="test", key=uuid4())
         document = GenericEntity(identifier, timestamp=time(), fields=None)
-        document.fields = [ValueField("one", 1)]
+        document.fields = [UpdateField("one", 1)]
         document.set_field_value("one", 3)
         document.set_field_value("two", 5)
-        assert_that(document.fields, contains_inanyorder(ValueField("one", 3), ValueField("two", 5)))
+        assert_that(document.fields, contains_inanyorder(UpdateField("one", 3), UpdateField("two", 5)))

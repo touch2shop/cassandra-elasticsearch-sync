@@ -6,11 +6,11 @@ class AbstractEntityIterableResult:
 
     __metaclass__ = ABCMeta.__class__
 
-    def __init__(self, iterator):
-        if isinstance(iterator, list) or isinstance(iterator, Iterable):
-            self._iterator = iterator.__iter__()
+    def __init__(self, result):
+        if isinstance(result, list) or isinstance(result, Iterable):
+            self._iterator = result.__iter__()
         else:
-            self._iterator = iterator
+            self._iterator = result
 
     def __iter__(self):
         return self
@@ -31,7 +31,7 @@ class AbstractEntityIterableResult:
         millions of results. This is mainly useful for unit testing.
         :return: all entities from the result iterator.
         """
-        all = []
+        _all = []
         for single_result in self:
-            all.append(single_result)
-        return all
+            _all.append(single_result)
+        return _all

@@ -1,6 +1,7 @@
 from time_uuid import TimeUUID
 
 from app.core.abstract_data_object import AbstractDataObject
+from app.core.identifier import Identifier
 
 
 class CassandraLogEntry(AbstractDataObject):
@@ -63,7 +64,11 @@ class CassandraLogEntry(AbstractDataObject):
     @logged_key.setter
     def logged_key(self, value):
         self._logged_key = value
-        
+
+    @property
+    def logged_identifier(self):
+        return Identifier(self.logged_keyspace, self.logged_table, self.logged_key)
+
     @property
     def operation(self):
         return self._operation
@@ -123,5 +128,5 @@ class CassandraLogEntry(AbstractDataObject):
             "logged_table": self.logged_table,
             "logged_key": self.logged_key,
             "operation": self.operation,
-            "updated_columns": repr(self.updated_columns),
+            "updated_columns": self.updated_columns
         }

@@ -3,7 +3,7 @@ from uuid import UUID
 
 from app.core.generic_entity import GenericEntity
 from app.core.identifier import Identifier
-from app.core.value_field import ValueField
+from app.core.update_field import UpdateField
 from app.elasticsearch_domain.store.abstract_elasticsearch_store import AbstractElasticsearchStore
 
 
@@ -37,7 +37,7 @@ class GenericElasticsearchStore(AbstractElasticsearchStore):
     def _extract_fields(body):
         fields = []
         for (field_name, field_value) in body.items():
-            fields.append(ValueField(field_name, field_value))
+            fields.append(UpdateField(field_name, field_value))
         return fields
 
     def _to_request_body(self, document):

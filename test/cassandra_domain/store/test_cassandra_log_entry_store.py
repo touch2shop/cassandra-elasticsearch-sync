@@ -2,10 +2,16 @@ import random
 import uuid
 
 import arrow
+import pytest
 from time_uuid import TimeUUID
 from hamcrest import *
 
 from app.cassandra_domain.cassandra_log_entry import CassandraLogEntry
+
+
+@pytest.fixture(scope="function", autouse=True)
+def setup(cassandra_log_entry_store):
+    cassandra_log_entry_store.delete_all()
 
 
 class TestCassandraLogEntryStore(object):
@@ -48,11 +54,11 @@ class TestCassandraLogEntryStore(object):
             cassandra_log_entry_store.create(entry)
 
         found = cassandra_log_entry_store.find_all().to_list()
-        assert_that(found, has_length(greater_than_or_equal_to(len(entries))))
+        assert_that(found, has_length(len(entries)))
         assert_that(found, has_items(*entries))
 
-    def test_find_log_entries_filtering_by_minimum_time(self, cassandra_log_entry_store):
-        minimum_timestamp = arrow.get("2015-01-02T16:00:00.000000-0000").float_timestamp
+    def test_find_log_entries_filtering_by_minimum_timestamp(self, cassandra_log_entry_store):
+        minimum_timestamp = arrow.get("2015-01-02T16:00:00.000000-00:00").float_timestamp
         entries = list()
 
         # These entries SHOULD NOT be included in the results
@@ -114,8 +120,8 @@ class TestCassandraLogEntryStore(object):
 
         found_entries = cassandra_log_entry_store.find_by_time_greater_or_equal_than(minimum_timestamp).to_list()
 
-        assert_that(found_entries, has_length(greater_than_or_equal_to(5)))
-        assert_that(found_entries, not(has_items(entries[0], entries[1], entries[2])))
+        assert_that(found_entries, has_length(5))
+        assert_that(found_entries, is_not(has_items(entries[0], entries[1], entries[2])))
         assert_that(found_entries, has_items(entries[3], entries[4], entries[5], entries[6], entries[7]))
 
     @staticmethod

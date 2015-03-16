@@ -1,5 +1,5 @@
 from app.core.abstract_data_object import AbstractDataObject
-from app.core.value_field import ValueField
+from app.core.update_field import UpdateField
 
 
 class GenericEntity(AbstractDataObject):
@@ -38,7 +38,7 @@ class GenericEntity(AbstractDataObject):
                 self._fields[field.name] = field
 
     def add_field(self, name, value):
-        self._fields[name] = ValueField(name, value)
+        self._fields[name] = UpdateField(name, value)
 
     def get_field_value(self, name):
         field = self._fields.get(name, None)
@@ -48,7 +48,7 @@ class GenericEntity(AbstractDataObject):
             return None
 
     def set_field_value(self, name, value):
-        self._fields[name] = ValueField(name, value)
+        self._fields[name] = UpdateField(name, value)
 
     # noinspection PyProtectedMember
     def _deep_equals(self, other):

@@ -5,9 +5,8 @@ from time import time, sleep
 import pytest
 
 from app.core.identifier import Identifier
-from app.core.update.update import Update
-from app.core.update.event.update_event import UpdateEvent
-from app.core.value_field import ValueField
+from app.core.update import Update
+from app.core.update_field import UpdateField
 from app.elasticsearch_domain.invalid_elasticsearch_schema_exception import InvalidElasticsearchSchemaException
 from app.elasticsearch_domain.elasticsearch_update_applier import ElasticsearchUpdateApplier
 from test.fixtures.product import ProductFixture
@@ -20,14 +19,13 @@ def update_applier(elasticsearch_client):
 
 def build_update(namespace, table, key, timestamp, fields=None, is_delete=False):
     identifier = Identifier(namespace, table, key)
-    event = UpdateEvent(identifier=identifier, timestamp=timestamp, is_delete=is_delete)
-    return Update(event, fields)
+    return Update(identifier=identifier, timestamp=timestamp, fields=fields, is_delete=is_delete)
 
 
 def build_fields(**kwargs):
     fields = []
     for (name, value) in kwargs.items():
-        fields.append(ValueField(name, value))
+        fields.append(UpdateField(name, value))
     return fields
 
 
@@ -38,7 +36,7 @@ class TestElasticsearchUpdateApplier:
         bogus_update = build_update(namespace="invalid", table="product", key=str(uuid4()), timestamp=time())
 
         with pytest.raises(InvalidElasticsearchSchemaException) as e:
-            update_applier.apply_updates([bogus_update])
+            update_applier.apply_update(bogus_update)
         assert e.value.identifier == bogus_update.identifier
 
     def test_fail_if_type_does_not_exist(self, update_applier, elasticsearch_fixture_index):
@@ -46,7 +44,7 @@ class TestElasticsearchUpdateApplier:
                                     timestamp=time())
 
         with pytest.raises(InvalidElasticsearchSchemaException) as e:
-            update_applier.apply_updates([bogus_update])
+            update_applier.apply_update(bogus_update)
         assert e.value.identifier == bogus_update.identifier
 
     def test_fail_if_mapping_does_not_store_timestamp_for_document(self, update_applier,
@@ -62,7 +60,7 @@ class TestElasticsearchUpdateApplier:
         update = build_update(namespace=_index, table=_type, key=str(_id), timestamp=time())
 
         with pytest.raises(InvalidElasticsearchSchemaException) as e:
-            update_applier.apply_updates([update])
+            update_applier.apply_update(update)
         assert e.value.identifier == update.identifier
         assert "Could not retrieve timestamp for Elasticsearch document" in e.value.message
 
@@ -80,15 +78,17 @@ class TestElasticsearchUpdateApplier:
         enabled = True
 
         update = build_update(namespace=_index, table=_type, key=str(_id), timestamp=time(),
-                              fields=build_fields(name=name, enabled=True, description=description,
+                              fields=build_fields(name=name, enabled=enabled, description=description,
                                                   quantity=quantity, price=price))
-        update_applier.apply_updates([update])
+        update_applier.apply_update(update)
 
         created = product_fixture_elasticsearch_store.read(_id)
         assert created
         assert created.name == name
         assert created.description == description
         assert created.quantity == quantity
+        assert created.enabled == enabled
+        assert created.price == price
 
     def test_apply_delete_update_to_nonexistent_document(self, update_applier, elasticsearch_fixture_index,
                                                          product_fixture_table, product_fixture_elasticsearch_store):
@@ -99,7 +99,7 @@ class TestElasticsearchUpdateApplier:
 
         delete_update = build_update(namespace=_index, table=_type, key=str(_id), timestamp=time(), is_delete=True,
                                      fields=build_fields(name="t-shirt", description="cool red t-shirt", quantity=5))
-        update_applier.apply_updates([delete_update])
+        update_applier.apply_update(delete_update)
 
         assert not product_fixture_elasticsearch_store.read(_id)
 
@@ -126,7 +126,7 @@ class TestElasticsearchUpdateApplier:
                                                   quantity=updated_quantity,
                                                   price=updated_price,
                                                   enabled=updated_enabled))
-        update_applier.apply_updates([update])
+        update_applier.apply_update(update)
 
         product = product_fixture_elasticsearch_store.read(_id)
         assert product.name == updated_name
@@ -157,7 +157,7 @@ class TestElasticsearchUpdateApplier:
         update = build_update(namespace=_index, table=_type, key=str(_id), timestamp=time(),
                               fields=build_fields(description=updated_description,
                                                   quantity=updated_quantity))
-        update_applier.apply_updates([update])
+        update_applier.apply_update(update)
 
         product = product_fixture_elasticsearch_store.read(_id)
         assert product.name == original_name
@@ -176,7 +176,7 @@ class TestElasticsearchUpdateApplier:
         product_fixture_elasticsearch_store.create(product)
 
         delete_update = build_update(namespace=_index, table=_type, key=str(_id), timestamp=time(), is_delete=True)
-        update_applier.apply_updates([delete_update])
+        update_applier.apply_update(delete_update)
 
         assert not product_fixture_elasticsearch_store.read(_id)
 
@@ -214,17 +214,12 @@ class TestElasticsearchUpdateApplier:
         product.timestamp = time()
         product_fixture_elasticsearch_store.update(product)
 
-        update_applier.apply_updates([obsolete_update])
+        update_applier.apply_update(obsolete_update)
 
         product = product_fixture_elasticsearch_store.read(_id)
         assert product.name == more_recently_updated_name
         assert product.description == more_recently_updated_description
         assert product.quantity == original_quantity
-
-    def test_does_nothing_if_no_updates(self, update_applier):
-        # no exceptions...
-        update_applier.apply_updates(None)
-        update_applier.apply_updates([])
 
     def only_update_if_fields_are_different(self, update_applier, elasticsearch_fixture_index,
                                             product_fixture_table, product_fixture_elasticsearch_store):
@@ -256,7 +251,7 @@ class TestElasticsearchUpdateApplier:
                                                           enabled=original_enabled,
                                                           price=original_price))
 
-        update_applier.apply_updates([useless_update])
+        update_applier.apply_update(useless_update)
 
         read_product = product_fixture_elasticsearch_store.read(product)
         assert read_product.name == original_name

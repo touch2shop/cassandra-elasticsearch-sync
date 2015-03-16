@@ -1,6 +1,8 @@
 from datetime import datetime
 from time_uuid import TimeUUID
+
 from app.cassandra_domain.cassandra_log_entry import CassandraLogEntry
+from app.core.identifier import Identifier
 
 
 # noinspection PyMethodMayBeStatic,PyClassHasNoInit
@@ -31,3 +33,7 @@ class TestCassandraLogEntry:
         log_entry = CassandraLogEntry(time_uuid=TimeUUID.convert(utc_time))
 
         assert log_entry.time == utc_time
+
+    def test_get_logged_identifier(self):
+        log_entry = CassandraLogEntry(logged_keyspace="test_keyspace", logged_table="test_table", logged_key="test_key")
+        assert log_entry.logged_identifier == Identifier("test_keyspace", "test_table", "test_key")

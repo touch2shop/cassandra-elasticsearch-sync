@@ -1,8 +1,9 @@
 from datetime import datetime
+
 from app.core.abstract_data_object import AbstractDataObject
 
 
-class ValueField(AbstractDataObject):
+class UpdateField(AbstractDataObject):
 
     def __init__(self, name, value):
         self._name = name

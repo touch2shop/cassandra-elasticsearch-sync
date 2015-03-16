@@ -1,25 +1,23 @@
 import logging
 
 from app.elasticsearch_domain.invalid_elasticsearch_schema_exception import InvalidElasticsearchSchemaException
-from app.core.update_field import UpdateField
-from app.core.generic_entity import GenericEntity
-from app.elasticsearch_domain.store.generic_elasticsearch_store import GenericElasticsearchStore
+from app.core.field import Field
+from app.elasticsearch_domain.store.elasticsearch_document_store import ElasticsearchDocumentStore
 
 
 class ElasticsearchUpdateApplier:
 
     def __init__(self, elasticsearch):
         self._elasticsearch = elasticsearch
-        self._generic_store = GenericElasticsearchStore(elasticsearch)
+        self._document_store = ElasticsearchDocumentStore(elasticsearch)
         self._logger = logging.getLogger()
 
     def apply_update(self, update):
         self._check_index_and_type_exist(update.identifier)
-
-        document = self._generic_store.read(update.identifier)
-        if document:
-            self._validate_document(document)
-            self._apply_update_to_existing_document(update, document)
+        existing_document = self._document_store.read(update.identifier)
+        if existing_document:
+            self._validate_existing_document(existing_document)
+            self._apply_update_to_existing_document(update, existing_document)
         else:
             self._apply_update_to_nonexistent_document(update)
 
@@ -28,20 +26,18 @@ class ElasticsearchUpdateApplier:
             self._logger.info("Elasticsearch document %s is newer than update. No action performed.", update.identifier)
         else:
             if update.is_delete:
-                self._generic_store.delete(update.identifier)
+                self._document_store.delete(update.identifier)
             else:
                 # in order to avoid deadlocks and break cycles, a document is updated only if there are differences.
-                update_document = self._build_document(update)
-
-                if not UpdateField.fields_are_identical(existing_document.fields, update_document.fields):
-                    self._generic_store.update(update_document)
+                if not Field.fields_are_identical(existing_document.fields, update.fields):
+                    self._document_store.update(update)
 
     def _apply_update_to_nonexistent_document(self, update):
         if update.is_delete:
             self._logger.info(
                 "Document %s already deleted from Elasticsearch. No action performed.", update.identifier)
         else:
-            self._generic_store.create(self._build_document(update))
+            self._document_store.create(update)
 
     def _check_index_and_type_exist(self, identifier):
         if not self._elasticsearch.indices.exists(index=identifier.namespace):
@@ -52,11 +48,7 @@ class ElasticsearchUpdateApplier:
                 message="Type does not exist on elasticsearch. No action performed.")
 
     @staticmethod
-    def _build_document(update):
-        return GenericEntity(update.identifier, update.timestamp, list(update.fields))
-
-    @staticmethod
-    def _validate_document(document):
+    def _validate_existing_document(document):
         if not document.timestamp:
             raise InvalidElasticsearchSchemaException(identifier=document.identifier,
                 message="Could not retrieve timestamp for Elasticsearch document. Please check your mapping.")

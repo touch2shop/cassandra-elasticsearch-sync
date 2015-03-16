@@ -1,8 +1,8 @@
 from app.core.abstract_data_object import AbstractDataObject
-from app.core.update_field import UpdateField
+from app.core.field import Field
 
 
-class GenericEntity(AbstractDataObject):
+class Document(AbstractDataObject):
 
     def __init__(self, identifier=None, timestamp=None, fields=None):
         self._identifier = identifier
@@ -38,7 +38,10 @@ class GenericEntity(AbstractDataObject):
                 self._fields[field.name] = field
 
     def add_field(self, name, value):
-        self._fields[name] = UpdateField(name, value)
+        if name not in self._fields:
+            self._fields[name] = Field(name, value)
+        else:
+            raise KeyError("Field with name %s already exists." % name)
 
     def get_field_value(self, name):
         field = self._fields.get(name, None)
@@ -48,23 +51,23 @@ class GenericEntity(AbstractDataObject):
             return None
 
     def set_field_value(self, name, value):
-        self._fields[name] = UpdateField(name, value)
+        if name in self._fields:
+            field = self._fields[name]
+            field.value = value
+        else:
+            raise KeyError("Field with name %s does not exists." % name)
 
-    # noinspection PyProtectedMember
     def _deep_equals(self, other):
-        return self._identifier == other._identifier and \
-            self._timestamp == other._timestamp and \
-            self._fields == other._fields
+        return self.identifier == other.identifier and \
+            self.timestamp == other.timestamp and \
+            self.fields == other.fields
 
     def _deep_hash(self):
-        if self._fields:
-            return hash((self._identifier, self._timestamp, self._fields))
-        else:
-            return hash((self._identifier, self._timestamp))
+        return hash((self.identifier, self.timestamp, frozenset(self.fields)))
 
     def _deep_string_dictionary(self):
         return {
             "identifier": self.identifier,
-            "fields": self.fields,
-            "timestamp": self.timestamp
+            "timestamp": self.timestamp,
+            "fields": self.fields
         }

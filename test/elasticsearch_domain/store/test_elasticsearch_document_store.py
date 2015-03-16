@@ -3,10 +3,10 @@ import uuid
 import time
 
 import pytest
+from app.core.document import Document
 
 from app.core.identifier import Identifier
-from app.core.generic_entity import GenericEntity
-from app.elasticsearch_domain.store.generic_elasticsearch_store import GenericElasticsearchStore
+from app.elasticsearch_domain.store.elasticsearch_document_store import ElasticsearchDocumentStore
 from test.fixtures.product import ProductFixture
 
 
@@ -23,7 +23,7 @@ def product_fixtures():
 
 @pytest.fixture(scope="module")
 def generic_elasticsearch_store(elasticsearch_client):
-    return GenericElasticsearchStore(elasticsearch_client)
+    return ElasticsearchDocumentStore(elasticsearch_client)
 
 
 # noinspection PyShadowingNames
@@ -37,7 +37,7 @@ def elasticsearch_documents(product_fixtures, elasticsearch_fixture_index, produ
 
 
 def build_elasticsearch_document(index, _type, product_fixture):
-    document = GenericEntity()
+    document = Document()
     document.identifier = Identifier(index, _type, product_fixture.id)
     document.add_field("name", product_fixture.name)
     document.add_field("description", product_fixture.description)

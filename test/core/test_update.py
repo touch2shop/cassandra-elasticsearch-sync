@@ -1,9 +1,11 @@
+from uuid import uuid4
 import arrow
+from hamcrest import assert_that, contains_inanyorder, contains
 import pytest
 
 from app.core.identifier import Identifier
 from app.core.update import Update
-from app.core.update_field import UpdateField
+from app.core.field import Field
 
 
 def generate_timestamp():
@@ -19,7 +21,7 @@ def identifier():
 @pytest.fixture
 def update(identifier):
     return Update(identifier=identifier, timestamp=generate_timestamp(), is_delete=False,
-                  fields=[UpdateField("a", 5), UpdateField("b", "foo"), UpdateField("c", "bar")])
+                  fields=[Field("a", 5), Field("b", "foo"), Field("c", "bar")])
 
 
 # noinspection PyShadowingNames
@@ -33,14 +35,14 @@ def identical_update(update):
 @pytest.fixture
 def slightly_different_update(update):
     return Update(identifier=update.identifier, timestamp=generate_timestamp(), is_delete=False,
-                  fields=[UpdateField("a", 5), UpdateField("b", "foo")])
+                  fields=[Field("a", 5), Field("b", "foo")])
 
 
 @pytest.fixture
 def very_different_update():
     different_identifier = Identifier("shop", "product", 456)
     return Update(identifier=different_identifier, timestamp=generate_timestamp(), is_delete=True,
-                  fields=[UpdateField("a", 5), UpdateField("b", "foo")])
+                  fields=[Field("a", 5), Field("b", "foo")])
 
 
 # noinspection PyMethodMayBeStatic,PyShadowingNames,PyClassHasNoInit
@@ -60,3 +62,10 @@ class TestUpdate:
         assert update != very_different_update
         assert not (update == very_different_update)
         assert hash(update) != hash(very_different_update)
+
+    def test_set_fields(self):
+        identifier = Identifier(namespace="test", table="test", key=uuid4())
+        document = Update(identifier, timestamp=arrow.utcnow(), fields=[Field("foo", "bar")])
+        assert_that(document.fields, contains(Field("foo", "bar")))
+        document.fields = [Field("one", 1), Field("two", 2)]
+        assert_that(document.fields, contains_inanyorder(Field("one", 1), Field("two", 2)))

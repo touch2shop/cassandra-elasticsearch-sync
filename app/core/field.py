@@ -3,7 +3,7 @@ from datetime import datetime
 from app.core.abstract_data_object import AbstractDataObject
 
 
-class UpdateField(AbstractDataObject):
+class Field(AbstractDataObject):
 
     def __init__(self, name, value):
         self._name = name
@@ -13,9 +13,17 @@ class UpdateField(AbstractDataObject):
     def name(self):
         return self._name
 
+    @name.setter
+    def name(self, value):
+        self._name = value
+
     @property
     def value(self):
         return self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = value
 
     def _deep_equals(self, other):
         return self.name == other.name and \

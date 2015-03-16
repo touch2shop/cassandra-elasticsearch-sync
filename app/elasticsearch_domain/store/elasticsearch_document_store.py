@@ -1,16 +1,17 @@
 from decimal import Decimal
 from uuid import UUID
 
-from app.core.generic_entity import GenericEntity
+from app.core.document import Document
+
 from app.core.identifier import Identifier
-from app.core.update_field import UpdateField
+from app.core.field import Field
 from app.elasticsearch_domain.store.abstract_elasticsearch_store import AbstractElasticsearchStore
 
 
-class GenericElasticsearchStore(AbstractElasticsearchStore):
+class ElasticsearchDocumentStore(AbstractElasticsearchStore):
 
     def __init__(self, client):
-        super(GenericElasticsearchStore, self).__init__(client)
+        super(ElasticsearchDocumentStore, self).__init__(client)
 
     def read(self, identifier):
         return self._base_read(identifier.namespace, identifier.table, identifier.key)
@@ -31,13 +32,13 @@ class GenericElasticsearchStore(AbstractElasticsearchStore):
 
         fields = self._extract_fields(body)
 
-        return GenericEntity(identifier, timestamp, fields)
+        return Document(identifier, timestamp, fields)
 
     @staticmethod
     def _extract_fields(body):
         fields = []
         for (field_name, field_value) in body.items():
-            fields.append(UpdateField(field_name, field_value))
+            fields.append(Field(field_name, field_value))
         return fields
 
     def _to_request_body(self, document):

@@ -13,7 +13,7 @@ class AbstractElasticsearchStore(object):
 
     def _base_read(self, index, _type, _id):
         try:
-            response = self._client.get(index=index, doc_type=_type, id=_id, fields="_source,_timestamp")
+            response = self._client.get(index=index, doc_type=_type, id=_id, _source=True, fields="_timestamp")
             return self._process_response(response)
         except TransportError as e:
             if e.status_code == 404:

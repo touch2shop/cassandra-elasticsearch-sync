@@ -5,7 +5,7 @@ from test.fixtures.product import ProductFixture
 
 
 # noinspection PyMethodMayBeStatic, PyClassHasNoInit
-class TestAbstractEntityElasticsearchStore:
+class TestAbstractElasticsearchStore:
 
     def test_create_and_read(self, product_fixture_elasticsearch_store):
         _id = uuid4()

@@ -5,7 +5,7 @@ import pytest
 
 from app.cassandra_domain.store.abstract_cassandra_store import AbstractCassandraStore
 from app.core.abstract_data_object import AbstractDataObject
-from app.elasticsearch_domain.store.abstract_entity_elasticsearch_store import AbstractEntityElasticsearchStore
+from app.elasticsearch_domain.store.abstract_elasticsearch_store import AbstractElasticsearchStore
 
 
 class ProductFixture(AbstractDataObject):
@@ -35,8 +35,8 @@ class ProductFixture(AbstractDataObject):
     # noinspection PyProtectedMember
     def _deep_equals(self, other):
         return self._id == other._id and self.name == other.name and \
-               self.quantity == other.quantity and self.description == other.description and \
-               self.price == other.price and self.enabled == other.enabled
+            self.quantity == other.quantity and self.description == other.description and \
+            self.price == other.price and self.enabled == other.enabled
 
 
 @pytest.fixture(scope="session")
@@ -126,10 +126,24 @@ def create_product_fixture_cassandra_schema(cassandra_fixture_client, cassandra_
 ########################################################################################################################
 
 
-class ProductFixtureElasticsearchStore(AbstractEntityElasticsearchStore):
+class ProductFixtureElasticsearchStore(AbstractElasticsearchStore):
 
     def __init__(self, client, index):
-        super(ProductFixtureElasticsearchStore, self).__init__(client, index, ProductFixture.TABLE_NAME)
+        super(ProductFixtureElasticsearchStore, self).__init__(client)
+        self._index = index
+        self._type = ProductFixture.TABLE_NAME
+
+    def read(self, _id):
+        return self._base_read(self._index, self._type, _id)
+
+    def delete(self, _id):
+        self._base_delete(self._index, self._type, _id)
+
+    def create(self, document):
+        self._base_create(self._index, self._type, document.id, document)
+
+    def update(self, document):
+        self._base_update(self._index, self._type, document.id, document)
 
     def _from_response(self, body, timestamp, index, _type, _id):
         product = ProductFixture()

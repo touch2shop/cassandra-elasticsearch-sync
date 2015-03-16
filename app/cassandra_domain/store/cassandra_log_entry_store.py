@@ -1,10 +1,10 @@
 import arrow
 from app.cassandra_domain.store.abstract_cassandra_store import AbstractCassandraStore
 from app.cassandra_domain.cassandra_log_entry import CassandraLogEntry
-from app.core.abstract_entity_iterable_result import AbstractEntityIterableResult
+from app.core.abstract_iterable_result import AbstractIterableResult
 
 
-class CassandraLogEntryIterableResult(AbstractEntityIterableResult):
+class CassandraLogEntryIterableResult(AbstractIterableResult):
 
     def __init__(self, result):
         super(CassandraLogEntryIterableResult, self).__init__(result)

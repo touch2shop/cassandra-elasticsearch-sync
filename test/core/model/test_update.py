@@ -1,11 +1,12 @@
 from uuid import uuid4
+
 import arrow
 from hamcrest import assert_that, contains_inanyorder, contains
 import pytest
 
-from app.core.identifier import Identifier
-from app.core.update import Update
-from app.core.field import Field
+from app.core.model.identifier import Identifier
+from app.core.model.update import Update
+from app.core.model.field import Field
 
 
 def generate_timestamp():

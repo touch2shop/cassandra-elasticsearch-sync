@@ -2,10 +2,11 @@ from time import time
 from uuid import uuid4
 
 from hamcrest import assert_that, contains_inanyorder
-from app.core.document import Document
-from app.core.field import Field
 
-from app.core.identifier import Identifier
+from app.core.model.document import Document
+from app.core.model.field import Field
+from app.core.model.identifier import Identifier
+
 
 
 # noinspection PyClassHasNoInit,PyMethodMayBeStatic

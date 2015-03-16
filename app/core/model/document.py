@@ -1,5 +1,5 @@
-from app.core.abstract_data_object import AbstractDataObject
-from app.core.field import Field
+from app.core.model.abstract_data_object import AbstractDataObject
+from app.core.model.field import Field
 
 
 class Document(AbstractDataObject):

@@ -1,10 +1,11 @@
 from decimal import Decimal
 from uuid import UUID
+
 import arrow
 import pytest
 
 from app.cassandra_domain.store.abstract_cassandra_store import AbstractCassandraStore
-from app.core.abstract_data_object import AbstractDataObject
+from app.core.model.abstract_data_object import AbstractDataObject
 from app.elasticsearch_domain.store.abstract_elasticsearch_store import AbstractElasticsearchStore
 
 

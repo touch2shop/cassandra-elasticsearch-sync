@@ -1,7 +1,7 @@
 from time_uuid import TimeUUID
 
-from app.core.abstract_data_object import AbstractDataObject
-from app.core.identifier import Identifier
+from app.core.model.abstract_data_object import AbstractDataObject
+from app.core.model.identifier import Identifier
 
 
 class CassandraLogEntry(AbstractDataObject):

@@ -1,10 +1,11 @@
 import logging
 from operator import attrgetter
+
 import arrow
 
 from app.cassandra_domain.invalid_cassandra_schema_exception import InvalidCassandraSchemaException
 from app.core.abstract_update_fetcher import AbstractUpdateFetcher
-from app.core.update import Update
+from app.core.model.update import Update
 
 
 _DEFAULT_CASSANDRA_ID_COLUMN_NAME = "id"

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from app.core.abstract_data_object import AbstractDataObject
+from app.core.model.abstract_data_object import AbstractDataObject
 
 
 class Field(AbstractDataObject):

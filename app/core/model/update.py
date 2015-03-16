@@ -1,4 +1,4 @@
-from app.core.document import Document
+from app.core.model.document import Document
 
 
 class Update(Document):

@@ -1,7 +1,7 @@
 import logging
 
 from app.elasticsearch_domain.invalid_elasticsearch_schema_exception import InvalidElasticsearchSchemaException
-from app.core.field import Field
+from app.core.model.field import Field
 from app.elasticsearch_domain.store.elasticsearch_document_store import ElasticsearchDocumentStore
 
 

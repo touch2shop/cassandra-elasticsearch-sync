@@ -3,9 +3,9 @@ import uuid
 import time
 
 import pytest
-from app.core.document import Document
 
-from app.core.identifier import Identifier
+from app.core.model.document import Document
+from app.core.model.identifier import Identifier
 from app.elasticsearch_domain.store.elasticsearch_document_store import ElasticsearchDocumentStore
 from test.fixtures.product import ProductFixture
 

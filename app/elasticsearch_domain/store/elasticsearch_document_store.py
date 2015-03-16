@@ -1,10 +1,10 @@
 from decimal import Decimal
 from uuid import UUID
 
-from app.core.document import Document
+from app.core.model.document import Document
 
-from app.core.identifier import Identifier
-from app.core.field import Field
+from app.core.model.identifier import Identifier
+from app.core.model.field import Field
 from app.elasticsearch_domain.store.abstract_elasticsearch_store import AbstractElasticsearchStore
 
 

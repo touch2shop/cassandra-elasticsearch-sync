@@ -4,9 +4,9 @@ from time import time, sleep
 
 import pytest
 
-from app.core.identifier import Identifier
-from app.core.update import Update
-from app.core.field import Field
+from app.core.model.identifier import Identifier
+from app.core.model.update import Update
+from app.core.model.field import Field
 from app.elasticsearch_domain.invalid_elasticsearch_schema_exception import InvalidElasticsearchSchemaException
 from app.elasticsearch_domain.elasticsearch_update_applier import ElasticsearchUpdateApplier
 from test.fixtures.product import ProductFixture

@@ -2,7 +2,8 @@ from decimal import Decimal
 from time import sleep
 from uuid import uuid4
 from datetime import datetime
-from app.core.field import Field
+
+from app.core.model.field import Field
 
 
 # noinspection PyMethodMayBeStatic,PyClassHasNoInit

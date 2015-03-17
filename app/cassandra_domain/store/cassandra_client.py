@@ -45,3 +45,24 @@ class CassandraClient(object):
             """ % (columns_string, keyspace, table, id_column_name, _id)
         )
         return self.execute(statement)
+
+    def __select_table_names_from_keyspace(self, keyspace):
+        statement = self.prepare_statement(
+            """
+            SELECT columnfamily_name FROM System.schema_columnfamilies WHERE keyspace_name=?
+            """
+        )
+        return self.execute(statement, [keyspace])
+
+    def keyspace_exists(self, keyspace):
+        # this for is necessary because the result might be a paginated iterator
+        for row in self.__select_table_names_from_keyspace(keyspace.lower()):
+            return True
+        return False
+
+    def table_exists(self, keyspace, table):
+        all_tables = self.__select_table_names_from_keyspace(keyspace.lower())
+        for row in all_tables:
+            if row.columnfamily_name.lower() == table.lower():
+                return True
+        return False

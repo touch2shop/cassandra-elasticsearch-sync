@@ -5,6 +5,8 @@ import pytest
 from app.cassandra_domain.store.cassandra_document_store import CassandraDocumentStore
 from app.core.model.document import Document
 from app.core.model.identifier import Identifier
+from app.cassandra_domain.invalid_cassandra_schema_exception import InvalidCassandraSchemaException
+from app.core.util.timestamp_util import TimestampUtil
 from test.fixtures.product import ProductFixture
 
 
@@ -42,13 +44,62 @@ class TestCassandraDocumentStore:
         identifier = Identifier(cassandra_fixture_keyspace, product_fixture_table, uuid4())
         assert not cassandra_document_store.read(identifier)
 
-    def test_fail_if_table_has_no_timestamp(self, cassandra_fixture_client):
-        # TODO
-        pass
+    def test_fail_if_table_has_no_timestamp(self, cassandra_document_store, cassandra_fixture_client,
+                                            cassandra_fixture_keyspace):
+        cassandra_fixture_client.execute(
+            """
+            CREATE TABLE table_without_timestamp (
+              id uuid PRIMARY KEY,
+              whatever text
+            )
+            """)
 
-    def test_fail_if_id_is_not_unique(self):
-        # TODO
-        pass
+        statement = cassandra_fixture_client.prepare_statement(
+            """
+            INSERT INTO table_without_timestamp (id,whatever) VALUES (?,?)
+            """)
+
+        _id = uuid4()
+        whatever = "whatever"
+        cassandra_fixture_client.execute(statement, (_id, whatever))
+
+        identifier = Identifier(cassandra_fixture_keyspace, "table_without_timestamp", str(_id))
+        with pytest.raises(InvalidCassandraSchemaException) as e:
+            cassandra_document_store.read(identifier)
+        assert e.value.identifier == identifier
+        assert "No timestamp column found for entity on Cassandra." in e.value.message
+
+    def test_fail_if_id_is_not_unique(self, cassandra_document_store, cassandra_fixture_client,
+                                      cassandra_fixture_keyspace):
+
+        cassandra_fixture_client.execute(
+            """
+            CREATE TABLE table_with_composite_key (
+              id uuid,
+              timestamp timestamp,
+              whatever text,
+              PRIMARY KEY (id, timestamp)
+            )
+            """)
+
+        statement = cassandra_fixture_client.prepare_statement(
+            """
+            INSERT INTO table_with_composite_key (id,timestamp,whatever) VALUES (?,?,?)
+            """)
+
+        _id = uuid4()
+        timestamp1 = TimestampUtil.seconds_to_milliseconds(time())
+        timestamp2 = TimestampUtil.seconds_to_milliseconds(time() + 1)
+        whatever = "whatever"
+
+        cassandra_fixture_client.execute(statement, (_id, timestamp1, whatever))
+        cassandra_fixture_client.execute(statement, (_id, timestamp2, whatever))
+
+        identifier = Identifier(cassandra_fixture_keyspace, "table_with_composite_key", str(_id))
+        with pytest.raises(InvalidCassandraSchemaException) as e:
+            cassandra_document_store.read(identifier)
+        assert e.value.identifier == identifier
+        assert "More than one row found for entity on Cassandra." in e.value.message
 
     def test_create(self, cassandra_document_store, product, product_fixture_cassandra_store,
                     cassandra_fixture_keyspace, product_fixture_table):

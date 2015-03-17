@@ -6,9 +6,6 @@ from app.core.abstract_iterable_result import AbstractIterableResult
 
 class CassandraLogEntryIterableResult(AbstractIterableResult):
 
-    def __init__(self, result):
-        super(CassandraLogEntryIterableResult, self).__init__(result)
-
     def _to_entity(self, single_result):
         (logged_keyspace, logged_table, logged_key, time_uuid, operation, updated_columns) = single_result
         log_entry = CassandraLogEntry()
@@ -53,19 +50,19 @@ class CassandraLogEntryStore(AbstractCassandraStore):
             log_entry.operation,
             log_entry.updated_columns))
 
-    def find_all(self, timeout=None):
+    def search_all(self, timeout=None):
         statement = self.prepare_statement(self._build_select_query())
         rows = self.execute(statement, timeout)
         return CassandraLogEntryIterableResult(rows)
 
-    def find_by_logged_row(self, logged_keyspace, logged_table, logged_key, timeout=None):
+    def search_by_logged_row(self, logged_keyspace, logged_table, logged_key, timeout=None):
         statement = self.prepare_statement(
             self._build_select_query(where="logged_keyspace = ? AND logged_table = ? AND logged_key = ?"))
 
         rows = self.execute(statement, (logged_keyspace, logged_table, logged_key), timeout)
         return CassandraLogEntryIterableResult(rows)
 
-    def find_by_time_greater_or_equal_than(self, minimum_timestamp, timeout=None):
+    def search_by_minimum_timestamp(self, minimum_timestamp, timeout=None):
         statement = self.prepare_statement(
             self._build_select_query(where="time_uuid >= minTimeuuid(?)", allow_filtering=True))
 

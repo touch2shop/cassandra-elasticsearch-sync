@@ -1,6 +1,5 @@
+from time import time
 from uuid import uuid4
-
-import arrow
 from hamcrest import assert_that, contains_inanyorder, contains
 import pytest
 
@@ -10,7 +9,7 @@ from app.core.model.field import Field
 
 
 def generate_timestamp():
-    return arrow.utcnow().float_timestamp
+    return time()
 
 
 @pytest.fixture
@@ -66,7 +65,7 @@ class TestUpdate:
 
     def test_set_fields(self):
         identifier = Identifier(namespace="test", table="test", key=uuid4())
-        document = Update(identifier, timestamp=arrow.utcnow(), fields=[Field("foo", "bar")])
+        document = Update(identifier, timestamp=time(), fields=[Field("foo", "bar")])
         assert_that(document.fields, contains(Field("foo", "bar")))
         document.fields = [Field("one", 1), Field("two", 2)]
         assert_that(document.fields, contains_inanyorder(Field("one", 1), Field("two", 2)))

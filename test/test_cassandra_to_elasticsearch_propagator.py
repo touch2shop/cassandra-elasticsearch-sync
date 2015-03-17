@@ -1,7 +1,7 @@
 from decimal import Decimal
-from time import sleep
+from time import sleep, time
 from uuid import uuid4
-import arrow
+
 import pytest
 
 from app.cassandra_to_elasticsearch_propagator import CassandraToElasticsearchPropagator
@@ -20,13 +20,13 @@ def propagator(cassandra_cluster, elasticsearch_client, settings):
 
 @pytest.fixture(scope="function")
 def product_fixtures():
-    now = arrow.utcnow()
+    timestamp = time()
     return [ProductFixture(_id=uuid4(), name="navy polo shirt", quantity=5, description="great shirt, great price!",
-                           price=Decimal("99.99"), enabled=True, timestamp=now),
+                           price=Decimal("99.99"), enabled=True, timestamp=timestamp),
             ProductFixture(_id=uuid4(), name="cool red shorts", quantity=7, description="perfect to go to the beach",
-                           price=Decimal("49.99"), enabled=False, timestamp=now),
+                           price=Decimal("49.99"), enabled=False, timestamp=timestamp),
             ProductFixture(_id=uuid4(), name="black DC skater shoes", quantity=10, description="yo!",
-                           price=Decimal("149.99"), enabled=True, timestamp=now)]
+                           price=Decimal("149.99"), enabled=True, timestamp=timestamp)]
 
 
 # noinspection PyShadowingNames,PyClassHasNoInit,PyMethodMayBeStatic
@@ -56,7 +56,7 @@ class TestCassandraToElasticsearchPropagator:
             product.description = "new_description"
             product.price = Decimal("98.99")
             product.enabled = True
-            product.timestamp = arrow.utcnow()
+            product.timestamp = time()
             product_fixture_cassandra_store.update(product)
 
         propagator.propagate_updates(minimum_timestamp=None)
@@ -75,7 +75,7 @@ class TestCassandraToElasticsearchPropagator:
         for product in product_fixtures:
             product.name = "new_name"
             product.description = "new_description"
-            product.timestamp = arrow.utcnow()
+            product.timestamp = time()
             product_fixture_cassandra_store.update(product)
 
         deleted = product_fixtures.pop(0)
@@ -93,19 +93,19 @@ class TestCassandraToElasticsearchPropagator:
     def test_only_propagate_updates_that_are_created_after_minimum_timestamp(self, propagator,
             product_fixture_cassandra_store, product_fixture_elasticsearch_store):
 
-        before_time = arrow.utcnow()
+        before_timestamp = time()
         product_created_before = ProductFixture(_id=uuid4(), name="gloves", description="warm pair of gloves",
-                                                quantity=50, timestamp=before_time)
+                                                quantity=50, timestamp=before_timestamp)
         product_fixture_cassandra_store.create(product_created_before)
 
         sleep(0.001)
 
-        minimum_time = arrow.utcnow()
+        minimum_timestamp = time()
         products_created_after = [
-            ProductFixture(uuid4(), "navy polo shirt", 5, "great shirt, great price!", timestamp=minimum_time),
-            ProductFixture(uuid4(), "cool red shorts", 7, "perfect to go to the beach", timestamp=minimum_time),
-            ProductFixture(uuid4(), "black DC skater shoes", 10, "yo!", timestamp=minimum_time),
-            ProductFixture(uuid4(), "regular jeans", 12, "blue, nice jeans", timestamp=minimum_time)
+            ProductFixture(uuid4(), "navy polo shirt", 5, "great shirt, great price!", timestamp=minimum_timestamp),
+            ProductFixture(uuid4(), "cool red shorts", 7, "perfect to go to the beach", timestamp=minimum_timestamp),
+            ProductFixture(uuid4(), "black DC skater shoes", 10, "yo!", timestamp=minimum_timestamp),
+            ProductFixture(uuid4(), "regular jeans", 12, "blue, nice jeans", timestamp=minimum_timestamp)
         ]
 
         for product in products_created_after:
@@ -116,10 +116,10 @@ class TestCassandraToElasticsearchPropagator:
         for product in products_created_after:
             product.name = "new_name"
             product.description = "new_description"
-            product.timestamp = arrow.utcnow()
+            product.timestamp = time()
             product_fixture_cassandra_store.update(product)
 
-        propagator.propagate_updates(minimum_timestamp=minimum_time.float_timestamp)
+        propagator.propagate_updates(minimum_timestamp=minimum_timestamp)
 
         for product in products_created_after:
             read_from_cassandra = product_fixture_cassandra_store.read(product.id)
@@ -141,7 +141,7 @@ class TestCassandraToElasticsearchPropagator:
         for product in product_fixtures:
             product.name = "new_name"
             product.description = "new_description"
-            product.timestamp = arrow.utcnow()
+            product.timestamp = time()
             product_fixture_cassandra_store.update(product)
 
         deleted = product_fixtures.pop(0)
@@ -149,9 +149,9 @@ class TestCassandraToElasticsearchPropagator:
 
         sleep(0.001)
 
-        most_recent_time = arrow.utcnow()
+        most_recent_timestamp = time()
         product_fixture_cassandra_store.create(
-            ProductFixture(uuid4(), "navy polo shirt", 5, "great shirt, great price!", timestamp=most_recent_time))
+            ProductFixture(uuid4(), "navy polo shirt", 5, "great shirt, great price!", timestamp=most_recent_timestamp))
 
         actual_most_recent_timestamp = propagator.propagate_updates(minimum_timestamp=None)
-        assert (arrow.get(actual_most_recent_timestamp) - most_recent_time).total_seconds() < 0.001
+        assert abs(actual_most_recent_timestamp - most_recent_timestamp) < 0.001

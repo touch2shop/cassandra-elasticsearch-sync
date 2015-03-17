@@ -62,7 +62,7 @@ class TestElasticsearchUpdateApplier:
         with pytest.raises(InvalidElasticsearchSchemaException) as e:
             update_applier.apply_update(update)
         assert e.value.identifier == update.identifier
-        assert "Could not retrieve timestamp for Elasticsearch document" in e.value.message
+        assert "Could not retrieve '_timestamp' for Elasticsearch document" in e.value.message
 
     def test_apply_save_update_to_nonexistent_document(self, update_applier, elasticsearch_fixture_index,
                                                        product_fixture_table, product_fixture_elasticsearch_store):
@@ -111,7 +111,7 @@ class TestElasticsearchUpdateApplier:
         _id = uuid4()
 
         product = ProductFixture(_id=_id, name="jeans", description="cool jeans", quantity=10,
-                                 price=Decimal("49.99"), enabled=True)
+                                 price=Decimal("49.99"), enabled=True, timestamp=time())
         product_fixture_elasticsearch_store.create(product)
 
         updated_name = "t-shirt"
@@ -146,7 +146,7 @@ class TestElasticsearchUpdateApplier:
         original_price = Decimal("149.99")
         original_enabled = True
 
-        product = ProductFixture(_id=_id, name=original_name,
+        product = ProductFixture(_id=_id, timestamp=time(), name=original_name,
                                  description=original_description, quantity=original_quantity,
                                  price=original_price, enabled=original_enabled)
         product_fixture_elasticsearch_store.create(product)
@@ -172,7 +172,7 @@ class TestElasticsearchUpdateApplier:
         _type = product_fixture_table
         _id = uuid4()
 
-        product = ProductFixture(_id=_id, name="jeans", description="cool jeans", quantity=5)
+        product = ProductFixture(_id=_id, name="jeans", timestamp=time(), description="cool jeans", quantity=5)
         product_fixture_elasticsearch_store.create(product)
 
         delete_update = build_update(namespace=_index, table=_type, key=str(_id), timestamp=time(), is_delete=True)

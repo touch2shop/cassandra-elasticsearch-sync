@@ -51,4 +51,4 @@ class ElasticsearchUpdateApplier:
     def _validate_existing_document(document):
         if not document.timestamp:
             raise InvalidElasticsearchSchemaException(identifier=document.identifier,
-                message="Could not retrieve timestamp for Elasticsearch document. Please check your mapping.")
+                message="Could not retrieve '_timestamp' for Elasticsearch document. Please check your mappings.")

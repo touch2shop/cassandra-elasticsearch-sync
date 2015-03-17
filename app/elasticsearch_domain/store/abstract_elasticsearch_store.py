@@ -1,7 +1,10 @@
 from abc import abstractmethod
 import abc
-from datetime import datetime
+
 from elasticsearch import TransportError
+
+from app.core.util.timestamp_util import TimestampUtil
+from app.elasticsearch_domain.store.elasticsearch_response_util import ElasticsearchResponseUtil
 
 
 class AbstractElasticsearchStore(object):
@@ -22,44 +25,38 @@ class AbstractElasticsearchStore(object):
                 raise
 
     def _base_create(self, index, _type, _id, document):
-        time = self._get_time(document)
+        timestamp = self.__get_timestamp(document)
         body = self._to_request_body(document)
-        self._client.create(index=index, doc_type=_type, id=_id, body=body, timestamp=time)
+        self._client.create(index=index, doc_type=_type, id=_id, body=body, timestamp=timestamp, refresh=True)
 
     def _base_update(self, index, _type, _id, document):
-        time = self._get_time(document)
+        timestamp = self.__get_timestamp(document)
         body = self._to_request_body(document)
-        self._client.update(index=index, doc_type=_type, id=_id, body={"doc": body}, timestamp=time)
+        self._client.update(index=index, doc_type=_type, id=_id, body={"doc": body}, timestamp=timestamp, refresh=True)
 
     def _base_delete(self, index, _type, _id):
-        return self._client.delete(index=index, doc_type=_type, id=_id)
+        return self._client.delete(index=index, doc_type=_type, id=_id, refresh=True)
 
     @abstractmethod
     def _to_request_body(self, document):
         pass
 
     @abstractmethod
-    def _from_response(self, body, timestamp, index, _type, _id):
+    def _from_response(self, source, timestamp, identifier):
         pass
 
     def _process_response(self, response):
         if not response["found"]:
             return None
 
-        _id = response["_id"]
-        _type = response["_type"]
-        _index = response["_index"]
-
-        timestamp = self._extract_timestamp(response)
-        return self._from_response(response["_source"], timestamp, _index, _type, _id)
+        identifier = ElasticsearchResponseUtil.extract_identifier(response)
+        timestamp = ElasticsearchResponseUtil.extract_timestamp(response)
+        source = ElasticsearchResponseUtil.extract_source(response)
+        return self._from_response(source, timestamp, identifier)
 
     @staticmethod
-    def _extract_timestamp(response):
-        if "fields" in response and "_timestamp" in response["fields"]:
-            return response["fields"]["_timestamp"] / 1000.0
+    def __get_timestamp(document):
+        if document.timestamp:
+            return TimestampUtil.seconds_to_milliseconds(document.timestamp)
         else:
             return None
-
-    @staticmethod
-    def _get_time(document):
-        return datetime.utcfromtimestamp(document.timestamp) if document.timestamp else datetime.utcnow()

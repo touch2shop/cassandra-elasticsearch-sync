@@ -1,6 +1,5 @@
 import logging
 from operator import attrgetter
-
 import arrow
 
 from app.cassandra_domain.invalid_cassandra_schema_exception import InvalidCassandraSchemaException
@@ -31,9 +30,9 @@ class CassandraUpdateFetcher(AbstractUpdateFetcher):
 
     def _fetch_log_entries(self, minimum_timestamp):
         if minimum_timestamp is None:
-            return self._log_entry_store.find_all()
+            return self._log_entry_store.search_all()
         else:
-            return self._log_entry_store.find_by_time_greater_or_equal_than(minimum_timestamp)
+            return self._log_entry_store.search_by_minimum_timestamp(minimum_timestamp)
 
     def next(self):
         if self._log_entries_iterator is None:

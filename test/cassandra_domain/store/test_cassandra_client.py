@@ -1,3 +1,5 @@
+from decimal import Decimal
+from time import time
 import uuid
 
 import pytest
@@ -9,9 +11,12 @@ from test.fixtures.product import ProductFixture
 @pytest.fixture(scope="module")
 def product_fixtures(product_fixture_cassandra_store):
     products = list()
-    products.append(ProductFixture(uuid.uuid4(), "navy polo shirt", 5, "great shirt, great price!"))
-    products.append(ProductFixture(uuid.uuid4(), "cool red shorts", 7, "perfect to go to the beach"))
-    products.append(ProductFixture(uuid.uuid4(), "black DC skater shoes", 10, "yo!"))
+    products.append(ProductFixture(_id=uuid.uuid4(), name="navy polo shirt", quantity=5, price=Decimal("19.99"),
+                                   enabled=True, description="great shirt, great price!", timestamp=time()))
+    products.append(ProductFixture(_id=uuid.uuid4(), name="cool red shorts", quantity=7, price=Decimal("29.99"),
+                                   enabled=True, description="perfect to go to the beach", timestamp=time()))
+    products.append(ProductFixture(_id=uuid.uuid4(), name="black DC skater shoes", quantity=10, price=Decimal("99.99"),
+                                   enabled=True, description="yo!", timestamp=time()))
 
     for product in products:
         product_fixture_cassandra_store.create(product)
@@ -25,13 +30,13 @@ def cassandra_client(cassandra_cluster):
 
 
 # noinspection PyClassHasNoInit,PyShadowingNames,PyMethodMayBeStatic
-class TestSimpleCassandraClient:
+class TestCassandraClient:
 
     def test_select_specific_columns_by_id(self, cassandra_client, cassandra_fixture_keyspace, product_fixtures):
 
         for product in product_fixtures:
             rows = cassandra_client.select_by_id(ProductFixture.TABLE_NAME, product.id,
-                                                 columns=("quantity", "description", "name"),
+                                                 columns=("quantity", "description", "name", "price", "enabled"),
                                                  keyspace=cassandra_fixture_keyspace)
 
             assert len(rows) == 1
@@ -39,6 +44,8 @@ class TestSimpleCassandraClient:
             assert row[0] == product.quantity
             assert row[1] == product.description
             assert row[2] == product.name
+            assert row[3] == product.price
+            assert row[4] == product.enabled
 
     def test_select_all_columns_by_id(self, cassandra_client, cassandra_fixture_keyspace, product_fixtures):
 
@@ -52,6 +59,8 @@ class TestSimpleCassandraClient:
             assert row.quantity == product.quantity
             assert row.description == product.description
             assert row.name == product.name
+            assert row.price == product.price
+            assert row.enabled == product.enabled
 
     def test_select_by_uuid_encoded_as_string(self, cassandra_client, cassandra_fixture_keyspace, product_fixtures):
 
@@ -66,6 +75,8 @@ class TestSimpleCassandraClient:
             assert row.quantity == product.quantity
             assert row.description == product.description
             assert row.name == product.name
+            assert row.price == product.price
+            assert row.enabled == product.enabled
 
     def test_select_by_id_on_default_keyspace(self, cassandra_client, cassandra_fixture_keyspace, product_fixtures):
 
@@ -79,3 +90,5 @@ class TestSimpleCassandraClient:
             assert row.quantity == product.quantity
             assert row.description == product.description
             assert row.name == product.name
+            assert row.price == product.price
+            assert row.enabled == product.enabled

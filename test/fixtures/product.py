@@ -6,6 +6,7 @@ import pytest
 
 from app.cassandra_domain.store.abstract_cassandra_store import AbstractCassandraStore
 from app.core.model.abstract_data_object import AbstractDataObject
+from app.core.util.timestamp_util import TimestampUtil
 from app.elasticsearch_domain.store.abstract_elasticsearch_store import AbstractElasticsearchStore
 
 
@@ -78,7 +79,8 @@ class ProductFixtureCassandraStore(AbstractCassandraStore):
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """ % self.table)
         self.execute(statement, (product.id, product.name, product.quantity, product.description,
-                                 product.price, product.enabled, product.timestamp))
+                                 product.price, product.enabled,
+                                 TimestampUtil.seconds_to_milliseconds(product.timestamp)))
 
     def update(self, product):
         statement = self.prepare_statement(
@@ -88,7 +90,9 @@ class ProductFixtureCassandraStore(AbstractCassandraStore):
             WHERE id=?
             """ % self.table)
         self.execute(statement, (product.name, product.quantity, product.description,
-                                 product.price, product.enabled, product.timestamp, product.id))
+                                 product.price, product.enabled,
+                                 TimestampUtil.seconds_to_milliseconds(product.timestamp),
+                                 product.id))
 
     def delete(self, product):
         statement = self.prepare_statement(
@@ -146,16 +150,16 @@ class ProductFixtureElasticsearchStore(AbstractElasticsearchStore):
     def update(self, document):
         self._base_update(self._index, self._type, document.id, document)
 
-    def _from_response(self, body, timestamp, index, _type, _id):
+    def _from_response(self, source, timestamp, identifier):
         product = ProductFixture()
-        product._id = UUID(_id)
+        product._id = UUID(identifier.key)
         product.timestamp = timestamp
-        product.name = body.get("name", None)
-        product.quantity = body.get("quantity", None)
-        product.description = body.get("description", None)
-        price = body.get("price", None)
+        product.name = source.get("name", None)
+        product.quantity = source.get("quantity", None)
+        product.description = source.get("description", None)
+        price = source.get("price", None)
         product.price = Decimal(price) if price else None
-        product.enabled = body.get("enabled", None)
+        product.enabled = source.get("enabled", None)
         return product
 
     def _to_request_body(self, document):
@@ -180,9 +184,7 @@ def create_product_fixture_elasticsearch_schema(elasticsearch_client,
         elasticsearch_client.indices.delete_mapping(index=elasticsearch_fixture_index, doc_type=product_fixture_table)
 
     mapping = {
-        "_timestamp": {
-            "enabled": True, "store": True
-        },
+        "_timestamp": {"enabled": True, "store": True},
         "properties": {
             "name": {"type": "string"},
             "description": {"type": "string"},

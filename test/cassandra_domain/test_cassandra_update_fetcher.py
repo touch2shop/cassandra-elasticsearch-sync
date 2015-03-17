@@ -1,5 +1,6 @@
 from decimal import Decimal
 from operator import attrgetter
+from time import time
 import uuid
 import arrow
 import pytest
@@ -14,25 +15,25 @@ def setup(cassandra_log_entry_store):
 
 
 @pytest.fixture(scope="module")
-def product_fixtures_creation_time():
-    return arrow.utcnow()
+def product_fixtures_creation_timestamp():
+    return time()
 
 
 # noinspection PyUnusedLocal,PyShadowingNames
 @pytest.fixture(scope="module")
-def product_fixtures(product_fixture_cassandra_store, product_fixtures_creation_time):
+def product_fixtures(product_fixture_cassandra_store, product_fixtures_creation_timestamp):
     product_fixture_cassandra_store.delete_all()
 
-    products = [ProductFixture(_id=uuid.uuid4(), timestamp=product_fixtures_creation_time,
+    products = [ProductFixture(_id=uuid.uuid4(), timestamp=product_fixtures_creation_timestamp,
                                name="navy polo shirt", quantity=5, description="great shirt, great price!",
                                price=Decimal("99.99"), enabled=True),
-                ProductFixture(_id=uuid.uuid4(), timestamp=product_fixtures_creation_time,
+                ProductFixture(_id=uuid.uuid4(), timestamp=product_fixtures_creation_timestamp,
                                name="cool red shorts", quantity=7, description="perfect to go to the beach",
                                price=Decimal("49.99"), enabled=False),
-                ProductFixture(_id=uuid.uuid4(), timestamp=product_fixtures_creation_time,
+                ProductFixture(_id=uuid.uuid4(), timestamp=product_fixtures_creation_timestamp,
                                name="black DC skater shoes", quantity=10, description="yo!",
                                price=Decimal("149.99"), enabled=True),
-                ProductFixture(_id=uuid.uuid4(), timestamp=product_fixtures_creation_time,
+                ProductFixture(_id=uuid.uuid4(), timestamp=product_fixtures_creation_timestamp,
                                name="warm gloves", quantity=15, description="elegant, warm, one-size-fits-all gloves",
                                price=Decimal("19.99"), enabled=True)]
 
@@ -51,8 +52,8 @@ def cassandra_update_fetcher(cassandra_log_entry_store):
 class TestCassandraUpdateFetcher:
 
     def test_fetch_updates_for_product_fixtures_creation_from_beginning_of_time(
-            self, cassandra_update_fetcher, product_fixtures, 
-            cassandra_fixture_keyspace, product_fixtures_creation_time):
+            self, cassandra_update_fetcher, product_fixtures,
+            cassandra_fixture_keyspace, product_fixtures_creation_timestamp):
 
         updates = cassandra_update_fetcher.fetch_updates()
         updates_by_key = self.group_updates_by_unique_key(updates)
@@ -63,15 +64,15 @@ class TestCassandraUpdateFetcher:
             assert key in updates_by_key
             update = updates_by_key[key]
 
-            self.check_update_timestamp(update, product_fixtures_creation_time)
+            self.check_update_timestamp(update, product_fixtures_creation_timestamp)
             self.check_update_identifier(update, cassandra_fixture_keyspace, ProductFixture.TABLE_NAME)
             self.check_update_matches_product_fixture_creation(update, product_fixture)
 
     def test_fetch_updates_for_product_fixtures_creation_with_minimum_timestamp(
-            self, cassandra_update_fetcher, product_fixtures, 
-            cassandra_fixture_keyspace, product_fixtures_creation_time):
+            self, cassandra_update_fetcher, product_fixtures,
+            cassandra_fixture_keyspace, product_fixtures_creation_timestamp):
 
-        updates = cassandra_update_fetcher.fetch_updates(product_fixtures_creation_time)
+        updates = cassandra_update_fetcher.fetch_updates(product_fixtures_creation_timestamp)
         updates_by_key = self.group_updates_by_unique_key(updates)
 
         assert len(updates_by_key) == 4
@@ -80,7 +81,7 @@ class TestCassandraUpdateFetcher:
             assert key in updates_by_key
             update = updates_by_key[key]
 
-            self.check_update_timestamp(update, product_fixtures_creation_time)
+            self.check_update_timestamp(update, product_fixtures_creation_timestamp)
             self.check_update_identifier(update, cassandra_fixture_keyspace, ProductFixture.TABLE_NAME)
             self.check_update_matches_product_fixture_creation(update, product_fixture)
 
@@ -123,22 +124,22 @@ class TestCassandraUpdateFetcher:
     def test_fetch_multiple_save_updates_for_the_same_entity(self, cassandra_update_fetcher,
                                                              product_fixture_cassandra_store):
         _id = uuid.uuid4()
-        time = arrow.utcnow()
+        timestamp = time()
 
-        product_fixture = ProductFixture(_id=_id, timestamp=time, name="The new MacBook Pro by Apple", quantity=10,
+        product_fixture = ProductFixture(_id=_id, timestamp=timestamp, name="The new MacBook Pro by Apple", quantity=10,
                                          description="it's amazing", price=Decimal("1999.99"), enabled=True)
         product_fixture_cassandra_store.create(product_fixture)
 
         product_fixture.price = Decimal("1499.99")
-        product_fixture.timestamp = arrow.utcnow()
+        product_fixture.timestamp = time()
         product_fixture_cassandra_store.update(product_fixture)
 
-        product_fixture.description = "it' beyong amazing"
+        product_fixture.description = "it' beyond amazing"
         product_fixture.enabled = False
-        product_fixture.timestamp = arrow.utcnow()
+        product_fixture.timestamp = time()
         product_fixture_cassandra_store.update(product_fixture)
 
-        updates_iterator = cassandra_update_fetcher.fetch_updates(minimum_timestamp=time.float_timestamp)
+        updates_iterator = cassandra_update_fetcher.fetch_updates(minimum_timestamp=timestamp)
 
         updates = []
         for update in updates_iterator:
@@ -152,7 +153,7 @@ class TestCassandraUpdateFetcher:
                 fields[field.name] = field.value
 
         assert fields["price"] == Decimal("1499.99")
-        assert fields["description"] == "it' beyong amazing"
+        assert fields["description"] == "it' beyond amazing"
         assert fields["enabled"] is False
 
     @staticmethod
@@ -161,10 +162,9 @@ class TestCassandraUpdateFetcher:
         assert update.identifier.table == table
 
     @staticmethod
-    def check_update_timestamp(update, operation_time):
-        update_time = arrow.get(update.timestamp)
-        assert arrow.utcnow() >= update_time
-        assert (update_time - operation_time).total_seconds() <= 0.001
+    def check_update_timestamp(update, operation_timestamp):
+        assert time() >= update.timestamp
+        assert abs(update.timestamp - operation_timestamp) <= 0.001
 
     @staticmethod
     def check_update_matches_product_fixture_creation(update, product_fixture):

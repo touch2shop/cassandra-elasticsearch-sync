@@ -25,12 +25,12 @@ class TestCassandraLogEntryStore(object):
                                      updated_columns={"a", "b", "c"})
         cassandra_log_entry_store.create(entry)
 
-        rows = cassandra_log_entry_store.find_by_logged_row(entry.logged_keyspace, entry.logged_table, entry.logged_key)
+        rows = cassandra_log_entry_store.search_by_logged_row(entry.logged_keyspace, entry.logged_table, entry.logged_key)
         log_entries = rows.to_list()
         assert len(log_entries) == 1
         assert log_entries[0] == entry
 
-    def test_find_all(self, cassandra_log_entry_store):
+    def test_search_all(self, cassandra_log_entry_store):
         entries = list()
         entries.append(self.build_log_entry(time_uuid=self._create_time_uuid("2015-03-05T00:00:00.000000-0000"),
                                             logged_keyspace="test_keyspace",
@@ -53,11 +53,11 @@ class TestCassandraLogEntryStore(object):
         for entry in entries:
             cassandra_log_entry_store.create(entry)
 
-        found = cassandra_log_entry_store.find_all().to_list()
+        found = cassandra_log_entry_store.search_all().to_list()
         assert_that(found, has_length(len(entries)))
         assert_that(found, has_items(*entries))
 
-    def test_find_log_entries_filtering_by_minimum_timestamp(self, cassandra_log_entry_store):
+    def test_search_by_minimum_timestamp(self, cassandra_log_entry_store):
         minimum_timestamp = arrow.get("2015-01-02T16:00:00.000000-00:00").float_timestamp
         entries = list()
 
@@ -118,7 +118,7 @@ class TestCassandraLogEntryStore(object):
         for entry in shuffled_entries:
             cassandra_log_entry_store.create(entry)
 
-        found_entries = cassandra_log_entry_store.find_by_time_greater_or_equal_than(minimum_timestamp).to_list()
+        found_entries = cassandra_log_entry_store.search_by_minimum_timestamp(minimum_timestamp).to_list()
 
         assert_that(found_entries, has_length(5))
         assert_that(found_entries, is_not(has_items(entries[0], entries[1], entries[2])))

@@ -68,7 +68,7 @@ class ProductFixtureCassandraStore(AbstractCassandraStore):
             row = rows[0]
             return ProductFixture(_id=row.id, name=row.name, description=row.description,
                                   quantity=row.quantity, price=row.price, enabled=row.enabled,
-                                  timestamp=arrow.get(row.timestamp))
+                                  timestamp=arrow.get(row.timestamp).float_timestamp)
         else:
             return None
 

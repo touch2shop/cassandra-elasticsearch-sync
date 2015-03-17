@@ -87,3 +87,13 @@ class TestAbstractElasticsearchStore:
         product_fixture_elasticsearch_store.delete(_id)
 
         assert not product_fixture_elasticsearch_store.read(_id)
+
+    def test_delete_all(self, product_fixture_elasticsearch_store):
+        product = ProductFixture(_id=uuid4(), timestamp=time(), name="jeans", description="cool jeans", quantity=5)
+        product_fixture_elasticsearch_store.create(product)
+
+        assert product_fixture_elasticsearch_store.read(product.id)
+
+        product_fixture_elasticsearch_store.delete_all()
+
+        assert not product_fixture_elasticsearch_store.read(product.id)

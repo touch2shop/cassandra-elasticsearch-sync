@@ -133,20 +133,6 @@ class TestGenericElasticsearchStore:
             assert not elasticsearch_client.exists(index=identifier.namespace,
                                                    doc_type=identifier.table, id=identifier.key)
 
-    def filter_documents_by_type(self, index, _type, documents):
-        filtered_documents = []
-        for document in documents:
-            identifier = document.identifier
-            if identifier.namespace == index and identifier.table == _type:
-                filtered_documents.append(document)
-        return filtered_documents
-
-    def group_documents_by_key(self, documents):
-        grouped = {}
-        for document in documents:
-            grouped[document.identifier.key] = document
-        return grouped
-
     def test_search_all(self, product_fixture_elasticsearch_store, elasticsearch_document_store,
                         elasticsearch_fixture_index, product_fixture_table):
         products = [
@@ -209,3 +195,19 @@ class TestGenericElasticsearchStore:
         assert p6.id in found_ids
         assert p7.id in found_ids
         assert p8.id in found_ids
+
+    def filter_documents_by_type(self, index, _type, documents):
+        filtered_documents = []
+        for document in documents:
+            identifier = document.identifier
+            if identifier.namespace == index and identifier.table == _type:
+                filtered_documents.append(document)
+        return filtered_documents
+
+    def group_documents_by_key(self, documents):
+        grouped = {}
+        for document in documents:
+            key = document.identifier.key
+            assert key not in grouped
+            grouped[key] = document
+        return grouped

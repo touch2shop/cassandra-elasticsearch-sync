@@ -7,6 +7,7 @@ import pytest
 from app.core.model.identifier import Identifier
 from app.core.model.update import Update
 from app.core.model.field import Field
+from app.core.util.timestamp_util import TimestampUtil
 from app.elasticsearch_domain.invalid_elasticsearch_schema_exception import InvalidElasticsearchSchemaException
 from app.elasticsearch_domain.elasticsearch_update_applier import ElasticsearchUpdateApplier
 from test.fixtures.product import ProductFixture
@@ -55,14 +56,19 @@ class TestElasticsearchUpdateApplier:
 
         bogus_mapping = {"_timestamp": {"enabled": False}}
         elasticsearch_client.indices.put_mapping(index=_index, doc_type=_type, body=bogus_mapping)
-        elasticsearch_client.index(index=_index, doc_type=_type, id=_id, body={"foo": "bar"})
 
-        update = build_update(namespace=_index, table=_type, key=str(_id), timestamp=time())
+        try:
+            elasticsearch_client.index(index=_index, doc_type=_type, id=_id, body={"foo": "bar"},
+                                       timestamp=TimestampUtil.seconds_to_milliseconds(time()), refresh=True)
 
-        with pytest.raises(InvalidElasticsearchSchemaException) as e:
-            update_applier.apply_update(update)
-        assert e.value.identifier == update.identifier
-        assert "Could not retrieve '_timestamp' for Elasticsearch document" in e.value.message
+            update = build_update(namespace=_index, table=_type, key=str(_id), timestamp=time())
+
+            with pytest.raises(InvalidElasticsearchSchemaException) as e:
+                update_applier.apply_update(update)
+            assert e.value.identifier == update.identifier
+            assert "Could not retrieve '_timestamp' for Elasticsearch document" in e.value.message
+        finally:
+            elasticsearch_client.indices.delete_mapping(index=elasticsearch_fixture_index, doc_type=_type)
 
     def test_apply_save_update_to_nonexistent_document(self, update_applier, elasticsearch_fixture_index,
                                                        product_fixture_table, product_fixture_elasticsearch_store):

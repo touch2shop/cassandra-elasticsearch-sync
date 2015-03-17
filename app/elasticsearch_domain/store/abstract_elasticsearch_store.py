@@ -7,6 +7,9 @@ from app.core.util.timestamp_util import TimestampUtil
 from app.elasticsearch_domain.store.elasticsearch_response_util import ElasticsearchResponseUtil
 
 
+MATCH_ALL_QUERY = {"query": {"match_all": {}}}
+
+
 class AbstractElasticsearchStore(object):
 
     __metaclass__ = abc.ABCMeta
@@ -36,6 +39,9 @@ class AbstractElasticsearchStore(object):
 
     def _base_delete(self, index, _type, _id):
         return self._client.delete(index=index, doc_type=_type, id=_id, refresh=True)
+
+    def _base_delete_all(self, index, _type):
+        self._client.delete_by_query(index=index, doc_type=_type, body=MATCH_ALL_QUERY)
 
     @abstractmethod
     def _to_request_body(self, document):

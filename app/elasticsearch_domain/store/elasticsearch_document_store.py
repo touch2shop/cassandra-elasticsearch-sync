@@ -5,12 +5,8 @@ from uuid import UUID
 from app.core.abstract_iterable_result import AbstractIterableResult
 from app.core.model.document import Document
 from app.core.util.timestamp_util import TimestampUtil
-from app.elasticsearch_domain.store.abstract_elasticsearch_store import AbstractElasticsearchStore
+from app.elasticsearch_domain.store.abstract_elasticsearch_store import AbstractElasticsearchStore, MATCH_ALL_QUERY
 from app.elasticsearch_domain.store.elasticsearch_response_util import ElasticsearchResponseUtil
-
-
-_DEFAULT_SCROLL_TIME = "5m"
-_MATCH_ALL_FILTER = {"filter": {"match_all": {}}}
 
 
 class ElasticsearchDocumentIterableResponse(AbstractIterableResult):
@@ -21,6 +17,9 @@ class ElasticsearchDocumentIterableResponse(AbstractIterableResult):
         source = ElasticsearchResponseUtil.extract_source(response)
         fields = ElasticsearchResponseUtil.extract_fields_from_source(source)
         return Document(identifier=identifier, timestamp=timestamp, fields=fields)
+
+
+_DEFAULT_SCROLL_TIME = "5m"
 
 
 class ElasticsearchDocumentStore(AbstractElasticsearchStore):
@@ -51,7 +50,7 @@ class ElasticsearchDocumentStore(AbstractElasticsearchStore):
         return self.search(query=self.__filter_by_timestamp_greater_than_or_equal_to(minimum_timestamp))
 
     def search_all(self):
-        return self.search(query=_MATCH_ALL_FILTER)
+        return self.search(query=MATCH_ALL_QUERY)
 
     @staticmethod
     def __filter_by_timestamp_greater_than_or_equal_to(minimum_timestamp):

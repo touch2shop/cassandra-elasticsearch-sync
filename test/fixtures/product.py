@@ -150,6 +150,9 @@ class ProductFixtureElasticsearchStore(AbstractElasticsearchStore):
     def update(self, document):
         self._base_update(self._index, self._type, document.id, document)
 
+    def delete_all(self):
+        self._base_delete_all(self._index, self._type)
+
     def _from_response(self, source, timestamp, identifier):
         product = ProductFixture()
         product._id = UUID(identifier.key)

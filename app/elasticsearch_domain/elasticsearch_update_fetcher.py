@@ -11,36 +11,21 @@ class ElasticsearchUpdateFetcher(AbstractUpdateFetcher):
     def __init__(self, elasticsearch_client):
         super(ElasticsearchUpdateFetcher, self).__init__()
         self._document_store = ElasticsearchDocumentStore(elasticsearch_client)
-        self._documents_iterator = None
 
-    def fetch_updates(self, minimum_timestamp=None):
+    def _fetch_data(self, minimum_timestamp):
         if minimum_timestamp:
-            self._documents_iterator = self._document_store.search_by_minimum_timestamp(minimum_timestamp)
+            return self._document_store.search_by_minimum_timestamp(minimum_timestamp)
         else:
-            self._documents_iterator = self._document_store.search_all()
-        return self
+            return self._document_store.search_all()
 
-    def next(self):
-        if not self._documents_iterator:
-            raise ValueError("No updates fetched. Did you call fetch_updates first?")
+    def _to_update(self, data):
+        self.__validate_document(data)
 
-        next_document = next(self._documents_iterator)
-        self.__validate_document(next_document)
-        return self.__to_update(next_document)
+        # TODO: as of now, it is impossible to retrieve delete updates from Elasticsearch. All updates are save only.
+        return Update.from_document(data, is_delete=False)
 
     @staticmethod
     def __validate_document(document):
         if not document.timestamp:
             raise InvalidElasticsearchSchemaException(identifier=document.identifier,
                 message="Could not retrieve '_timestamp' for Elasticsearch document. Please check your mappings.")
-
-    @staticmethod
-    def __to_update(document):
-        update = Update()
-        update.identifier = document.identifier
-        update.timestamp = document.timestamp
-        update.fields = document.fields
-
-        # TODO: as of now, it is impossible to retrieve delete updates from Elasticsearch.
-        update.is_delete = False
-        return update

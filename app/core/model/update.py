@@ -31,3 +31,12 @@ class Update(Document):
             "timestamp": self.timestamp,
             "fields": self.fields
         }
+
+    @classmethod
+    def from_document(cls, document, is_delete):
+        update = Update()
+        update.identifier = document.identifier
+        update.timestamp = document.timestamp
+        update.fields = document.fields
+        update.is_delete = is_delete
+        return update

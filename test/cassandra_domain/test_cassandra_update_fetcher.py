@@ -43,8 +43,8 @@ def product_fixtures(product_fixture_cassandra_store, product_fixtures_creation_
 
 
 @pytest.fixture("module")
-def cassandra_update_fetcher(cassandra_log_entry_store):
-    return CassandraUpdateFetcher(cassandra_log_entry_store)
+def cassandra_update_fetcher(cassandra_cluster, settings):
+    return CassandraUpdateFetcher(cassandra_cluster, settings)
 
 
 # noinspection PyShadowingNames,PyMethodMayBeStatic,PyClassHasNoInit

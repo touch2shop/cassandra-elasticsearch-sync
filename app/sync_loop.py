@@ -5,7 +5,7 @@ import arrow
 from cassandra.cluster import Cluster
 from elasticsearch import Elasticsearch
 
-from app.cassandra_to_elasticsearch_propagator import CassandraToElasticsearchPropagator
+from app.cassandra_to_elasticsearch_river import CassandraToElasticsearchRiver
 from app.core.exception.unrecoverable_error import UnrecoverableError
 from app.sync_state_store import SyncStateStore
 
@@ -24,7 +24,7 @@ class SyncLoop:
         cassandra_cluster = Cluster()
         elasticsearch_client = Elasticsearch()
 
-        self._cassandra_to_elastic_search = CassandraToElasticsearchPropagator(
+        self._cassandra_to_elasticsearch_river = CassandraToElasticsearchRiver(
             cassandra_cluster, elasticsearch_client, settings)
 
     def run(self):
@@ -52,7 +52,7 @@ class SyncLoop:
             if last_sync_timestamp:
                 self._logger.info("Syncing since %s...", self.__format_timestamp(last_sync_timestamp))
 
-            new_sync_timestamp = self._cassandra_to_elastic_search.propagate_updates(last_sync_timestamp)
+            new_sync_timestamp = self._cassandra_to_elasticsearch_river.propagate_updates(last_sync_timestamp)
             if new_sync_timestamp:
                 self._logger.info("...synced until %s", self.__format_timestamp(new_sync_timestamp))
             return new_sync_timestamp

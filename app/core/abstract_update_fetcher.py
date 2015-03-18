@@ -3,13 +3,13 @@ from abc import ABCMeta, abstractmethod
 
 class AbstractUpdateFetcher(object):
 
-    def __init__(self):
-        pass
-
     __metaclass__ = ABCMeta
 
-    @abstractmethod
+    def __init__(self):
+        self.__data_iterator = None
+
     def fetch_updates(self, minimum_timestamp=None):
+        self.__data_iterator = self._fetch_data(minimum_timestamp)
         return self
 
     def __iter__(self):
@@ -18,6 +18,20 @@ class AbstractUpdateFetcher(object):
     def __next__(self):
         return next(self)
 
-    @abstractmethod
     def next(self):
-        raise StopIteration()
+        if not self.__data_iterator:
+            raise ValueError("There's no data fetched. Did you call fetch_updates first?")
+
+        update = None
+        while update is None:
+            next_data = next(self.__data_iterator)
+            update = self._to_update(next_data)
+        return update
+
+    @abstractmethod
+    def _fetch_data(self, minimum_timestamp):
+        pass
+
+    @abstractmethod
+    def _to_update(self, data):
+        pass

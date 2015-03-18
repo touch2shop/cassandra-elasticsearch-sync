@@ -4,7 +4,7 @@ from uuid import uuid4
 
 import pytest
 
-from app.cassandra_to_elasticsearch_propagator import CassandraToElasticsearchPropagator
+from app.cassandra_to_elasticsearch_river import CassandraToElasticsearchRiver
 from test.fixtures.product import ProductFixture
 
 
@@ -15,7 +15,7 @@ def setup(cassandra_log_entry_store):
 
 @pytest.fixture(scope="module")
 def propagator(cassandra_cluster, elasticsearch_client, settings):
-    return CassandraToElasticsearchPropagator(cassandra_cluster, elasticsearch_client, settings)
+    return CassandraToElasticsearchRiver(cassandra_cluster, elasticsearch_client, settings)
 
 
 @pytest.fixture(scope="function")
@@ -30,7 +30,7 @@ def product_fixtures():
 
 
 # noinspection PyShadowingNames,PyClassHasNoInit,PyMethodMayBeStatic
-class TestCassandraToElasticsearchPropagator:
+class TestCassandraToElasticsearchRiver:
 
     def test_propagate_creation_updates_from_the_beginning_of_time(self, propagator,
             product_fixture_cassandra_store, product_fixture_elasticsearch_store, product_fixtures):

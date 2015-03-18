@@ -129,7 +129,7 @@ class CassandraDocumentStore:
             document.timestamp = arrow.get(timestamp).float_timestamp
 
         for field_name in row.__dict__:
-            if field_name != self._timestamp_column_name:
+            if field_name != self._timestamp_column_name and field_name != self._id_column_name:
                 field_value = attrgetter(field_name)(row)
                 document.add_field(field_name, field_value)
 

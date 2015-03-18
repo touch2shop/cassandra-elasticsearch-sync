@@ -2,14 +2,11 @@ from time import time
 from uuid import uuid4
 from hamcrest import assert_that, contains_inanyorder, contains
 import pytest
+from app.core.model.document import Document
 
 from app.core.model.identifier import Identifier
 from app.core.model.update import Update
 from app.core.model.field import Field
-
-
-def generate_timestamp():
-    return time()
 
 
 @pytest.fixture
@@ -20,7 +17,7 @@ def identifier():
 # noinspection PyShadowingNames
 @pytest.fixture
 def update(identifier):
-    return Update(identifier=identifier, timestamp=generate_timestamp(), is_delete=False,
+    return Update(identifier=identifier, timestamp=time(), is_delete=False,
                   fields=[Field("a", 5), Field("b", "foo"), Field("c", "bar")])
 
 
@@ -34,14 +31,14 @@ def identical_update(update):
 # noinspection PyShadowingNames
 @pytest.fixture
 def slightly_different_update(update):
-    return Update(identifier=update.identifier, timestamp=generate_timestamp(), is_delete=False,
+    return Update(identifier=update.identifier, timestamp=time(), is_delete=False,
                   fields=[Field("a", 5), Field("b", "foo")])
 
 
 @pytest.fixture
 def very_different_update():
     different_identifier = Identifier("shop", "product", 456)
-    return Update(identifier=different_identifier, timestamp=generate_timestamp(), is_delete=True,
+    return Update(identifier=different_identifier, timestamp=time(), is_delete=True,
                   fields=[Field("a", 5), Field("b", "foo")])
 
 
@@ -69,3 +66,10 @@ class TestUpdate:
         assert_that(document.fields, contains(Field("foo", "bar")))
         document.fields = [Field("one", 1), Field("two", 2)]
         assert_that(document.fields, contains_inanyorder(Field("one", 1), Field("two", 2)))
+
+    def test_create_update_from_document(self, identifier):
+        document = Document(identifier, time(), fields=[Field("a", 2), Field("b", 2), Field("c", 3)])
+        update = Update.from_document(document, is_delete=True)
+        assert update.identifier == document.identifier
+        assert update.timestamp == document.timestamp
+        assert update.fields == document.fields

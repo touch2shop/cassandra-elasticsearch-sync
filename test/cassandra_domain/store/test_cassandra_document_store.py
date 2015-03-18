@@ -171,6 +171,19 @@ class TestCassandraDocumentStore:
         read_document = cassandra_document_store.read(document.identifier)
         assert read_document.get_field_value("external_id") == external_id
 
+    def test_serialize_string_as_datetime_if_column_type_is_datetime(self,
+            cassandra_document_store, cassandra_fixture_keyspace, product_fixture_table):
+        publish_date = datetime.utcnow()
+
+        document = Document()
+        document.identifier = Identifier(cassandra_fixture_keyspace, product_fixture_table, uuid4())
+        document.timestamp = time()
+        document.add_field("publish_date", str(publish_date))
+
+        cassandra_document_store.create(document)
+        read_document = cassandra_document_store.read(document.identifier)
+        assert DateTimeUtil.are_equal_by_less_than(read_document.get_field_value("publish_date"), publish_date, 0.001)
+
     @staticmethod
     def to_document(product, keyspace, table):
         document = Document()

@@ -120,13 +120,15 @@ class CassandraDocumentStore(AbstractDocumentStore):
 
     @classmethod
     def __serialize_field_value(cls, value, column_type):
-        if isinstance(value, str):
+        if isinstance(value, str) or isinstance(value, unicode):
             if column_type == cassandra.cqltypes.DecimalType:
                 return Decimal(value)
             if column_type == cassandra.cqltypes.UUIDType:
                 return UUID(value)
             if column_type == cassandra.cqltypes.TimeUUIDType:
                 return UUID(value)
+            if column_type == cassandra.cqltypes.DateType:
+                return arrow.get(value)
         return value
 
     def _to_document(self, identifier, rows):

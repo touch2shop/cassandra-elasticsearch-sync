@@ -1,5 +1,5 @@
 CASSANDRA <> ELASTICSEARCH SYNC (efficiently)
-===========================================
+=============================================
 
 This is a daemon job to efficiently and incrementally sync data from Cassandra to Elasticsearch and vice-versa. It is implemented in Python.
 
@@ -53,14 +53,19 @@ KNOWN ISSUES
 ------------
 
 - Currently the application only access the Cassandra and Elasticsearch instances running in the localhost.
-
-- Currently all indexes and all document types from Elasticsearch will be synchronized to Cassandra. A feature that would allow configuring the  
-
+- Currently all indexes and all document types from Elasticsearch will be synchronized to Cassandra. A feature that would allow the user to specify which documents types should be synchronized is already planned.
 - Improve exception handling. Currently, if any exception occurs, like a connection timeout, the application quits.
-
 - The solution was not tested yet in a multi-clustered environment. Therefore, please keep in mind it is still not suitable for production.
-
 - Although a substantial amount of unit, integration and functional tests were put in place, the code needs still could benefit from some additional test coverage.
+
+USAGE
+-----
+
+You can customize the application by editing file `settings.yaml`.
+
+The first time the application is run it does a full sync between Cassandra and Elasticsearch based on the logs. This might be a time-consuming operation.
+
+The following syncs are going to be incremental. The application stores, at all times, the current sync state at file `state.yaml`.
 
 SETUP
 -----

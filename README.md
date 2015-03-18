@@ -1,11 +1,18 @@
 CASSANDRA <> ELASTICSEARCH SYNC
 ===============================
 
-This is a daemon service to efficiently and incrementally sync data from Cassandra to Elasticsearch and vice-versa. It is implemented in Python.
+This is a daemon service for efficient and incremental bidirectional sync between [Cassandra](https://cassandra.apache.org) and [Elasticsearch](https://www.elastic.co).
 
-It uses my [Cassandra Logger](http://github.com/felipead/cassandra-logger) trigger to keep track of changes in the Cassandra database, which is very efficient.
+It is implemented in Python and uses my [Cassandra Logger](http://github.com/felipead/cassandra-logger) trigger to keep track of changes in the Cassandra database, thus making it very efficient.
 
-Synchronization is also idempotent and fault tolerant. This means that running the service for the same data more than once will produce exactly the same results. 
+Synchronization is also idempotent and fault tolerant. This means that running the service with the same data more than once will produce exactly the same results.
+
+REQUIREMENTS
+------------
+
+- Cassandra 2.1+
+- Elasticsearch 1.4+
+- Python 2.7
 
 RATIONALE
 ---------
@@ -14,17 +21,38 @@ Traditional sync methods usually query the whole Cassandra database and then com
 
 To solve this issue I created a custom trigger that keeps track of all commits made on any Cassandra table. Changes are recorded in a log table which is optimized to efficiently retrieve updates by timestamp order.
 
-REQUIREMENTS
-------------
+This is the schema of the log table:
 
-- Cassandra 2.1+ with the [Cassandra Logger](http://github.com/felipead/cassandra-logger) installed
-- Elasticsearch 1.4+
-- Python 2.7
+        CREATE TABLE log (
+            time_uuid timeuuid,
+            logged_keyspace text,
+            logged_table text,
+            logged_key text,
+            operation text,
+            updated_columns set<text>,
+            PRIMARY KEY ((logged_keyspace, logged_table, logged_key), time_uuid)
+        ) WITH CLUSTERING ORDER BY (time_uuid DESC);
+
+which can be queried efficiently on Cassandra by:
+
+        SELECT * FROM log WHERE time_uuid >= minTimeuuid('2015-03-01 00:35:00-0300') ALLOW FILTERING;
+
+From the Elasticsearch end we can make a similar query by running:
+
+        curl -XGET 'http://localhost:9200/_all/_search' -d '{
+            "query": {
+                "range": {
+                    "_timestamp": { "gte": "2015-03-01T00:35:00-03:00" }
+                }
+            }
+        }'
+
+Due to Elasticsearch's architecture and the fact that it was built with search as a first class citzen, the above query does not suffer from performance degradation. Internally, the `_timestamp` field is stored as a long integer, which is automatically indexed.
 
 LIMITATIONS
 -----------
 
-It is currently not possible to sync delete updates from Elasticsearch to Cassandra. This is due to a limitation on how updates are queried on Elasticsearch.
+It is not possible to sync delete updates from Elasticsearch to Cassandra. This is due to a limitation on how updates are queried on Elasticsearch.
 
 Deletes from Cassandra to Elasticsearch, however, are fully synchronized. If you want to delete an entity, delete it from the Cassandra end and the application will automatically delete it from Elasticsearch.
 

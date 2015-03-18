@@ -1,0 +1,134 @@
+from decimal import Decimal
+from time import time, sleep
+from uuid import uuid4
+from datetime import datetime
+import pytest
+from app.elasticsearch_domain.store.abstract_elasticsearch_store import MATCH_ALL_QUERY
+from app.elasticsearch_to_cassandra_river import ElasticsearchToCassandraRiver
+from test.fixtures.product import ProductFixture
+
+
+@pytest.fixture(scope="function", autouse=True)
+def setup(elasticsearch_client):
+    elasticsearch_client.delete_by_query(index="_all", body=MATCH_ALL_QUERY)
+
+@pytest.fixture(scope="module")
+def river(cassandra_cluster, elasticsearch_client, settings):
+    return ElasticsearchToCassandraRiver(elasticsearch_client, cassandra_cluster, settings)
+
+
+@pytest.fixture(scope="module")
+def product_fixtures():
+    timestamp = time()
+    return [ProductFixture(_id=uuid4(), name="navy polo shirt", quantity=5, description="great shirt, great price!",
+                           price=Decimal("99.99"), enabled=True, publish_date=datetime.utcnow(),
+                           external_id=uuid4(), timestamp=timestamp),
+            ProductFixture(_id=uuid4(), name="cool red shorts", quantity=7, description="perfect to go to the beach",
+                           price=Decimal("49.99"), enabled=False, publish_date=datetime.utcnow(),
+                           external_id=uuid4(), timestamp=timestamp),
+            ProductFixture(_id=uuid4(), name="black DC skater shoes", quantity=10, description="yo!",
+                           price=Decimal("149.99"), enabled=True, publish_date=datetime.utcnow(),
+                           external_id=uuid4(), timestamp=timestamp)]
+
+
+# noinspection PyClassHasNoInit,PyMethodMayBeStatic,PyShadowingNames
+class TestElasticsearchToCassandraRiver:
+
+    def test_propagate_creation_updates_from_the_beginning_of_time(self, river,
+            product_fixture_cassandra_store, product_fixture_elasticsearch_store, product_fixtures):
+
+        for product in product_fixtures:
+            product_fixture_elasticsearch_store.create(product)
+
+        river.propagate_updates(minimum_timestamp=None)
+
+        for product in product_fixtures:
+            read_from_elasticsearch = product_fixture_elasticsearch_store.read(product.id)
+            read_from_cassandra = product_fixture_cassandra_store.read(product.id)
+            assert product == read_from_elasticsearch == read_from_cassandra
+
+    def test_propagate_creation_and_modification_updates_from_the_beginning_of_time(self, river,
+            product_fixture_cassandra_store, product_fixture_elasticsearch_store, product_fixtures):
+
+        for product in product_fixtures:
+            product_fixture_elasticsearch_store.create(product)
+
+        for product in product_fixtures:
+            product.name = "new_name"
+            product.description = "new_description"
+            product.price = Decimal("98.99")
+            product.enabled = True
+            product.external_id = uuid4()
+            product.publish_date = datetime.utcnow()
+            product.timestamp = time()
+            product_fixture_elasticsearch_store.update(product)
+
+        river.propagate_updates(minimum_timestamp=None)
+
+        for product in product_fixtures:
+            read_from_cassandra = product_fixture_cassandra_store.read(product.id)
+            read_from_elasticsearch = product_fixture_elasticsearch_store.read(product.id)
+            assert product == read_from_cassandra == read_from_elasticsearch
+
+    def test_only_propagate_updates_that_are_created_after_minimum_timestamp(self, river,
+            product_fixture_cassandra_store, product_fixture_elasticsearch_store):
+
+        before_timestamp = time()
+        product_created_before = ProductFixture(_id=uuid4(), name="gloves", description="warm pair of gloves",
+                                                quantity=50, timestamp=before_timestamp)
+        product_fixture_elasticsearch_store.create(product_created_before)
+
+        sleep(0.001)
+
+        minimum_timestamp = time()
+        products_created_after = [
+            ProductFixture(uuid4(), "navy polo shirt", 5, "great shirt, great price!", timestamp=minimum_timestamp),
+            ProductFixture(uuid4(), "cool red shorts", 7, "perfect to go to the beach", timestamp=minimum_timestamp),
+            ProductFixture(uuid4(), "black DC skater shoes", 10, "yo!", timestamp=minimum_timestamp),
+            ProductFixture(uuid4(), "regular jeans", 12, "blue, nice jeans", timestamp=minimum_timestamp)
+        ]
+
+        for product in products_created_after:
+            product_fixture_elasticsearch_store.create(product)
+
+        sleep(0.001)
+
+        for product in products_created_after:
+            product.name = "new_name"
+            product.description = "new_description"
+            product.timestamp = time()
+            product_fixture_elasticsearch_store.update(product)
+
+        river.propagate_updates(minimum_timestamp=minimum_timestamp)
+
+        for product in products_created_after:
+            read_from_cassandra = product_fixture_cassandra_store.read(product.id)
+            read_from_elasticsearch = product_fixture_elasticsearch_store.read(product.id)
+            assert product == read_from_cassandra == read_from_elasticsearch
+
+        assert product_fixture_elasticsearch_store.read(product_created_before.id)
+        assert not product_fixture_cassandra_store.read(product_created_before.id)
+
+    def test_does_nothing_if_no_updates(self, river):
+        assert river.propagate_updates() is None
+
+    def test_returns_timestamp_of_the_most_recent_update(self, river, product_fixtures,
+                                                         product_fixture_elasticsearch_store):
+
+        for product in product_fixtures:
+            product_fixture_elasticsearch_store.create(product)
+
+        for product in product_fixtures:
+            product.name = "new_name"
+            product.description = "new_description"
+            product.timestamp = time()
+            product_fixture_elasticsearch_store.update(product)
+
+        sleep(0.001)
+
+        most_recent_timestamp = time()
+        product_fixture_elasticsearch_store.create(
+            ProductFixture(uuid4(), "navy polo shirt", 5, "great shirt, great price!", timestamp=most_recent_timestamp))
+
+        actual_most_recent_timestamp = river.propagate_updates(minimum_timestamp=None)
+        assert abs(actual_most_recent_timestamp - most_recent_timestamp) < 0.001

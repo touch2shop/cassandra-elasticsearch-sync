@@ -190,7 +190,7 @@ class ProductFixtureElasticsearchStore(AbstractElasticsearchStore):
                 "price": str(document.price) if document.price else None,
                 "enabled": document.enabled,
                 "publish_date": document.publish_date,
-                "external_id": document.external_id}
+                "external_id": str(document.external_id) if document.external_id else None}
 
 
 @pytest.fixture(scope="session")

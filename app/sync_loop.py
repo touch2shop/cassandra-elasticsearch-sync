@@ -7,17 +7,13 @@ from app.elasticsearch_to_cassandra_river import ElasticsearchToCassandraRiver
 from app.sync_state_store import SyncStateStore
 
 
-_INTERVAL_BETWEEN_RIVER_SYNCS = 5
-_DEFAULT_STATE_FILENAME = "state.yaml"
+_INTERVAL_BETWEEN_RIVER_SYNCS = 1
 
 
 class SyncLoop:
 
-    def __init__(self, cassandra_cluster, elasticsearch_client, settings, state_file_name=None):
+    def __init__(self, cassandra_cluster, elasticsearch_client, settings, state_file_name):
         self._logger = logging.getLogger()
-
-        if not state_file_name:
-            state_file_name = _DEFAULT_STATE_FILENAME
         self._state_store = SyncStateStore(state_file_name)
 
         self._interval_between_runs = settings.interval_between_runs
@@ -48,12 +44,12 @@ class SyncLoop:
             self.__initial_elasticsearch_to_cassandra_sync(state)
 
     def __initial_cassandra_to_elasticsearch_sync(self, state):
-        self._logger.info("Initial Cassandra to Elasticsearch sync. This will take a while...")
+        self._logger.warning("Initial Cassandra to Elasticsearch sync. This might take a while...")
         state.last_cassandra_to_elasticsearch_sync = self._cassandra_to_elasticsearch_river.propagate_updates()
         state.save()
 
     def __initial_elasticsearch_to_cassandra_sync(self, state):
-        self._logger.info("Initial Elasticsearch to Cassandra sync. This will take a while...")
+        self._logger.warning("Initial Elasticsearch to Cassandra sync. This will take a while...")
         state.last_elasticsearch_to_cassandra_sync = self._elasticsearch_to_cassandra_river.propagate_updates()
         state.save()
 

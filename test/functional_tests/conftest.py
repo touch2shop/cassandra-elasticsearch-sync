@@ -21,6 +21,11 @@ def state_filename(tmpdir):
     return unicode(tmpdir.join(random_filename(".yaml")))
 
 
+@pytest.fixture(scope="session")
+def sync_interval_time(settings):
+    return settings.interval_between_runs * 5
+
+
 # noinspection PyShadowingNames
 @pytest.fixture(scope="function", autouse=True)
 def setup(request, settings, state_filename, cassandra_log_entry_store, elasticsearch_client):

@@ -5,28 +5,24 @@ from elasticsearch import Elasticsearch
 from app.sync_loop import SyncLoop
 
 
-_LOG_FILE_NAME = "cassandra-elasticsearch-sync.log"
+_DEFAULT_STATE_FILENAME = "state.yaml"
+_DEFAULT_LOGGER_LEVEL = logging.INFO
 
 
-def _setup_logger():
+def _setup_logger(logger_level):
     root_logger = logging.getLogger()
-    root_logger.setLevel(logging.INFO)
+    root_logger.setLevel(logger_level)
 
     formatter = logging.Formatter("[%(asctime)s] %(levelname)s - %(message)s")
 
-    log_file_handler = logging.FileHandler(_LOG_FILE_NAME)
-    log_file_handler.setLevel(logging.INFO)
-    log_file_handler.setFormatter(formatter)
-    root_logger.addHandler(log_file_handler)
-
     log_stream_handler = logging.StreamHandler(sys.stdout)
-    log_stream_handler.setLevel(logging.INFO)
+    log_stream_handler.setLevel(logger_level)
     log_stream_handler.setFormatter(formatter)
     root_logger.addHandler(log_stream_handler)
 
 
-def run(settings, state_file_name=None):
-    _setup_logger()
+def run(settings, state_file_name=_DEFAULT_STATE_FILENAME, logger_level=_DEFAULT_LOGGER_LEVEL):
+    _setup_logger(logger_level)
 
     # TODO: For now, connecting to localhost's cassandra and elasticsearch. Load this from environment variables.
     cassandra_cluster = Cluster()

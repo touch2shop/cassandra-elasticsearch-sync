@@ -171,7 +171,9 @@ class ProductFixtureElasticsearchStore(AbstractElasticsearchStore):
         product.quantity = source.get("quantity", None)
         product.description = source.get("description", None)
         product.enabled = source.get("enabled", None)
-        product.publish_date = source.get("publish_date", None)
+
+        publish_date = source.get("publish_date", None)
+        product.publish_date = publish_date
 
         price = source.get("price", None)
         product.price = Decimal(price) if price else None

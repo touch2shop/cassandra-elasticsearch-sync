@@ -1,6 +1,7 @@
 from decimal import Decimal
 from time import sleep, time
 from uuid import uuid4
+from datetime import datetime
 
 import pytest
 
@@ -22,11 +23,14 @@ def river(cassandra_cluster, elasticsearch_client, settings):
 def product_fixtures():
     timestamp = time()
     return [ProductFixture(_id=uuid4(), name="navy polo shirt", quantity=5, description="great shirt, great price!",
-                           price=Decimal("99.99"), enabled=True, timestamp=timestamp),
+                           price=Decimal("99.99"), enabled=True, publish_date=datetime.utcnow(),
+                           external_id=uuid4(), timestamp=timestamp),
             ProductFixture(_id=uuid4(), name="cool red shorts", quantity=7, description="perfect to go to the beach",
-                           price=Decimal("49.99"), enabled=False, timestamp=timestamp),
+                           price=Decimal("49.99"), enabled=False, publish_date=datetime.utcnow(),
+                           external_id=uuid4(), timestamp=timestamp),
             ProductFixture(_id=uuid4(), name="black DC skater shoes", quantity=10, description="yo!",
-                           price=Decimal("149.99"), enabled=True, timestamp=timestamp)]
+                           price=Decimal("149.99"), enabled=True, publish_date=datetime.utcnow(),
+                           external_id=uuid4(), timestamp=timestamp)]
 
 
 # noinspection PyShadowingNames,PyClassHasNoInit,PyMethodMayBeStatic
@@ -56,6 +60,8 @@ class TestCassandraToElasticsearchRiver:
             product.description = "new_description"
             product.price = Decimal("98.99")
             product.enabled = True
+            product.external_id = uuid4()
+            product.publish_date = datetime.utcnow()
             product.timestamp = time()
             product_fixture_cassandra_store.update(product)
 
@@ -76,6 +82,7 @@ class TestCassandraToElasticsearchRiver:
             product.name = "new_name"
             product.description = "new_description"
             product.timestamp = time()
+            product.publish_date = datetime.utcnow()
             product_fixture_cassandra_store.update(product)
 
         deleted = product_fixtures.pop(0)

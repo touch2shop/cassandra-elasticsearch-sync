@@ -7,15 +7,19 @@ from app.elasticsearch_to_cassandra_river import ElasticsearchToCassandraRiver
 from app.sync_state_store import SyncStateStore
 
 
-_STATE_FILENAME = "state.yaml"
 _INTERVAL_BETWEEN_RIVER_SYNCS = 5
+_DEFAULT_STATE_FILENAME = "state.yaml"
 
 
 class SyncLoop:
 
-    def __init__(self, cassandra_cluster, elasticsearch_client, settings):
+    def __init__(self, cassandra_cluster, elasticsearch_client, settings, state_file_name=None):
         self._logger = logging.getLogger()
-        self._state_store = SyncStateStore(_STATE_FILENAME)
+
+        if not state_file_name:
+            state_file_name = _DEFAULT_STATE_FILENAME
+        self._state_store = SyncStateStore(state_file_name)
+
         self._interval_between_runs = settings.interval_between_runs
 
         self._cassandra_to_elasticsearch_river = CassandraToElasticsearchRiver(

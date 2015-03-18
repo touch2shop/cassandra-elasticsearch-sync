@@ -1,4 +1,4 @@
-interval_between_runs: 10 # seconds
+interval_between_runs: 5 # seconds
 cassandra_log_keyspace: logger
 cassandra_log_table: log
 cassandra_id_column_name: id

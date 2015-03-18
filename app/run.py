@@ -1,5 +1,7 @@
 import logging
 import sys
+from cassandra.cluster import Cluster
+from elasticsearch import Elasticsearch
 from app.settings import Settings
 from app.sync_loop import SyncLoop
 
@@ -28,7 +30,12 @@ def setup_logger():
 def run():
     setup_logger()
     settings = Settings.load_from_file(_SETTINGS_FILE_NAME)
-    sync_loop = SyncLoop(settings)
+
+    # TODO: For now, connecting to localhost's cassandra and elasticsearch. Load this from environment variables.
+    cassandra_cluster = Cluster()
+    elasticsearch_client = Elasticsearch()
+
+    sync_loop = SyncLoop(cassandra_cluster, elasticsearch_client, settings)
     sync_loop.run()
 
 

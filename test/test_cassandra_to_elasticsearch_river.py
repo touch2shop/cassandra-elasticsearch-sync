@@ -6,6 +6,7 @@ from datetime import datetime
 import pytest
 
 from app.cassandra_to_elasticsearch_river import CassandraToElasticsearchRiver
+from app.core.util.timestamp_util import TimestampUtil
 from test.fixtures.product import ProductFixture
 
 
@@ -136,29 +137,5 @@ class TestCassandraToElasticsearchRiver:
         assert product_fixture_cassandra_store.read(product_created_before.id)
         assert not product_fixture_elasticsearch_store.read(product_created_before.id)
 
-    def test_does_nothing_if_no_updates(self, river):
-        assert river.propagate_updates() is None
-
-    def test_returns_timestamp_of_the_most_recent_update(self, river, product_fixtures,
-                                                         product_fixture_cassandra_store):
-
-        for product in product_fixtures:
-            product_fixture_cassandra_store.create(product)
-
-        for product in product_fixtures:
-            product.name = "new_name"
-            product.description = "new_description"
-            product.timestamp = time()
-            product_fixture_cassandra_store.update(product)
-
-        deleted = product_fixtures.pop(0)
-        product_fixture_cassandra_store.delete(deleted)
-
-        sleep(0.001)
-
-        most_recent_timestamp = time()
-        product_fixture_cassandra_store.create(
-            ProductFixture(uuid4(), "navy polo shirt", 5, "great shirt, great price!", timestamp=most_recent_timestamp))
-
-        actual_most_recent_timestamp = river.propagate_updates(minimum_timestamp=None)
-        assert abs(actual_most_recent_timestamp - most_recent_timestamp) < 0.001
+    def test_returns_current_timestamp_if_no_updates(self, river):
+        assert TimestampUtil.are_equal_by_less_than(river.propagate_updates(), time(), 1)

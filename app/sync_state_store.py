@@ -32,25 +32,38 @@ class SyncStateStore:
 
     @classmethod
     def _to_utc_time_string(cls, timestamp):
-        return arrow.get(timestamp).format(DATE_FORMAT)
+        return arrow.get(timestamp).format(DATE_FORMAT) if timestamp else ""
 
     @classmethod
     def _to_timestamp(cls, utc_time):
-        return arrow.get(utc_time).float_timestamp
+        return arrow.get(utc_time).float_timestamp if utc_time else None
 
-    @classmethod
-    def _default_instance(cls):
-        return SyncState()
+    def _default_instance(self):
+        return SyncState(self)
 
     @classmethod
     def _to_yaml(cls, sync_state):
-        return {"last_sync_timestamp": cls._to_utc_time_string(sync_state.last_sync_timestamp)}
+        return {
+            "last_cassandra_to_elasticsearch_sync":
+                cls._to_utc_time_string(sync_state.last_cassandra_to_elasticsearch_sync),
+            "last_elasticsearch_to_cassandra_sync":
+                cls._to_utc_time_string(sync_state.last_elasticsearch_to_cassandra_sync)
+        }
 
-    @classmethod
-    def _from_yaml(cls, data):
-        time_string = data.get("last_sync_timestamp", None)
-        if time_string:
-            last_sync_timestamp = cls._to_timestamp(time_string)
+    def _from_yaml(self, data):
+        last_cassandra_to_elasticsearch_sync_string = data.get("last_cassandra_to_elasticsearch_sync", None)
+        if last_cassandra_to_elasticsearch_sync_string:
+            last_cassandra_to_elasticsearch_sync = self._to_timestamp(last_cassandra_to_elasticsearch_sync_string)
         else:
-            last_sync_timestamp = None
-        return SyncState(last_sync_timestamp=last_sync_timestamp)
+            last_cassandra_to_elasticsearch_sync = None
+
+        last_elasticsearch_to_cassandra_sync_string = data.get("last_elasticsearch_to_cassandra_sync", None)
+        if last_elasticsearch_to_cassandra_sync_string:
+            last_elasticsearch_to_cassandra_sync = self._to_timestamp(last_elasticsearch_to_cassandra_sync_string)
+        else:
+            last_elasticsearch_to_cassandra_sync = None
+
+        return SyncState(self,
+            last_cassandra_to_elasticsearch_sync=last_cassandra_to_elasticsearch_sync,
+            last_elasticsearch_to_cassandra_sync=last_elasticsearch_to_cassandra_sync,
+        )

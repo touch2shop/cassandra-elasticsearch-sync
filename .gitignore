@@ -57,3 +57,7 @@ target/
 .idea/
 *.iml
 *.iws
+
+# Application specific files
+
+state.yaml

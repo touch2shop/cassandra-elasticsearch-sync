@@ -56,7 +56,7 @@ KNOWN ISSUES
 - Currently all indexes and all document types from Elasticsearch will be synchronized to Cassandra. A feature that would allow the user to specify which documents types should be synchronized is already planned.
 - Improve exception handling. Currently, if any exception occurs, like a connection timeout, the application quits.
 - The solution was not tested yet in a multi-clustered environment. Therefore, please keep in mind it is still not suitable for production.
-- Although a substantial amount of unit, integration and functional tests were put in place, the code needs still could benefit from some additional test coverage.
+- Although a substantial amount of unit, integration and functional tests were put in place, the code could still benefit from some additional test coverage.
 
 USAGE
 -----

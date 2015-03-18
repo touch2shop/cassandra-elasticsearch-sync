@@ -17,7 +17,7 @@ To solve this issue I created a custom trigger that keeps track of all commits m
 REQUIREMENTS
 ------------
 
-- Cassandra 2.1+
+- Cassandra 2.1+ with [Cassandra Logger](http://github.com/felipead/cassandra-logger) trigger
 - Elasticsearch 1.4+
 - Python 2.7
 

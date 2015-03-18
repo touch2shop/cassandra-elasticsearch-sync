@@ -14,11 +14,11 @@ def setup(cassandra_log_entry_store):
 
 
 @pytest.fixture(scope="module")
-def propagator(cassandra_cluster, elasticsearch_client, settings):
+def river(cassandra_cluster, elasticsearch_client, settings):
     return CassandraToElasticsearchRiver(cassandra_cluster, elasticsearch_client, settings)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def product_fixtures():
     timestamp = time()
     return [ProductFixture(_id=uuid4(), name="navy polo shirt", quantity=5, description="great shirt, great price!",
@@ -32,20 +32,20 @@ def product_fixtures():
 # noinspection PyShadowingNames,PyClassHasNoInit,PyMethodMayBeStatic
 class TestCassandraToElasticsearchRiver:
 
-    def test_propagate_creation_updates_from_the_beginning_of_time(self, propagator,
+    def test_propagate_creation_updates_from_the_beginning_of_time(self, river,
             product_fixture_cassandra_store, product_fixture_elasticsearch_store, product_fixtures):
 
         for product in product_fixtures:
             product_fixture_cassandra_store.create(product)
 
-        propagator.propagate_updates(minimum_timestamp=None)
+        river.propagate_updates(minimum_timestamp=None)
 
         for product in product_fixtures:
             read_from_cassandra = product_fixture_cassandra_store.read(product.id)
             read_from_elasticsearch = product_fixture_elasticsearch_store.read(product.id)
             assert product == read_from_cassandra == read_from_elasticsearch
 
-    def test_propagate_creation_and_modification_updates_from_the_beginning_of_time(self, propagator,
+    def test_propagate_creation_and_modification_updates_from_the_beginning_of_time(self, river,
             product_fixture_cassandra_store, product_fixture_elasticsearch_store, product_fixtures):
 
         for product in product_fixtures:
@@ -59,14 +59,14 @@ class TestCassandraToElasticsearchRiver:
             product.timestamp = time()
             product_fixture_cassandra_store.update(product)
 
-        propagator.propagate_updates(minimum_timestamp=None)
+        river.propagate_updates(minimum_timestamp=None)
 
         for product in product_fixtures:
             read_from_cassandra = product_fixture_cassandra_store.read(product.id)
             read_from_elasticsearch = product_fixture_elasticsearch_store.read(product.id)
             assert product == read_from_cassandra == read_from_elasticsearch
 
-    def test_propagate_creation_modification_and_deletion_updates_from_the_beginning_of_time(self, propagator,
+    def test_propagate_creation_modification_and_deletion_updates_from_the_beginning_of_time(self, river,
             product_fixture_cassandra_store, product_fixture_elasticsearch_store, product_fixtures):
 
         for product in product_fixtures:
@@ -81,7 +81,7 @@ class TestCassandraToElasticsearchRiver:
         deleted = product_fixtures.pop(0)
         product_fixture_cassandra_store.delete(deleted)
 
-        propagator.propagate_updates(minimum_timestamp=None)
+        river.propagate_updates(minimum_timestamp=None)
 
         for product in product_fixtures:
             read_from_cassandra = product_fixture_cassandra_store.read(product.id)
@@ -90,7 +90,7 @@ class TestCassandraToElasticsearchRiver:
 
         assert not product_fixture_elasticsearch_store.read(deleted.id)
 
-    def test_only_propagate_updates_that_are_created_after_minimum_timestamp(self, propagator,
+    def test_only_propagate_updates_that_are_created_after_minimum_timestamp(self, river,
             product_fixture_cassandra_store, product_fixture_elasticsearch_store):
 
         before_timestamp = time()
@@ -119,7 +119,7 @@ class TestCassandraToElasticsearchRiver:
             product.timestamp = time()
             product_fixture_cassandra_store.update(product)
 
-        propagator.propagate_updates(minimum_timestamp=minimum_timestamp)
+        river.propagate_updates(minimum_timestamp=minimum_timestamp)
 
         for product in products_created_after:
             read_from_cassandra = product_fixture_cassandra_store.read(product.id)
@@ -129,10 +129,10 @@ class TestCassandraToElasticsearchRiver:
         assert product_fixture_cassandra_store.read(product_created_before.id)
         assert not product_fixture_elasticsearch_store.read(product_created_before.id)
 
-    def test_does_nothing_if_no_updates(self, propagator):
-        assert propagator.propagate_updates() is None
+    def test_does_nothing_if_no_updates(self, river):
+        assert river.propagate_updates() is None
 
-    def test_returns_timestamp_of_the_most_recent_update(self, propagator, product_fixtures,
+    def test_returns_timestamp_of_the_most_recent_update(self, river, product_fixtures,
                                                          product_fixture_cassandra_store):
 
         for product in product_fixtures:
@@ -153,5 +153,5 @@ class TestCassandraToElasticsearchRiver:
         product_fixture_cassandra_store.create(
             ProductFixture(uuid4(), "navy polo shirt", 5, "great shirt, great price!", timestamp=most_recent_timestamp))
 
-        actual_most_recent_timestamp = propagator.propagate_updates(minimum_timestamp=None)
+        actual_most_recent_timestamp = river.propagate_updates(minimum_timestamp=None)
         assert abs(actual_most_recent_timestamp - most_recent_timestamp) < 0.001

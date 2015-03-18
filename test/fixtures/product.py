@@ -6,6 +6,7 @@ import pytest
 
 from app.cassandra_domain.store.abstract_cassandra_store import AbstractCassandraStore
 from app.core.model.abstract_data_object import AbstractDataObject
+from app.core.util.datetime_util import DateTimeUtil
 from app.core.util.timestamp_util import TimestampUtil
 from app.elasticsearch_domain.store.abstract_elasticsearch_store import AbstractElasticsearchStore
 
@@ -14,7 +15,8 @@ class ProductFixture(AbstractDataObject):
 
     TABLE_NAME = "product"
 
-    def __init__(self, _id=None, name=None, quantity=None, description=None, price=None, enabled=None, timestamp=None):
+    def __init__(self, _id=None, name=None, quantity=None, description=None, price=None, enabled=None,
+                 timestamp=None, external_id=None, publish_date=None):
         self._id = _id
         self.name = name
         self.quantity = quantity
@@ -22,6 +24,8 @@ class ProductFixture(AbstractDataObject):
         self.price = price
         self.enabled = enabled
         self.timestamp = timestamp
+        self.external_id = external_id
+        self.publish_date = publish_date
 
     @property
     def id(self):
@@ -32,13 +36,16 @@ class ProductFixture(AbstractDataObject):
         return unicode(self._id)
 
     def _deep_hash(self):
-        return hash((self._id, self.name, self.quantity, self.description, self.price, self.enabled))
+        return hash((self._id, self.name, self.quantity, self.description, self.price,
+                     self.enabled, self.external_id, self.publish_date))
 
     # noinspection PyProtectedMember
     def _deep_equals(self, other):
         return self._id == other._id and self.name == other.name and \
             self.quantity == other.quantity and self.description == other.description and \
-            self.price == other.price and self.enabled == other.enabled
+            self.price == other.price and self.enabled == other.enabled and \
+            self.external_id == other.external_id and \
+            DateTimeUtil.are_equal_by_less_than(self.publish_date, other.publish_date, 0.001)
 
 
 @pytest.fixture(scope="session")
@@ -57,7 +64,7 @@ class ProductFixtureCassandraStore(AbstractCassandraStore):
     def read(self, _id):
         statement = self.prepare_statement(
             """
-            SELECT id, name, quantity, description, price, enabled, timestamp FROM %s
+            SELECT id, name, quantity, description, price, enabled, external_id, publish_date, timestamp FROM %s
             WHERE id=?
             """ % self.table)
         rows = self.execute(statement, [_id])
@@ -68,29 +75,30 @@ class ProductFixtureCassandraStore(AbstractCassandraStore):
             row = rows[0]
             return ProductFixture(_id=row.id, name=row.name, description=row.description,
                                   quantity=row.quantity, price=row.price, enabled=row.enabled,
-                                  timestamp=arrow.get(row.timestamp).float_timestamp)
+                                  timestamp=arrow.get(row.timestamp).float_timestamp,
+                                  external_id=row.external_id, publish_date=row.publish_date)
         else:
             return None
 
     def create(self, product):
         statement = self.prepare_statement(
             """
-            INSERT INTO %s (id, name, quantity, description, price, enabled, timestamp)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO %s (id, name, quantity, description, price, enabled, external_id, publish_date, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """ % self.table)
         self.execute(statement, (product.id, product.name, product.quantity, product.description,
-                                 product.price, product.enabled,
+                                 product.price, product.enabled, product.external_id, product.publish_date,
                                  TimestampUtil.seconds_to_milliseconds(product.timestamp)))
 
     def update(self, product):
         statement = self.prepare_statement(
             """
             UPDATE %s
-            SET name=?, quantity=?, description=?, price=?, enabled=?, timestamp=?
+            SET name=?, quantity=?, description=?, price=?, enabled=?, external_id=?, publish_date=?, timestamp=?
             WHERE id=?
             """ % self.table)
         self.execute(statement, (product.name, product.quantity, product.description,
-                                 product.price, product.enabled,
+                                 product.price, product.enabled, product.external_id, product.publish_date,
                                  TimestampUtil.seconds_to_milliseconds(product.timestamp),
                                  product.id))
 
@@ -120,6 +128,8 @@ def create_product_fixture_cassandra_schema(cassandra_fixture_client, cassandra_
           description text,
           price decimal,
           enabled boolean,
+          external_id uuid,
+          publish_date timestamp,
           timestamp timestamp
         )
         """ % ProductFixture.TABLE_NAME)
@@ -160,9 +170,15 @@ class ProductFixtureElasticsearchStore(AbstractElasticsearchStore):
         product.name = source.get("name", None)
         product.quantity = source.get("quantity", None)
         product.description = source.get("description", None)
+        product.enabled = source.get("enabled", None)
+        product.publish_date = source.get("publish_date", None)
+
         price = source.get("price", None)
         product.price = Decimal(price) if price else None
-        product.enabled = source.get("enabled", None)
+
+        external_id = source.get("external_id", None)
+        product.external_id = UUID(external_id) if external_id else None
+
         return product
 
     def _to_request_body(self, document):
@@ -170,7 +186,9 @@ class ProductFixtureElasticsearchStore(AbstractElasticsearchStore):
                 "quantity": document.quantity,
                 "description": document.description,
                 "price": str(document.price) if document.price else None,
-                "enabled": document.enabled}
+                "enabled": document.enabled,
+                "publish_date": document.publish_date,
+                "external_id": document.external_id}
 
 
 @pytest.fixture(scope="session")
@@ -193,7 +211,9 @@ def create_product_fixture_elasticsearch_schema(elasticsearch_client,
             "description": {"type": "string"},
             "quantity": {"type": "integer"},
             "price": {"type": "string"},
-            "enabled": {"type": "boolean"}
+            "enabled": {"type": "boolean"},
+            "publish_date": {"type": "date"},
+            "external_id": {"type": "string"}
         }
     }
     elasticsearch_client.indices.put_mapping(index=elasticsearch_fixture_index,

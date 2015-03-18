@@ -169,7 +169,7 @@ class TestCassandraUpdateFetcher:
     @staticmethod
     def check_update_matches_product_fixture_creation(update, product_fixture):
         assert update.is_delete is False
-        assert len(update.fields) == 5
+        assert len(update.fields) == 7
         for field in update.fields:
             assert attrgetter(field.name)(product_fixture) == field.value
 

@@ -80,7 +80,7 @@ class ElasticsearchDocumentStore(AbstractElasticsearchStore, AbstractDocumentSto
             if isinstance(field.value, UUID):
                 serialized_value = str(field.value)
             elif isinstance(field.value, Decimal):
-                serialized_value = str(field.value)
+                serialized_value = str(field.value.normalize())
             else:
                 serialized_value = field.value
             body[field.name] = serialized_value

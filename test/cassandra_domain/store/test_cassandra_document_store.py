@@ -1,11 +1,13 @@
 from decimal import Decimal
 from time import time
 from uuid import uuid4
+from datetime import datetime
 import pytest
 from app.cassandra_domain.store.cassandra_document_store import CassandraDocumentStore
 from app.core.model.document import Document
 from app.core.model.identifier import Identifier
 from app.cassandra_domain.invalid_cassandra_schema_exception import InvalidCassandraSchemaException
+from app.core.util.datetime_util import DateTimeUtil
 from app.core.util.timestamp_util import TimestampUtil
 from test.fixtures.product import ProductFixture
 
@@ -18,7 +20,8 @@ def cassandra_document_store(cassandra_cluster):
 @pytest.fixture(scope="function")
 def product():
     return ProductFixture(_id=uuid4(), timestamp=time(), name="jeans", description="cool jeans",
-                          price=Decimal("19.99"), quantity=7, enabled=False)
+                          price=Decimal("19.99"), quantity=7, publish_date=datetime.utcnow(),
+                          external_id=uuid4(), enabled=False)
 
 
 # noinspection PyClassHasNoInit,PyShadowingNames,PyMethodMayBeStatic
@@ -32,13 +35,16 @@ class TestCassandraDocumentStore:
         identifier = Identifier(cassandra_fixture_keyspace, product_fixture_table, product.key)
         document = cassandra_document_store.read(identifier)
 
-        assert abs(product.timestamp - document.timestamp) < 0.001
+        assert TimestampUtil.are_equal_by_less_than(product.timestamp, document.timestamp, 0.001)
         assert document.identifier == identifier
         assert document.get_field_value("name") == product.name
         assert document.get_field_value("description") == product.description
         assert document.get_field_value("price") == product.price
         assert document.get_field_value("quantity") == product.quantity
         assert document.get_field_value("enabled") == product.enabled
+        assert document.get_field_value("external_id") == product.external_id
+        assert DateTimeUtil.are_equal_by_less_than(
+            document.get_field_value("publish_date"), product.publish_date, 0.001)
 
     def test_read_not_found(self, cassandra_document_store, cassandra_fixture_keyspace, product_fixture_table):
         identifier = Identifier(cassandra_fixture_keyspace, product_fixture_table, uuid4())
@@ -128,6 +134,7 @@ class TestCassandraDocumentStore:
         assert read_product.quantity == document.get_field_value("quantity")
         assert read_product.enabled == document.get_field_value("enabled")
         assert read_product.price == document.get_field_value("price")
+        assert read_product.external_id == document.get_field_value("external_id")
         assert read_product.description == product.description
 
     def test_delete(self, cassandra_document_store, product, product_fixture_cassandra_store,
@@ -140,6 +147,30 @@ class TestCassandraDocumentStore:
 
         assert not product_fixture_cassandra_store.read(product.id)
 
+    def test_serialize_string_as_decimal_if_column_type_is_decimal(self,
+            cassandra_document_store, cassandra_fixture_keyspace, product_fixture_table):
+        document = Document()
+        document.identifier = Identifier(cassandra_fixture_keyspace, product_fixture_table, uuid4())
+        document.timestamp = time()
+        document.add_field("price", "99.99")
+
+        cassandra_document_store.create(document)
+        read_document = cassandra_document_store.read(document.identifier)
+        assert read_document.get_field_value("price") == Decimal("99.99")
+
+    def test_serialize_string_as_uuid_if_column_type_is_uuid(self,
+            cassandra_document_store, cassandra_fixture_keyspace, product_fixture_table):
+        external_id = uuid4()
+
+        document = Document()
+        document.identifier = Identifier(cassandra_fixture_keyspace, product_fixture_table, uuid4())
+        document.timestamp = time()
+        document.add_field("external_id", str(external_id))
+
+        cassandra_document_store.create(document)
+        read_document = cassandra_document_store.read(document.identifier)
+        assert read_document.get_field_value("external_id") == external_id
+
     @staticmethod
     def to_document(product, keyspace, table):
         document = Document()
@@ -150,4 +181,6 @@ class TestCassandraDocumentStore:
         document.add_field("price", product.price)
         document.add_field("quantity", product.quantity)
         document.add_field("enabled", product.enabled)
+        document.add_field("publish_date", product.publish_date)
+        document.add_field("external_id", product.external_id)
         return document

@@ -1,5 +1,9 @@
+from decimal import Decimal
 from operator import attrgetter
+from uuid import UUID
 import arrow
+import cassandra.cqltypes
+
 from app.cassandra_domain.invalid_cassandra_schema_exception import InvalidCassandraSchemaException
 from app.cassandra_domain.store.cassandra_client import CassandraClient
 from app.core.abstract_document_store import AbstractDocumentStore
@@ -37,12 +41,13 @@ class CassandraDocumentStore(AbstractDocumentStore):
                    (%s,%s,%s)
             VALUES (%s,?,%s)
             """ % (identifier.namespace, identifier.table,
-                   self._id_column_name, self._timestamp_column_name, self.__get_field_names_for_insert_cql_string(document),
+                   self._id_column_name, self._timestamp_column_name,
+                   self.__get_field_names_for_insert_cql_string(document),
                    identifier.key, self.__get_question_marks_string(document))
         )
 
         arguments = [self.__get_timestamp(document)]
-        arguments.extend(self.__get_field_values(document))
+        arguments.extend(self.__get_field_values(document, statement))
 
         self._client.execute(statement, arguments)
 
@@ -57,9 +62,8 @@ class CassandraDocumentStore(AbstractDocumentStore):
                    self._timestamp_column_name, self.__get_field_names_for_update_cql_string(document),
                    self._id_column_name, identifier.key)
         )
-
         arguments = [self.__get_timestamp(document)]
-        arguments.extend(self.__get_field_values(document))
+        arguments.extend(self.__get_field_values(document, statement))
 
         self._client.execute(statement, arguments)
 
@@ -73,37 +77,57 @@ class CassandraDocumentStore(AbstractDocumentStore):
         )
         self._client.execute(statement)
 
-    @staticmethod
-    def __get_timestamp(document):
+    @classmethod
+    def __get_timestamp(cls, document):
         return TimestampUtil.seconds_to_milliseconds(document.timestamp)
 
-    @staticmethod
-    def __get_field_names_for_insert_cql_string(document):
+    @classmethod
+    def __get_field_names_for_insert_cql_string(cls, document):
         names = []
         for field in document.fields:
             names.append(field.name)
         return ",".join(names)
 
-    @staticmethod
-    def __get_field_names_for_update_cql_string(document):
+    @classmethod
+    def __get_field_names_for_update_cql_string(cls, document):
         names = []
         for field in document.fields:
             names.append("%s=?" % field.name)
         return ",".join(names)
 
-    @staticmethod
-    def __get_question_marks_string(document):
+    @classmethod
+    def __get_question_marks_string(cls, document):
         question_marks = []
         for _ in document.fields:
             question_marks.append("?")
         return ",".join(question_marks)
 
-    @staticmethod
-    def __get_field_values(document):
+    @classmethod
+    def __get_column_types(cls, statement):
+        types = dict()
+        for metadata in statement.column_metadata:
+            types[metadata[2].lower()] = metadata[3]
+        return types
+
+    @classmethod
+    def __get_field_values(cls, document, statement):
+        column_types = cls.__get_column_types(statement)
         values = []
         for field in document.fields:
-            values.append(field.value)
+            value = cls.__serialize_field_value(field.value, column_types[field.name.lower()])
+            values.append(value)
         return values
+
+    @classmethod
+    def __serialize_field_value(cls, value, column_type):
+        if isinstance(value, str):
+            if column_type == cassandra.cqltypes.DecimalType:
+                return Decimal(value)
+            if column_type == cassandra.cqltypes.UUIDType:
+                return UUID(value)
+            if column_type == cassandra.cqltypes.TimeUUIDType:
+                return UUID(value)
+        return value
 
     def _to_document(self, identifier, rows):
         if len(rows) == 0:

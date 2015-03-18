@@ -1,5 +1,5 @@
-EFFICIENT CASSANDRA <> ELASTICSEARCH SYNC
-=========================================
+CASSANDRA <> ELASTICSEARCH SYNC (efficiently)
+===========================================
 
 This is a daemon job to efficiently and incrementally sync data from Cassandra to Elasticsearch and vice-versa. It is implemented in Python.
 

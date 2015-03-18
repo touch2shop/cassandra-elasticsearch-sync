@@ -9,9 +9,6 @@ DEFAULT_CASSANDRA_ID_COLUMN_NAME = "id"
 DEFAULT_CASSANDRA_TIMESTAMP_COLUMN_NAME = "timestamp"
 
 
-# TODO: add an option containing the name of the "timestamp" column in Cassandra.
-
-
 class Settings(object):
 
     def __init__(self, dictionary):

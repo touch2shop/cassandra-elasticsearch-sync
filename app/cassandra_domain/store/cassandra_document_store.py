@@ -2,6 +2,7 @@ from operator import attrgetter
 import arrow
 from app.cassandra_domain.invalid_cassandra_schema_exception import InvalidCassandraSchemaException
 from app.cassandra_domain.store.cassandra_client import CassandraClient
+from app.core.abstract_document_store import AbstractDocumentStore
 from app.core.model.document import Document
 from app.core.util.timestamp_util import TimestampUtil
 
@@ -10,7 +11,7 @@ _DEFAULT_ID_COLUMN_NAME = "id"
 _DEFAULT_TIMESTAMP_COLUMN_NAME = "timestamp"
 
 
-class CassandraDocumentStore:
+class CassandraDocumentStore(AbstractDocumentStore):
 
     def __init__(self, cluster, id_column_name=_DEFAULT_ID_COLUMN_NAME,
                  timestamp_column_name=_DEFAULT_TIMESTAMP_COLUMN_NAME):

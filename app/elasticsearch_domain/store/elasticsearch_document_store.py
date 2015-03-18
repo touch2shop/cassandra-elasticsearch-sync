@@ -1,12 +1,23 @@
 import elasticsearch.helpers
 from decimal import Decimal
 from uuid import UUID
+from app.core.abstract_document_store import AbstractDocumentStore
 
 from app.core.abstract_iterable_result import AbstractIterableResult
 from app.core.model.document import Document
 from app.core.util.timestamp_util import TimestampUtil
+from app.elasticsearch_domain.invalid_elasticsearch_schema_exception import InvalidElasticsearchSchemaException
 from app.elasticsearch_domain.store.abstract_elasticsearch_store import AbstractElasticsearchStore, MATCH_ALL_QUERY
 from app.elasticsearch_domain.store.elasticsearch_response_util import ElasticsearchResponseUtil
+
+
+def _build_document(identifier, timestamp, source):
+    if not timestamp:
+        raise InvalidElasticsearchSchemaException(identifier=identifier,
+                message="Could not retrieve '_timestamp' for Elasticsearch document. Please check your mappings.")
+
+    fields = ElasticsearchResponseUtil.extract_document_fields_from_source(source)
+    return Document(identifier, timestamp, fields)
 
 
 class ElasticsearchDocumentIterableResponse(AbstractIterableResult):
@@ -15,14 +26,13 @@ class ElasticsearchDocumentIterableResponse(AbstractIterableResult):
         identifier = ElasticsearchResponseUtil.extract_identifier(response)
         timestamp = ElasticsearchResponseUtil.extract_timestamp(response)
         source = ElasticsearchResponseUtil.extract_source(response)
-        fields = ElasticsearchResponseUtil.extract_fields_from_source(source)
-        return Document(identifier=identifier, timestamp=timestamp, fields=fields)
+        return _build_document(identifier, timestamp, source)
 
 
 _DEFAULT_SCROLL_TIME = "5m"
 
 
-class ElasticsearchDocumentStore(AbstractElasticsearchStore):
+class ElasticsearchDocumentStore(AbstractElasticsearchStore, AbstractDocumentStore):
 
     def __init__(self, client):
         super(ElasticsearchDocumentStore, self).__init__(client)
@@ -57,9 +67,8 @@ class ElasticsearchDocumentStore(AbstractElasticsearchStore):
         ts = TimestampUtil.seconds_to_milliseconds(minimum_timestamp)
         return {"filter": {"range": {"_timestamp": {"gte": ts}}}}
 
-    def _from_response(self, source, timestamp, identifier):
-        fields = ElasticsearchResponseUtil.extract_fields_from_source(source)
-        return Document(identifier, timestamp, fields)
+    def _from_response(self, identifier, timestamp, source):
+        return _build_document(identifier, timestamp, source)
 
     def _to_request_body(self, document):
         body = {}

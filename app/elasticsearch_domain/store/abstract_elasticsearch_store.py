@@ -48,7 +48,7 @@ class AbstractElasticsearchStore(object):
         pass
 
     @abstractmethod
-    def _from_response(self, source, timestamp, identifier):
+    def _from_response(self, identifier, timestamp, source):
         pass
 
     def _process_response(self, response):
@@ -58,7 +58,7 @@ class AbstractElasticsearchStore(object):
         identifier = ElasticsearchResponseUtil.extract_identifier(response)
         timestamp = ElasticsearchResponseUtil.extract_timestamp(response)
         source = ElasticsearchResponseUtil.extract_source(response)
-        return self._from_response(source, timestamp, identifier)
+        return self._from_response(identifier, timestamp, source)
 
     @staticmethod
     def __get_timestamp(document):

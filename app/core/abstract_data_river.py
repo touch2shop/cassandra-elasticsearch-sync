@@ -1,7 +1,7 @@
 from abc import ABCMeta
 
 
-class AbstractDataRiver:
+class AbstractDataRiver(object):
 
     __metaclass__ = ABCMeta
 

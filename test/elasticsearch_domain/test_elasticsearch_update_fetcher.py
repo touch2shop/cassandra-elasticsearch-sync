@@ -14,8 +14,8 @@ def setup(product_fixture_elasticsearch_store):
 
 
 @pytest.fixture
-def elasticsearch_update_fetcher(elasticsearch_client):
-    return ElasticsearchUpdateFetcher(elasticsearch_client)
+def elasticsearch_update_fetcher(elasticsearch_client, settings):
+    return ElasticsearchUpdateFetcher(elasticsearch_client, settings)
 
 
 # noinspection PyClassHasNoInit,PyShadowingNames,PyMethodMayBeStatic

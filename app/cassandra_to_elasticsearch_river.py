@@ -6,6 +6,6 @@ from app.elasticsearch_domain.elasticsearch_update_applier import ElasticsearchU
 class CassandraToElasticsearchRiver(AbstractDataRiver):
 
     def __init__(self, cassandra_cluster, elasticsearch_client, settings):
-        update_applier = ElasticsearchUpdateApplier(elasticsearch_client)
         update_fetcher = CassandraUpdateFetcher(cassandra_cluster, settings)
+        update_applier = ElasticsearchUpdateApplier(elasticsearch_client, settings)
         super(CassandraToElasticsearchRiver, self).__init__(update_fetcher, update_applier)

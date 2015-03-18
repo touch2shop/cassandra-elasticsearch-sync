@@ -2,7 +2,7 @@ from abc import abstractmethod, ABCMeta
 from collections import Iterable
 
 
-class AbstractIterableResult:
+class AbstractIterableResult(object):
 
     __metaclass__ = ABCMeta.__class__
 

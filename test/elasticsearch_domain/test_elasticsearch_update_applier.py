@@ -14,8 +14,8 @@ from test.fixtures.product import ProductFixture
 
 
 @pytest.fixture(scope="module")
-def update_applier(elasticsearch_client):
-    return ElasticsearchUpdateApplier(elasticsearch_client)
+def update_applier(elasticsearch_client, settings):
+    return ElasticsearchUpdateApplier(elasticsearch_client, settings)
 
 
 def build_update(namespace, table, key, timestamp, fields=None, is_delete=False):

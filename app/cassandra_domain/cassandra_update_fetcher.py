@@ -4,14 +4,9 @@ from app.core.abstract_update_fetcher import AbstractUpdateFetcher
 from app.core.model.update import Update
 
 
-_DEFAULT_ID_COLUMN_NAME = "id"
-_DEFAULT_TIMESTAMP_COLUMN_NAME = "timestamp"
-
-
 class CassandraUpdateFetcher(AbstractUpdateFetcher):
 
     def __init__(self, cassandra_cluster, settings):
-
         super(CassandraUpdateFetcher, self).__init__()
 
         self._log_entry_store = CassandraLogEntryStore(

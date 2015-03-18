@@ -26,7 +26,7 @@ class ElasticsearchResponseUtil:
         return response["_source"]
 
     @classmethod
-    def extract_fields_from_source(cls, source):
+    def extract_document_fields_from_source(cls, source):
         fields = []
         for (field_name, field_value) in source.items():
             fields.append(Field(field_name, field_value))

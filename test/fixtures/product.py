@@ -153,7 +153,7 @@ class ProductFixtureElasticsearchStore(AbstractElasticsearchStore):
     def delete_all(self):
         self._base_delete_all(self._index, self._type)
 
-    def _from_response(self, source, timestamp, identifier):
+    def _from_response(self, identifier, timestamp, source):
         product = ProductFixture()
         product._id = UUID(identifier.key)
         product.timestamp = timestamp

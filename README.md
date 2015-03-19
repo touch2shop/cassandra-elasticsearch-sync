@@ -51,7 +51,7 @@ From the Elasticsearch end we can make a similar query by running:
 
 Due to Elasticsearch's architecture and the fact that it was built with search as a first class citzen, the above query does not suffer from performance degradation. Internally, the `_timestamp` field is stored as a long integer, which is automatically indexed.
 
-### Avoiding Cycles
+### Breaking Cycles
 
 One of the common problems faced in bidirectional syncing is how to avoid cycles. For instance, applying updates from Cassandra to Elasticsearch could generate another set of updates from Elasticsearch to Cassandra, which in turn would generate more update from Cassandra to Elasticsearch, and so on... One could end up creating an infinite update cycle if he is not careful. Here is an example diagram:
 
@@ -73,7 +73,7 @@ There are several techniques to break such cycles. One that is simple and also v
 
 ### Versioning and Conflict Resolution
 
-This sync algorithm uses timestamp for versioning. As long as timestamps are constantly updated whenever a table or document is updated, we can assume the data that contains the most recent timestamp is also the most recent.
+This sync algorithm uses *timestamps* for versioning. As long as timestamps are constantly updated whenever a table or document is updated, we can assume the data that contains the most recent timestamp is also the most recent.
 
 For the unlikely scenario where two entities are updated on both databases at the exact same moment with millisecond precision, a conflict would be generated. It would be impossible to know which version to use. 
 

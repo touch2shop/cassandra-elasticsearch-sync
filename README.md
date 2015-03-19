@@ -19,7 +19,7 @@ RATIONALE
 
 Traditional sync methods usually query the whole Cassandra database and then compare each row against the Elasticsearch database, which is very inefficient. Even if we restrict the query to match rows with a minimum timestamp, this is still an expensive operation due to Cassandra's distributed nature.
 
-To solve this issue I created a custom trigger that keeps track of all commits made on any Cassandra table. Changes are recorded in a log table which is optimized to efficiently retrieve updates by timestamp order.
+To solve this issue I created a custom trigger that automatically tracks all commits made on any Cassandra table that has the trigger enabled. Changes are recorded in a log table which is optimized to efficiently retrieve updates by timestamp order.
 
 This is the schema of the log table:
 

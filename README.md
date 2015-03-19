@@ -206,8 +206,10 @@ Run the service through the script (it will run in foreground):
 KNOWN ISSUES
 ------------
 
-- Currently all indexes and all document types from Elasticsearch will be synchronized to Cassandra. A feature that would allow the user to specify which documents types should be synchronized is already planned.
-- Improve exception handling. Currently, if any exception occurs, like a connection timeout, the application quits.
+- You can control wich Cassandra tables you want to be synchronized by creating or dropping the logger trigger on each of them. However, the same is not possible with Elasticsearch. The service will read all indexes and all document types from Elasticsearch and try to sync them with Cassandra. This will fail if Cassandra does not have all the corresponding tables. However, a feature that would allow the user to specify in `settings.yaml` which indexes and keyspaces it wants to be synchronized is already planned.
+
+- Improve exception handling. Currently, if any exception occurs, like a connection timeout, the application quits. This is a deal breaker if the application needs to run as a daemon.
+
 - The solution was not tested yet in a multi-clustered environment. Therefore, please keep in mind it is still not suitable for production.
 
 AUTOMATED TESTS

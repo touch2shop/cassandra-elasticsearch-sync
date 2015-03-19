@@ -1,4 +1,4 @@
-`CASSANDRA <-> ELASTICSEARCH SYNC`
+`CASSANDRA <-> ELASTICSEARCH sync`
 ==================================
 
 This is a daemon service for efficient and incremental bidirectional sync between [Cassandra](https://cassandra.apache.org) and [Elasticsearch](https://www.elastic.co).

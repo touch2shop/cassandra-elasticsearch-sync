@@ -105,13 +105,13 @@ DATA MODELLING
 
 4. Only simple column types are supported at the moment:
   
-    - integer / long
-    - float / double
-    - decimal (must be mapped as string in Elasticsearch due to lack of support).
-    - boolean
-    - string / text
-    - date / timestamp
-    - UUID / Time UUID (must be mapped as string in Elasticsearch due to lack of support).
+    - `integer` / `long`
+    - `float` / `double`
+    - `decimal` (must be mapped as `string` in Elasticsearch due to lack of support).
+    - `boolean`
+    - `string` / `text`
+    - `date` / `timestamp`
+    - `uuid` / `timeuuid` (must be mapped as `string` in Elasticsearch due to lack of support).
 
   Other types could work in theory, but were not tested yet.
 

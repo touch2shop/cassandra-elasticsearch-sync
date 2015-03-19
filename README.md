@@ -1,5 +1,5 @@
 `CASSANDRA <-> ELASTICSEARCH SYNC`
-=================================
+==================================
 
 This is a daemon service for efficient and incremental bidirectional sync between [Cassandra](https://cassandra.apache.org) and [Elasticsearch](https://www.elastic.co).
 
@@ -91,9 +91,9 @@ DATA MODELLING
 
         "_timestamp": {"enabled": True, "store": True}
 
-7. Your application code must update the *timestamp* fields whenever an entity is created or updated. The sync service requires all tables and doc types to have a timestamp, otherwise it will fail.
+8. Your application code must update the *timestamp* fields whenever an entity is created or updated. The sync service requires all tables and doc types to have a timestamp, otherwise it will fail.
 
-### Examples
+### Example Data Model
 
 Here's an example Cassandra schema:
 
@@ -111,7 +111,7 @@ Here's an example Cassandra schema:
 
 The following would be mapped to Elasticsearch as follows:
 
-        curl -XPUT "http://localhost:9200/example/product/_mapping" -d '{
+        $ curl -XPUT "http://localhost:9200/example/product/_mapping" -d '{
             "product": { 
                 "_timestamp": { "enabled": true, "store": true },
                 "properties": {
@@ -126,7 +126,9 @@ The following would be mapped to Elasticsearch as follows:
             }
         }'
         
-Notice that the UUID and decimal types on Cassandra are persisted on Elasticsearch as string. This is because Elasticsearch does not support these types natively.
+Notice that the UUID and decimal types on Cassandra are mapped on Elasticsearch as string. This is because Elasticsearch does not support these types natively. 
+
+Please remember that, in general, decimal numbers should not be stored as floating point numbers. The precision loss induced by floating point arithmetic could cause a significant impact on financial and business applications. You can read more about it [here](https://docs.python.org/3/library/decimal.html).
 
 KNOWN ISSUES
 ------------

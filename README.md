@@ -64,12 +64,20 @@ One of the common problems faced in bidirectional syncing is how to avoid cycles
 
 ...and so on.
 
-There are several techniques to break such cycles. One that is simple and also very effective is is to only apply updates from one database to another if data is different. It is easy to see how this breaks the cycle in two iterations:
+There are several techniques to break such cycles. One that is simple and also very effective is to only apply updates from one database to another if data is different. It is easy to see how this breaks the cycle in two iterations:
 
         CASSANDRA                                      ELASTICSEARCH
         
         {id: 1, name: "alice", timestamp: 1}   ---->   {id: 1, name: "bob", timestamp: 2}
         {id: 1, name: "alice", timestamp: 1}           {id: 1, name: "alice", timestamp: 2}
+
+### Versioning and Conflict Resolution
+
+This sync algorithm uses timestamp for versioning. As long as timestamps are constantly updated whenever a table or document is updated, we can assume the data that contains the most recent timestamp is also the most recent.
+
+For the unlikely scenario where two entities are updated on both databases at the exact same moment with millisecond precision, a conflict would be generated. It would be impossible to know which version to use. 
+
+Solving this problem is not a trivial task and I chose to ignore it for now. In the event of such conflict, the service will leave each row as it is.
 
 LIMITATIONS
 -----------

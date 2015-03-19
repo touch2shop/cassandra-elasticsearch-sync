@@ -1,5 +1,5 @@
-CASSANDRA <> ELASTICSEARCH SYNC
-===============================
+`CASSANDRA <-> ELASTICSEARCH SYNC`
+=================================
 
 This is a daemon service for efficient and incremental bidirectional sync between [Cassandra](https://cassandra.apache.org) and [Elasticsearch](https://www.elastic.co).
 
@@ -12,7 +12,7 @@ REQUIREMENTS
 
 - Cassandra 2.1+
 - Elasticsearch 1.4+
-- Python 2.7
+- Python 2.7 (Python 3 is not supported yet because the service relies on the legacy [time-uuid](https://pypi.python.org/pypi/time-uuid/) package)
 
 RATIONALE
 ---------

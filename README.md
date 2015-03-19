@@ -226,3 +226,5 @@ To run only fast tests, use:
 To run all tests, use:
 
         ./test-slow.sh
+
+You need to have both Cassandra and Elasticsearch running before running the tests.

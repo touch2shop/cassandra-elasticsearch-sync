@@ -12,7 +12,7 @@ REQUIREMENTS
 
 - Cassandra 2.1+
 - Elasticsearch 1.4+
-- Python 2.7 (*Python 3 is not supported yet because of the [time-uuid](https://pypi.python.org/pypi/time-uuid/) package*)
+- Python 2.7+ (*Python 3 is not supported yet because of the [time-uuid](https://pypi.python.org/pypi/time-uuid/) package*)
 
 RATIONALE
 ---------

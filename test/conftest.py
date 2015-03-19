@@ -28,7 +28,7 @@ def resources_directory(current_directory):
 # noinspection PyShadowingNames
 @pytest.fixture(scope="session")
 def settings(current_directory):
-    settings_file = os.path.join(current_directory, "..", "test_settings.yaml")
+    settings_file = os.path.join(current_directory, "..", "settings.test.yaml")
     return Settings.load_from_file(settings_file)
 
 

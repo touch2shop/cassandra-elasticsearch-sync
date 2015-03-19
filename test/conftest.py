@@ -1,17 +1,12 @@
 # py.test configuration file.
 import os
 from cassandra.cluster import Cluster
-
 from elasticsearch import Elasticsearch
-
-# noinspection PyUnresolvedReferences
 import pytest
 
 from app.cassandra_domain.store.cassandra_log_entry_store import CassandraLogEntryStore
 from app.cassandra_domain.store.cassandra_client import CassandraClient
 from app.settings import Settings
-
-from test.fixtures.product import *
 
 
 @pytest.fixture(scope="session")
@@ -113,3 +108,7 @@ def create_elasticsearch_fixture_index(elasticsearch_client, elasticsearch_fixtu
     if elasticsearch_client.indices.exists(elasticsearch_fixture_index):
         elasticsearch_client.indices.delete(index=elasticsearch_fixture_index)
     elasticsearch_client.indices.create(index=elasticsearch_fixture_index)
+
+
+# noinspection PyUnresolvedReferences
+from test.fixtures.product import *

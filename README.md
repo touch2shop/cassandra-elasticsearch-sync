@@ -17,7 +17,7 @@ REQUIREMENTS
 RATIONALE
 ---------
 
-### Peformance
+### Performance
 
 Traditional sync methods usually query the whole Cassandra database and then compare each row against the Elasticsearch database, which is very inefficient. Even if we restrict the query to match rows with a minimum timestamp, this is still an expensive operation due to Cassandra's distributed nature.
 
@@ -160,54 +160,65 @@ Notice that the UUID and decimal types on Cassandra are mapped on Elasticsearch 
 
 Please remember that, in general, decimal numbers should not be stored as floating point numbers. The precision loss induced by floating point arithmetic could cause a significant impact on financial and business applications. You can read more about it [here](https://docs.python.org/3/library/decimal.html).
 
-KNOWN ISSUES
-------------
+APPLICATION
+-----------
 
-- Currently the application only access the Cassandra and Elasticsearch instances running in the `localhost`.
-- Currently all indexes and all document types from Elasticsearch will be synchronized to Cassandra. A feature that would allow the user to specify which documents types should be synchronized is already planned.
-- Improve exception handling. Currently, if any exception occurs, like a connection timeout, the application quits.
-- The solution was not tested yet in a multi-clustered environment. Therefore, please keep in mind it is still not suitable for production.
-- Although a substantial amount of unit, integration and functional tests were put in place, the code could still benefit from some additional test coverage.
+### Usage
 
-USAGE
------
+At the first run the service performs a full sync between Cassandra and Elasticsearch. Depending on the volume of your data this might be a very time-consuming operation.
 
-You can customize the application by editing file `settings.yaml`.
+The following syncs are going to be incremental and much faster. The application automatically stores, at all times, the current sync state in a file called `state.yaml`. In case the service is interrupted for any reason, you can restart it and it will continue operation from the last saved state. The implemented data synchronization algorithms are idempotent, thus there is no risk on creating duplicates or corrupting the database by syncing data more than once.
 
-The first time the application runs it does a full sync between Cassandra and Elasticsearch based. Depending on your data this might be a very time-consuming operation.
+### Configuration
 
-The following syncs are going to be incremental. The application stores, at all times, the current sync state at file `state.yaml`.
+By default the service tries to connect to Cassandra and Elasticsearch at the `localhost` using the respective standard ports and without authentication.
 
-In case the application is interrupted for any reason, you can resume it and it will continue operation from the last state. The implemented data synchronization algorithms are idempotent, thus there is no risk on creating duplicates or corrupting data by syncing more than once.
+This can be changed by defining the following environment variables:
 
-SETUP
------
+- `ELASTICSEARCH_URLS`: A list of connection URLs for each Elasticsearch server, separated by space. For instance: `"https://felipe:345%340@us-east-1.bonsai.io"`. If not defined, connects to localhost.  
+- `CASSANDRA_USERNAME`: The Cassandra username. Leave empty for no authentication.
+- `CASSANDRA_PASSWORD`: The Cassandra password. Leave empty for no password.
+- `CASSANDRA_PORT`: The Cassandra port. If not defined, uses default.
+- `CASSANDRA_NODES`: A list of cassandra node ips, separated by space. For instance: `"192.168.0.100 192.168.0.3"`. If not defined, connects to localhost. 
 
-1. Install the [Cassandra Logger](http://github.com/felipead/cassandra-logger) into your Cassandra database.
+You can customize other parameters by editing file `settings.yaml`.
 
-2. Create a logger trigger for every table you want to synchronize with Elasticsearch. For instance:
+### Setup
+
+1. Install the [Cassandra Logger](http://github.com/felipead/cassandra-logger) into every node of your Cassandra cluster.
+
+2. For every Cassandra table that you want to synchronize, you need to create a logger trigger:
 
         CREATE TRIGGER logger ON product USING 'com.felipead.cassandra.logger.LogTrigger';
 
-Before running the application, please start both Cassandra and Elasticsearch servers.
-
-3. Setup Python and install dependencies through `pip`. You can use the `virtualenv` tool to create a virtual environment.
+3. Setup Python and install dependencies through `pip`. You might want to use the `virtualenv` tool to create a virtual environment first.
 
         pip install -r requirements.txt
+
+### Running
  
-4. You can start the application through the script:
+Start Cassandra and Elasticsearch, if they are not already running.
+
+Run the service through the script (it will run in foreground):
  
-        ./run.sh
+    ./run.sh
+
+KNOWN ISSUES
+------------
+
+- Currently all indexes and all document types from Elasticsearch will be synchronized to Cassandra. A feature that would allow the user to specify which documents types should be synchronized is already planned.
+- Improve exception handling. Currently, if any exception occurs, like a connection timeout, the application quits.
+- The solution was not tested yet in a multi-clustered environment. Therefore, please keep in mind it is still not suitable for production.
 
 AUTOMATED TESTS
 ---------------
 
 Tests are split into black-box functional tests, which are very slow, and fast unit and integration tests.
  
-To run only fast tests, use script `run-fast-tests.sh`. To run all tests, use `run-slow-tests.sh`.
-
-After running the test suite, it might be necessary to clean-up your Cassandra database from garbage generated during the tests. You can use something like:
-  
-        truncate logger.log;
+To run only fast tests, use:
+ 
+        ./run-fast-tests.sh
         
-This command will delete all log entries from the keyspace `logger`.
+To run all tests, use:
+
+        ./run-slow-tests.sh

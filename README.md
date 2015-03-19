@@ -187,11 +187,13 @@ You can customize other parameters by editing file `settings.yaml`.
 
 1. Install the [Cassandra Logger](http://github.com/felipead/cassandra-logger) into every node of your Cassandra cluster.
 
-2. For every Cassandra table that you want to synchronize, you need to create a logger trigger:
+2. Create the Cassanra Logger [schema](https://github.com/felipead/cassandra-logger/blob/master/create-log-schema.cql).
+
+3. For every Cassandra table that you want to synchronize, you need to create a logger trigger:
 
         CREATE TRIGGER logger ON product USING 'com.felipead.cassandra.logger.LogTrigger';
 
-3. Setup Python and install dependencies through `pip`. You might want to use the `virtualenv` tool to create a virtual environment first.
+4. Setup Python and install dependencies through `pip`. You might want to use the `virtualenv` tool to create a virtual environment first.
 
         pip install -r requirements.txt
 

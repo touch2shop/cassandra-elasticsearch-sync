@@ -17,6 +17,8 @@ REQUIREMENTS
 RATIONALE
 ---------
 
+### Peformance
+
 Traditional sync methods usually query the whole Cassandra database and then compare each row against the Elasticsearch database, which is very inefficient. Even if we restrict the query to match rows with a minimum timestamp, this is still an expensive operation due to Cassandra's distributed nature.
 
 To solve this issue I created a custom trigger that automatically tracks all commits made on any Cassandra table that has the trigger enabled. Changes are recorded in a log table which is optimized to efficiently retrieve updates by timestamp order.
@@ -48,6 +50,26 @@ From the Elasticsearch end we can make a similar query by running:
         }'
 
 Due to Elasticsearch's architecture and the fact that it was built with search as a first class citzen, the above query does not suffer from performance degradation. Internally, the `_timestamp` field is stored as a long integer, which is automatically indexed.
+
+### Avoiding Cycles
+
+One of the common problems faced in bidirectional syncing is how to avoid cycles. For instance, applying updates from Cassandra to Elasticsearch could generate another set of updates from Elasticsearch to Cassandra, which in turn would generate more update from Cassandra to Elasticsearch, and so on... One could end up creating an infinite update cycle if he is not careful. Here is an example diagram:
+
+        CASSANDRA                                      ELASTICSEARCH
+        
+        {id: 1, name: "alice", timestamp: 1}   --->   {id: 1, name: "bob", timestamp: 2}
+        {id: 1, name: "alice", timestamp: 3}   <---   {id: 1, name: "alice", timestamp: 2}
+        {id: 1, name: "alice", timestamp: 3}   --->   {id: 1, name: "alice", timestamp: 4}
+        {id: 1, name: "alice", timestamp: 5}   <---   {id: 1, name: "alice", timestamp: 4}
+
+...and so on.
+
+There are several techniques to break such cycles. One that is simple and also very effective is is to only apply updates from one database to another if data is different. It is easy to see how this breaks the cycle in two iterations:
+
+        CASSANDRA                                      ELASTICSEARCH
+        
+        {id: 1, name: "alice", timestamp: 1}   ---->   {id: 1, name: "bob", timestamp: 2}
+        {id: 1, name: "alice", timestamp: 1}           {id: 1, name: "alice", timestamp: 2}
 
 LIMITATIONS
 -----------

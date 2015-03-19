@@ -221,8 +221,8 @@ Tests are split into black-box functional tests, which are very slow, and fast u
  
 To run only fast tests, use:
  
-        ./run-fast-tests.sh
+        ./test-fast.sh
         
 To run all tests, use:
 
-        ./run-slow-tests.sh
+        ./test-slow.sh

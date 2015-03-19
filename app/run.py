@@ -1,13 +1,9 @@
-from app import application
-from app.settings import Settings
-
-
-_SETTINGS_FILE_NAME = "settings.yaml"
+from app.application import Application
 
 
 def main():
-    settings = Settings.load_from_file(_SETTINGS_FILE_NAME)
-    application.run(settings)
+    application = Application()
+    application.run()
 
 if __name__ == "__main__":
     main()

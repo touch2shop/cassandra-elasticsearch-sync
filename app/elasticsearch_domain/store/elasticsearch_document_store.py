@@ -24,7 +24,7 @@ def _build_document(identifier, timestamp, source):
     return Document(identifier, timestamp, fields)
 
 
-class ElasticsearchDocumentIterableResponse(AbstractIterableResult):
+class ElasticsearchDocumentIterableResult(AbstractIterableResult):
 
     def _to_entity(self, response):
         identifier = ElasticsearchResponseUtil.extract_identifier(response)
@@ -58,7 +58,7 @@ class ElasticsearchDocumentStore(AbstractElasticsearchStore, AbstractDocumentSto
     def search(self, query, scroll_time=_DEFAULT_SCROLL_TIME):
         response_iterator = elasticsearch.helpers.scan(client=self._client, query=query, scroll=scroll_time,
                                                        _source=True, fields="_timestamp")
-        return ElasticsearchDocumentIterableResponse(response_iterator)
+        return ElasticsearchDocumentIterableResult(response_iterator)
 
     def search_by_minimum_timestamp(self, minimum_timestamp):
         return self.search(query=self.__filter_by_timestamp_greater_than_or_equal_to(minimum_timestamp))

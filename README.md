@@ -12,7 +12,7 @@ REQUIREMENTS
 
 - Cassandra 2.1+
 - Elasticsearch 1.4+
-- Python 2.7 (Python 3 is not supported yet because the service relies on the legacy [time-uuid](https://pypi.python.org/pypi/time-uuid/) package)
+- Python 2.7 (*Python 3 is not supported yet because of the [time-uuid](https://pypi.python.org/pypi/time-uuid/) package*)
 
 RATIONALE
 ---------
@@ -39,7 +39,7 @@ which can be queried efficiently on Cassandra by:
 
 From the Elasticsearch end we can make a similar query by running:
 
-        curl -XGET 'http://localhost:9200/_all/_search' -d '{
+        $ curl -XGET 'http://localhost:9200/_all/_search' -d '{
             "query": {
                 "range": {
                     "_timestamp": { "gte": "2015-03-01T00:35:00-03:00" }
@@ -56,26 +56,77 @@ It is not possible to sync delete updates from Elasticsearch to Cassandra. This 
 
 Deletes from Cassandra to Elasticsearch, however, are fully synchronized. If you want to delete an entity, delete it from the Cassandra end and the application will automatically delete it from Elasticsearch.
 
-REQUIREMENTS ABOUT YOUR DATA MODEL
-----------------------------------
+DATA MODELLING
+--------------
+
+### Requirements
 
 1. Your Cassandra schema must mirror your Elasticsearch mapping for any tables and document types to be synchronized. This means the following must be the same:
-    - Cassandra keyspaces and Elasticsearch indexes
-    - Cassandra tables and Elasticsearch document types
-    - Cassandra columns and Elasticsearch fields
+    - Cassandra keyspace names and Elasticsearch index names
+    - Cassandra table names and Elasticsearch document type names
+    - Cassandra column names and Elasticsearch field names
     - Cassandra and Elasticsearch ids
 
 2. Every Cassandra table to be synchronized must have: 
     - A single primary key column named `id`. Composite primary keys are not supported at the moment.
-    - A timestamp column with name and type `timestamp`. The timestamp must be updated whenever a row is created or updated.
-    
-3. All date-times must be saved in the UTC timezone.
+    - A timestamp column with name and type `timestamp`.
+ 
+3. All `ids` must be unique. Supported types are: [UUID](http://en.wikipedia.org/wiki/Universally_unique_identifier), integer and string.
 
-4. All your Elasticsearch mappings must explicitly enable the `_timestamp` field. This can be done using:
+4. Only simple column types are supported at the moment:
+  
+    - integer / long
+    - float / double
+    - decimal (must be mapped as string in Elasticsearch due to lack of support).
+    - boolean
+    - string / text
+    - date / timestamp
+    - UUID / Time UUID (must be mapped as string in Elasticsearch due to lack of support).
+
+  Other types could work in theory, but were not tested yet.
+
+5. Date-times must be saved in UTC timezone.
+
+6. All your Elasticsearch mappings must explicitly enable the `_timestamp` field. This can be done using:
 
         "_timestamp": {"enabled": True, "store": True}
+
+7. Your application code must update the *timestamp* fields whenever an entity is created or updated. The sync service requires all tables and doc types to have a timestamp, otherwise it will fail.
+
+### Examples
+
+Here's an example Cassandra schema:
+
+        CREATE TABLE product (
+            id uuid PRIMARY KEY,
+            name text,
+            quantity int,
+            description text,
+            price decimal,
+            enabled boolean,
+            external_id uuid,
+            publish_date timestamp,
+            timestamp timestamp
+        )
+
+The following would be mapped to Elasticsearch as follows:
+
+        curl -XPUT "http://localhost:9200/example/product/_mapping" -d '{
+            "product": { 
+                "_timestamp": { "enabled": true, "store": true },
+                "properties": {
+                    "name": {"type": "string"},
+                    "description": {"type": "string"},
+                    "quantity": {"type": "integer"},
+                    "price": {"type": "string"},
+                    "enabled": {"type": "boolean"},
+                    "publish_date": {"type": "date"},
+                    "external_id": {"type": "string"}
+                }
+            }
+        }'
         
-    You also need to keep the `_timestamp` updated whenever a row is created or updated.
+Notice that the UUID and decimal types on Cassandra are persisted on Elasticsearch as string. This is because Elasticsearch does not support these types natively.
 
 KNOWN ISSUES
 ------------

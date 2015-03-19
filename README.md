@@ -139,7 +139,7 @@ Here's an example Cassandra schema:
             timestamp timestamp
         )
 
-The following would be mapped to Elasticsearch as follows:
+This schema would be mapped to Elasticsearch as follows:
 
         $ curl -XPUT "http://localhost:9200/example/product/_mapping" -d '{
             "product": { 

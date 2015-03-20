@@ -5,5 +5,3 @@ PyYAML
 arrow
 blist
 sortedcontainers
-pytest
-PyHamcrest

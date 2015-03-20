@@ -217,6 +217,10 @@ KNOWN ISSUES
 AUTOMATED TESTS
 ---------------
 
+First, install test dependencies through pip:
+
+    pip install -r requirements.test.txt
+
 Tests are split into black-box functional tests, which are very slow, and fast unit and integration tests.
  
 To run only fast tests, use:

@@ -4,6 +4,7 @@ python:
 
 services:
   - cassandra
+  - elasticsearch
 
 os:
   - linux

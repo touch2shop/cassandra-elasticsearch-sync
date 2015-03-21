@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-py.test -m "not slow"
+py.test -m "not slow" test

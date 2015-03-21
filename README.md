@@ -185,9 +185,15 @@ You can customize other parameters by editing file `settings.yaml`.
 
 ### Setup
 
-1. Install the [Cassandra Logger](http://github.com/felipead/cassandra-logger) into every node of your Cassandra cluster.
+1. Install the [Cassandra Logger](http://github.com/felipead/cassandra-logger) into every node of your Cassandra cluster. This can be done by the following script:
 
-2. Create the Cassandra Logger [schema](https://github.com/felipead/cassandra-logger/blob/master/create-log-schema.cql).
+        $ setup/install-cassandra-logger.sh {CASSANDRA_HOME}
+    
+  Where `{CASSANDRA_HOME}` is the directory of your Cassandra installation.  
+
+2. Create the Cassandra Logger [schema](https://github.com/felipead/cassandra-logger/blob/master/create-log-schema.cql). This can be done by the following script:
+
+        $ setup/create-cassandra-log-schema.sh {CASSANDRA_HOME}
 
 3. For every Cassandra table that you want to synchronize, you need to create a logger trigger:
 
@@ -208,7 +214,7 @@ Run the service through the script (it will run in foreground):
 KNOWN ISSUES
 ------------
 
-- You can control wich Cassandra tables you want to be synchronized by creating or dropping the logger trigger on each of them. However, the same is not possible with Elasticsearch. The service will read all indexes and all document types from Elasticsearch and try to sync them with Cassandra. This will fail if Cassandra does not have all the corresponding tables. However, a feature that would allow the user to specify in `settings.yaml` which indexes and keyspaces it wants to be synchronized is already planned.
+- You can control which Cassandra tables you want to be synchronized by creating or dropping the logger trigger on each of them. However, the same is not possible with Elasticsearch. The service will read all indexes and all document types from Elasticsearch and try to sync them with Cassandra. This will fail if Cassandra does not have all the corresponding tables. However, a feature that would allow the user to specify in `settings.yaml` which indexes and keyspaces it wants to be synchronized is already planned.
 
 - Improve exception handling. Currently, if any exception occurs, like a connection timeout, the application quits. This is a deal breaker if the application needs to run as a daemon.
 

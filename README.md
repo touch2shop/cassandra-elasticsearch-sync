@@ -1,6 +1,8 @@
 `CASSANDRA <-> ELASTICSEARCH sync`
 ==================================
 
+[![Build Status](https://travis-ci.org/felipead/cassandra-elasticsearch-sync.svg?branch=master)](https://travis-ci.org/felipead/cassandra-elasticsearch-sync)
+
 This is a daemon service for efficient and incremental bidirectional sync between [Cassandra](https://cassandra.apache.org) and [Elasticsearch](https://www.elastic.co).
 
 It is implemented in Python and uses my [Cassandra Logger](http://github.com/felipead/cassandra-logger) trigger to keep track of changes in the Cassandra database, thus making it very efficient.

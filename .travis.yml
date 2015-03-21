@@ -24,4 +24,4 @@ install:
   - pip install -r requirements.test.txt
 
 script:
-  - py.test
+  - py.test test

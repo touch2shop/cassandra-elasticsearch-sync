@@ -24,20 +24,21 @@ if [ ! -d ${cassandra_triggers_dir} ]; then
 	exit 1
 fi
 
-wget ${jar_download_url} && cp ${jar_file_name} ${cassandra_triggers_dir}
+wget ${jar_download_url} -O ${jar_file_name} && cp ${jar_file_name} ${cassandra_triggers_dir}
 
 echo "The trigger was successfully installed."
 
-user=`whoami`
-cassandra_pid=`pgrep -u ${user} -f cassandra || true`
-
-if [ ! -z "${cassandra_pid}" ]; then
-    echo "Cassandra is running for current user with PID ${cassandra_pid}. Atempting to reload triggers..."
-    if ${cassandra_dir}/bin/nodetool -h localhost reloadtriggers; then
-        echo "Trigger loaded successfuly. You can already use it on the CQL sheel."
-    else
-        echo "Something went wrong. Could not reload triggers. Try restarting Cassandra manually."
-        exit 1
+if [ ! ${CONTINUOUS_INTEGRATION} ]; then
+    user=`whoami`
+    cassandra_pid=`pgrep -u ${user} -f cassandra || true`
+    if [ ! -z "${cassandra_pid}" ]; then
+        echo "Cassandra is running for current user with PID ${cassandra_pid}. Atempting to reload triggers..."
+        if ${cassandra_dir}/bin/nodetool -h localhost reloadtriggers; then
+            echo "Trigger loaded successfuly. You can already use it on the CQL sheel."
+        else
+            echo "Something went wrong. Could not reload triggers. Try restarting Cassandra manually."
+            exit 1
+        fi
     fi
 fi
 

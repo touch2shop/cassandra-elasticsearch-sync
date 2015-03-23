@@ -55,14 +55,14 @@ Due to Elasticsearch's architecture and the fact that it was built with search a
 
 ### Breaking Cycles
 
-One of the common problems faced in bidirectional syncing is how to avoid cycles. For instance, applying updates from Cassandra to Elasticsearch could generate another set of updates from Elasticsearch to Cassandra, which in turn would generate more update from Cassandra to Elasticsearch, and so on... One could end up creating an infinite update cycle if he is not careful. Here is an example diagram:
+One of the common problems faced in bidirectional syncing is how to avoid cycles. For instance, applying updates from Cassandra to Elasticsearch could generate another set of updates from Elasticsearch to Cassandra, which in turn would generate more updates from Cassandra to Elasticsearch, and so on... One could end up creating an infinite update cycle if he is not careful. Here is an example diagram:
 
         CASSANDRA                                      ELASTICSEARCH
         
-        {id: 1, name: "alice", timestamp: 1}   --->   {id: 1, name: "bob", timestamp: 2}
-        {id: 1, name: "alice", timestamp: 3}   <---   {id: 1, name: "alice", timestamp: 2}
-        {id: 1, name: "alice", timestamp: 3}   --->   {id: 1, name: "alice", timestamp: 4}
-        {id: 1, name: "alice", timestamp: 5}   <---   {id: 1, name: "alice", timestamp: 4}
+        {id: 1, name: "alice", timestamp: 1}   --->   {id: 1, name: "bob", timestamp: 0}
+        {id: 1, name: "alice", timestamp: 1}   <---   {id: 1, name: "alice", timestamp: 2}
+        {id: 1, name: "alice", timestamp: 2}   --->   {id: 1, name: "alice", timestamp: 2}
+        {id: 1, name: "alice", timestamp: 2}   <---   {id: 1, name: "alice", timestamp: 3}
 
 ...and so on.
 
@@ -70,8 +70,8 @@ There are several techniques to break such cycles. One that is simple and also v
 
         CASSANDRA                                      ELASTICSEARCH
         
-        {id: 1, name: "alice", timestamp: 1}   ---->   {id: 1, name: "bob", timestamp: 2}
-        {id: 1, name: "alice", timestamp: 1}           {id: 1, name: "alice", timestamp: 2}
+        {id: 1, name: "alice", timestamp: 1}   ---->   {id: 1, name: "bob", timestamp: 0}
+        {id: 1, name: "alice", timestamp: 1}           {id: 1, name: "alice", timestamp: 1}
 
 ### Versioning and Conflict Resolution
 

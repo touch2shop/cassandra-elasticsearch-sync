@@ -92,11 +92,24 @@ Deletes from Cassandra to Elasticsearch, however, are fully synchronized. If you
 
 ### Optimistic Concurrency Control
 
-Currently, no concurrency control is implemented, neither on Cassandra or Elasticsearch. This means that data can get corrupted if updated between a read and a save. 
+Currently, no [Optimistic Concurrency Control](http://en.wikipedia.org/wiki/Optimistic_concurrency_control) is implemented, neither on Cassandra or Elasticsearch. This means that data can get corrupted if updated between a read and a save. However, this is a planned feature.
 
-Elasticsearch has built-in [Optimistic Concurrency Control](http://www.elastic.co/guide/en/elasticsearch/guide/master/optimistic-concurrency-control.html) support through a `version` field. It also allows us to use [a timestamp from another database](http://www.elastic.co/guide/en/elasticsearch/guide/master/optimistic-concurrency-control.html#_using_versions_from_an_external_system) as its version control, which is a planned feature.
+Elasticsearch has built-in Optimistic Concurrency Control support through a `_version` field. It also allows us to use [a timestamp from another database](http://www.elastic.co/guide/en/elasticsearch/guide/master/optimistic-concurrency-control.html#_using_versions_from_an_external_system) as its version control.
 
-In the Cassandra end, however, things can get more tricky. There are ways to implement some sort of concurrency control using [lightweight transactions](https://www.datastax.com/documentation/cassandra/2.0/cassandra/dml/dml_about_transactions_c.html).
+        PUT /example/product/cbbeec5c-5861-464e-9308-0457cad56a77?version=1427228258871&version_type=external
+        {
+            "name": "Apple 15-inch MacBook Pro",
+            "price":  "1999.99"
+        }
+        
+From the Cassandra end we can use [lightweight transactions](https://www.datastax.com/documentation/cassandra/2.0/cassandra/dml/dml_about_transactions_c.html) to implement Optimistic Concurrency Control. This can be done using CQL:
+
+        UPDATE example.product
+        SET name = 'Apple 15-inch MacBook Pro', price = 1999.99
+        WHERE id = 'cbbeec5c-5861-464e-9308-0457cad56a77'
+        IF timestamp = 1427228258871
+
+If the `timestamp` field was changed after the read and before the udpate, an error will occur.
 
 DATA MODELLING
 --------------

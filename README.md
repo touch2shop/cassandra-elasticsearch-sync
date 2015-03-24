@@ -84,9 +84,19 @@ Solving this problem is not a trivial task and I chose to ignore it for now. In 
 LIMITATIONS
 -----------
 
+### Deletes
+
 It is not possible to sync delete updates from Elasticsearch to Cassandra. This is due to a limitation on how updates are queried on Elasticsearch.
 
 Deletes from Cassandra to Elasticsearch, however, are fully synchronized. If you want to delete an entity, delete it from the Cassandra end and the application will automatically delete it from Elasticsearch.
+
+### Optimistic Concurrency Control
+
+Currently, no concurrency control is implemented, neither on Cassandra or Elasticsearch. This means that data can get corrupted if updated between a read and a save. 
+
+Elasticsearch has built-in [Optimistic Concurrency Control](http://www.elastic.co/guide/en/elasticsearch/guide/master/optimistic-concurrency-control.html) support through a `version` field. It also allows us to use [a timestamp from another database](http://www.elastic.co/guide/en/elasticsearch/guide/master/optimistic-concurrency-control.html#_using_versions_from_an_external_system) as its version control, which is a planned feature.
+
+In the Cassandra end, however, things can get more tricky. There are ways to implement some sort of concurrency control using [lightweight transactions](https://www.datastax.com/documentation/cassandra/2.0/cassandra/dml/dml_about_transactions_c.html).
 
 DATA MODELLING
 --------------

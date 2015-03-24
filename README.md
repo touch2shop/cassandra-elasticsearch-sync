@@ -39,7 +39,7 @@ This is the schema of the log table:
 
 which can be queried efficiently on Cassandra by:
 
-        SELECT * FROM log WHERE time_uuid >= minTimeuuid('2015-03-01 00:35:00-0300') ALLOW FILTERING;
+        SELECT * FROM log WHERE time_uuid >= minTimeuuid('2015-03-01T00:35:00-03:00') ALLOW FILTERING;
 
 From the Elasticsearch end we can make a similar query by running:
 

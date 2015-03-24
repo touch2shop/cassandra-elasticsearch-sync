@@ -66,7 +66,7 @@ One of the common problems faced in bidirectional syncing is how to avoid cycles
 
 ...and so on.
 
-There are several techniques to break such cycles. One that is simple and also very effective is to only apply updates from one database to another if data and/or timestamp is different. It is easy to see how this breaks the cycle in two iterations:
+There are several techniques to break such cycles. One that is simple and also very effective is to only apply updates from one database to another if data or *timestamp* is different. It is easy to see how this breaks the cycle in two iterations:
 
         CASSANDRA                                      ELASTICSEARCH
         

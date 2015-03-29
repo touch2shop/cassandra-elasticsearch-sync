@@ -30,22 +30,6 @@ class CassandraClient(object):
         else:
             return self._session.execute(query_or_statement, parameters, timeout)
 
-    def select_by_id(self, table, _id, columns=None, keyspace=None, id_column_name="id"):
-        if columns:
-            columns_string = string.join(columns, ",")
-        else:
-            columns_string = "*"
-
-        if not keyspace:
-            keyspace = self.keyspace
-
-        statement = self.prepare_statement(
-            """
-            SELECT %s FROM %s.%s WHERE %s=%s
-            """ % (columns_string, keyspace, table, id_column_name, _id)
-        )
-        return self.execute(statement)
-
     def __select_table_names_from_keyspace(self, keyspace):
         statement = self.prepare_statement(
             """
@@ -56,7 +40,7 @@ class CassandraClient(object):
 
     def keyspace_exists(self, keyspace):
         # this for is necessary because the result might be a paginated iterator
-        for row in self.__select_table_names_from_keyspace(keyspace.lower()):
+        for _ in self.__select_table_names_from_keyspace(keyspace.lower()):
             return True
         return False
 

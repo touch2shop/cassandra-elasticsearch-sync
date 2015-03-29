@@ -9,6 +9,8 @@ It is implemented in Python and uses my [Cassandra Logger](http://github.com/fel
 
 Synchronization is also idempotent and fault tolerant. This means that running the service with the same data more than once will produce exactly the same results.
 
+The purpose of this project was to present an example on how to synchronize data between major NoSQL databases. Most of the code and the techniques shown here can be easily leveraged to synchronize other databases as well.
+
 REQUIREMENTS
 ------------
 
@@ -51,7 +53,7 @@ From the Elasticsearch end we can make a similar query by running:
             }
         }'
 
-Due to Elasticsearch's architecture and the fact that it was built with search as a first class citzen, the above query does not suffer from performance degradation. Internally, the `_timestamp` field is stored as a long integer, which is automatically indexed.
+Due to Elasticsearch's architecture and the fact that it was built with search as a first class citizen, the above query does not suffer from performance degradation. Internally, the `_timestamp` field is stored as a long integer, which is automatically indexed.
 
 ### Breaking Cycles
 
@@ -77,9 +79,7 @@ There are several techniques to break such cycles. One that is simple and also v
 
 This sync algorithm uses *timestamps* for versioning. As long as timestamps are constantly updated whenever a table or document is updated, we can assume the data that contains the most recent timestamp is also the most recent.
 
-For the unlikely scenario where two entities are updated on both databases at the exact same moment with millisecond precision, a conflict would be generated. It would be impossible to know which version to use. 
-
-Solving this problem is not a trivial task and I chose to ignore it for now. In the event of such conflict, the service will leave each row as it is.
+For the unlikely scenario where two entities are updated on both databases at the exact same moment with millisecond precision, a conflict would be generated. It would be impossible to know which version to use. Solving this problem is not a trivial task and I chose to ignore it for now. In the event of such conflict, the service will leave each row as it is.
 
 LIMITATIONS
 -----------
@@ -92,7 +92,18 @@ Deletes from Cassandra to Elasticsearch, however, are fully synchronized. If you
 
 ### Optimistic Concurrency Control
 
-Currently, no [Optimistic Concurrency Control](http://en.wikipedia.org/wiki/Optimistic_concurrency_control) is implemented, neither on Cassandra or Elasticsearch. This means that data can get corrupted if updated between a read and a save. However, this is a planned feature.
+Currently, no [Optimistic Concurrency Control](http://en.wikipedia.org/wiki/Optimistic_concurrency_control) is implemented, neither on Cassandra or Elasticsearch. This means that data can get corrupted if updated between a read and a save. 
+
+Although this feature is not implemented, it is easy to add it on both databases.
+
+From the Cassandra end we can use [lightweight transactions](https://www.datastax.com/documentation/cassandra/2.0/cassandra/dml/dml_about_transactions_c.html) to implement Optimistic Concurrency Control:
+
+        UPDATE example.product
+        SET name = 'Apple 15-inch MacBook Pro', price = 1999.99
+        WHERE id = 'cbbeec5c-5861-464e-9308-0457cad56a77'
+        IF timestamp = 1427228258871
+
+If the `timestamp` field was changed after the read and before the update, the update will not be applied.
 
 Elasticsearch has built-in Optimistic Concurrency Control support through a `_version` field. It also allows us to use [a timestamp from another database](http://www.elastic.co/guide/en/elasticsearch/guide/master/optimistic-concurrency-control.html#_using_versions_from_an_external_system) as its version control.
 
@@ -101,15 +112,8 @@ Elasticsearch has built-in Optimistic Concurrency Control support through a `_ve
             "name": "Apple 15-inch MacBook Pro",
             "price":  "1999.99"
         }
-        
-From the Cassandra end we can use [lightweight transactions](https://www.datastax.com/documentation/cassandra/2.0/cassandra/dml/dml_about_transactions_c.html) to implement Optimistic Concurrency Control. This can be done using CQL:
 
-        UPDATE example.product
-        SET name = 'Apple 15-inch MacBook Pro', price = 1999.99
-        WHERE id = 'cbbeec5c-5861-464e-9308-0457cad56a77'
-        IF timestamp = 1427228258871
-
-If the `timestamp` field was changed after the read and before the udpate, an error will occur.
+One disadvantage is that your application code must keep the `_version` constantly updated with the current timestamp. We can't use Elasticsearch's built-in version numbering since both databases must rely on the same version number.     
 
 DATA MODELLING
 --------------
@@ -146,7 +150,7 @@ DATA MODELLING
 
         "_timestamp": {"enabled": True, "store": True}
 
-8. Your application code must update the *timestamp* fields whenever an entity is created or updated. The sync service requires all tables and doc types to have a timestamp, otherwise it will fail.
+7. Your application code must update the *timestamp* fields whenever an entity is created or updated. The sync service requires all tables and doc types to have a timestamp, otherwise it will fail.
 
 ### Example Data Model
 
@@ -200,7 +204,7 @@ By default the service tries to connect to Cassandra and Elasticsearch at the `l
 
 This can be changed by defining the following environment variables:
 
-- `ELASTICSEARCH_URLS`: A list of connection URLs for each Elasticsearch server, separated by space. For instance: `"https://felipe:345%340@us-east-1.bonsai.io"`. If not defined, connects to localhost.  
+- `ELASTICSEARCH_URLS`: A list of connection URLs for each Elasticsearch server, separated by space. For instance: `"https://felipe:345%340@us-east-1.bonsai.io"`. If not defined, connects to localhost.
 - `CASSANDRA_USERNAME`: The Cassandra username. Leave empty for no authentication.
 - `CASSANDRA_PASSWORD`: The Cassandra password. Leave empty for no password.
 - `CASSANDRA_PORT`: The Cassandra port. If not defined, uses default.

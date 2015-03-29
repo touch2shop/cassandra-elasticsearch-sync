@@ -3,11 +3,10 @@ from uuid import UUID
 
 import arrow
 import pytest
-
 from app.cassandra_domain.store.abstract_cassandra_store import AbstractCassandraStore
 from app.core.model.abstract_data_object import AbstractDataObject
-from app.core.util.datetime_util import DateTimeUtil
-from app.core.util.timestamp_util import TimestampUtil
+from app.util.datetime_util import DateTimeUtil
+from app.util.timestamp_util import TimestampUtil
 from app.elasticsearch_domain.store.abstract_elasticsearch_store import AbstractElasticsearchStore
 
 

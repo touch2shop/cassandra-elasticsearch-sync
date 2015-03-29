@@ -2,12 +2,11 @@ from decimal import Decimal
 from uuid import UUID
 
 import elasticsearch.helpers
-
 from app.core.exception.invalid_schema_exception import InvalidSchemaException
 from app.core.abstract_iterable_result import AbstractIterableResult
 from app.core.model.document import Document
 from app.core.model.field import Field
-from app.core.util.timestamp_util import TimestampUtil
+from app.util.timestamp_util import TimestampUtil
 from app.elasticsearch_domain.store.abstract_elasticsearch_store import AbstractElasticsearchStore, MATCH_ALL_QUERY
 from app.elasticsearch_domain.store.elasticsearch_response_util import ElasticsearchResponseUtil
 

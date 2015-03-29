@@ -8,8 +8,8 @@ import pytest
 from app.cassandra_domain.store.cassandra_document_store import CassandraDocumentStore
 from app.core.model.document import Document
 from app.core.model.identifier import Identifier
-from app.core.util.datetime_util import DateTimeUtil
-from app.core.util.timestamp_util import TimestampUtil
+from app.util.datetime_util import DateTimeUtil
+from app.util.timestamp_util import TimestampUtil
 from test.fixtures.product import ProductFixture
 
 

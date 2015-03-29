@@ -4,11 +4,10 @@ from uuid import UUID
 
 import arrow
 import cassandra.cqltypes
-
 from app.core.exception.invalid_schema_exception import InvalidSchemaException
 from app.cassandra_domain.store.cassandra_client import CassandraClient
 from app.core.model.document import Document
-from app.core.util.timestamp_util import TimestampUtil
+from app.util.timestamp_util import TimestampUtil
 
 
 _DEFAULT_ID_COLUMN_NAME = "id"

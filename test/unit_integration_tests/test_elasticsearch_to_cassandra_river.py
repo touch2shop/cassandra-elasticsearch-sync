@@ -2,8 +2,9 @@ from decimal import Decimal
 from time import time, sleep
 from uuid import uuid4
 from datetime import datetime
+
 import pytest
-from app.core.util.timestamp_util import TimestampUtil
+from app.util.timestamp_util import TimestampUtil
 from app.elasticsearch_domain.store.abstract_elasticsearch_store import MATCH_ALL_QUERY
 from app.elasticsearch_to_cassandra_river import ElasticsearchToCassandraRiver
 from test.fixtures.product import ProductFixture

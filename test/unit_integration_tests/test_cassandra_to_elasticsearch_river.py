@@ -4,9 +4,8 @@ from uuid import uuid4
 from datetime import datetime
 
 import pytest
-
 from app.cassandra_to_elasticsearch_river import CassandraToElasticsearchRiver
-from app.core.util.timestamp_util import TimestampUtil
+from app.util.timestamp_util import TimestampUtil
 from test.fixtures.product import ProductFixture
 
 

@@ -3,12 +3,11 @@ from uuid import uuid4
 from time import time, sleep
 
 import pytest
-
 from app.core.exception.invalid_schema_exception import InvalidSchemaException
 from app.core.model.identifier import Identifier
 from app.core.model.update import Update
 from app.core.model.field import Field
-from app.core.util.timestamp_util import TimestampUtil
+from app.util.timestamp_util import TimestampUtil
 from app.elasticsearch_domain.elasticsearch_update_applier import ElasticsearchUpdateApplier
 from test.fixtures.product import ProductFixture
 

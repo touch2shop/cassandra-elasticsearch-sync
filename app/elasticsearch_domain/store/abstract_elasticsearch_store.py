@@ -3,7 +3,7 @@ import abc
 
 from elasticsearch import TransportError
 
-from app.core.util.timestamp_util import TimestampUtil
+from app.util.timestamp_util import TimestampUtil
 from app.elasticsearch_domain.store.elasticsearch_response_util import ElasticsearchResponseUtil
 
 

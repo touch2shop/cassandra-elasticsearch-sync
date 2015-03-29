@@ -1,5 +1,5 @@
 from app.core.model.identifier import Identifier
-from app.core.util.timestamp_util import TimestampUtil
+from app.util.timestamp_util import TimestampUtil
 
 
 # noinspection PyClassHasNoInit

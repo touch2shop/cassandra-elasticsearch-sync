@@ -1,2 +1,4 @@
 pytest
 PyHamcrest
+pytest-cov
+python-coveralls

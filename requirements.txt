@@ -3,5 +3,3 @@ elasticsearch>=1.4
 time-uuid
 PyYAML
 arrow
-blist
-sortedcontainers

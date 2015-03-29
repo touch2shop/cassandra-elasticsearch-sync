@@ -6,6 +6,7 @@ from app.elasticsearch_domain.store.elasticsearch_document_store import Elastics
 
 class ElasticsearchUpdateApplier(AbstractUpdateApplier):
 
+    # noinspection PyUnusedLocal
     def __init__(self, elasticsearch_client, settings):
         document_store = ElasticsearchDocumentStore(elasticsearch_client)
         super(ElasticsearchUpdateApplier, self).__init__(document_store)

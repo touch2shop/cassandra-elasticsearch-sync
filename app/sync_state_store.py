@@ -65,5 +65,4 @@ class SyncStateStore:
 
         return SyncState(self,
             last_cassandra_to_elasticsearch_sync=last_cassandra_to_elasticsearch_sync,
-            last_elasticsearch_to_cassandra_sync=last_elasticsearch_to_cassandra_sync,
-        )
+            last_elasticsearch_to_cassandra_sync=last_elasticsearch_to_cassandra_sync)

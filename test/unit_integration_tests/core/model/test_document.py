@@ -8,7 +8,6 @@ from app.core.model.field import Field
 from app.core.model.identifier import Identifier
 
 
-
 # noinspection PyClassHasNoInit,PyMethodMayBeStatic
 class TestDocument:
 

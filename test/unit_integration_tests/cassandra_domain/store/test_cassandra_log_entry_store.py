@@ -25,7 +25,8 @@ class TestCassandraLogEntryStore(object):
                                      updated_columns={"a", "b", "c"})
         cassandra_log_entry_store.create(entry)
 
-        rows = cassandra_log_entry_store.search_by_logged_row(entry.logged_keyspace, entry.logged_table, entry.logged_key)
+        rows = cassandra_log_entry_store.search_by_logged_row(
+            entry.logged_keyspace, entry.logged_table, entry.logged_key)
         log_entries = rows.to_list()
         assert len(log_entries) == 1
         assert log_entries[0] == entry

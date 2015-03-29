@@ -7,6 +7,7 @@ from app.elasticsearch_domain.store.elasticsearch_document_store import Elastics
 # TODO: add a settings option to get a list of indexes to retrieve updates from. Currently, queries all indexes.
 class ElasticsearchUpdateFetcher(AbstractUpdateFetcher):
 
+    # noinspection PyUnusedLocal
     def __init__(self, elasticsearch_client, settings):
         super(ElasticsearchUpdateFetcher, self).__init__()
         self._document_store = ElasticsearchDocumentStore(elasticsearch_client)

@@ -37,8 +37,6 @@ class Document(AbstractDataObject):
             for field in value:
                 self._fields[field.name] = field
 
-    # FIXME: this modeling is not very good. The add_field, get_field_value and set_field_value can be improved.
-
     def add_field(self, name, value):
         if name not in self._fields:
             self._fields[name] = Field(name, value)

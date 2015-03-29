@@ -4,7 +4,6 @@ from uuid import UUID
 import elasticsearch.helpers
 
 from app.core.exception.invalid_schema_exception import InvalidSchemaException
-from app.core.abstract_document_store import AbstractDocumentStore
 from app.core.abstract_iterable_result import AbstractIterableResult
 from app.core.model.document import Document
 from app.core.model.field import Field
@@ -37,7 +36,7 @@ class ElasticsearchDocumentIterableResult(AbstractIterableResult):
 _DEFAULT_SCROLL_TIME = "5m"
 
 
-class ElasticsearchDocumentStore(AbstractElasticsearchStore, AbstractDocumentStore):
+class ElasticsearchDocumentStore(AbstractElasticsearchStore):
 
     def __init__(self, client):
         super(ElasticsearchDocumentStore, self).__init__(client)

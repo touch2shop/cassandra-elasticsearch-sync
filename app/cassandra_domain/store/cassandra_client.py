@@ -1,6 +1,3 @@
-import string
-
-
 class CassandraClient(object):
 
     def __init__(self, cluster, keyspace=None):

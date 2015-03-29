@@ -2,6 +2,7 @@
 ==================================
 
 [![Build Status](https://travis-ci.org/felipead/cassandra-elasticsearch-sync.svg?branch=master)](https://travis-ci.org/felipead/cassandra-elasticsearch-sync)
+[![Coverage Status](https://coveralls.io/repos/felipead/cassandra-elasticsearch-sync/badge.svg?branch=master)](https://coveralls.io/r/felipead/cassandra-elasticsearch-sync?branch=master)
 
 This is a daemon service for efficient and incremental bidirectional sync between [Cassandra](https://cassandra.apache.org) and [Elasticsearch](https://www.elastic.co).
 

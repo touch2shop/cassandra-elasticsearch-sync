@@ -26,17 +26,16 @@ class Field(AbstractDataObject):
         self._value = value
 
     def _deep_equals(self, other):
-        return self.name == other.name and \
-            self.value == other.value
+        return self.name == other.name and self.value == other.value
 
-    def _deep_hash(self):
+    def __hash__(self):
         return hash((self.name, self.value))
 
-    def _deep_string_dictionary(self):
-        return {
+    def __repr__(self):
+        return repr({
             "name": self.name,
             "value": self.value
-        }
+        })
 
     @classmethod
     def fields_are_identical(cls, left_fields, right_fields):

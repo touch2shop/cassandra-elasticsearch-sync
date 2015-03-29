@@ -23,7 +23,7 @@ class Identifier(AbstractDataObject):
     def _deep_equals(self, other):
         return self.namespace == other.namespace and self.table == other.table and self.key == other.key
 
-    def _deep_hash(self):
+    def __hash__(self):
         return hash((self.namespace, self.table, self.key))
 
     def __repr__(self):

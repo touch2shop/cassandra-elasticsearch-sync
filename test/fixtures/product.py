@@ -34,13 +34,12 @@ class ProductFixture(AbstractDataObject):
     def key(self):
         return unicode(self._id)
 
-    def _deep_hash(self):
+    def __hash__(self):
         return hash((self._id, self.name, self.quantity, self.description, self.price,
                      self.enabled, self.external_id, self.publish_date))
 
-    # noinspection PyProtectedMember
     def _deep_equals(self, other):
-        return self._id == other._id and self.name == other.name and \
+        return self.id == other.id and self.name == other.name and \
             self.quantity == other.quantity and self.description == other.description and \
             self.price == other.price and self.enabled == other.enabled and \
             self.external_id == other.external_id and \

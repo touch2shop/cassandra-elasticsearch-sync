@@ -16,21 +16,19 @@ class Update(Document):
         self._is_delete = value
 
     def _deep_equals(self, other):
-        return self.identifier == other.identifier and \
-            self.is_delete == other.is_delete and \
-            self.timestamp == other.timestamp and \
-            self.fields == other.fields
+        return self.identifier == other.identifier and self.is_delete == other.is_delete and \
+               self.timestamp == other.timestamp and self.fields == other.fields
 
-    def _deep_hash(self):
+    def __hash__(self):
         return hash((self.identifier, self.is_delete, self.timestamp, frozenset(self.fields)))
 
-    def _deep_string_dictionary(self):
-        return {
+    def __repr__(self):
+        return repr({
             "identifier": self.identifier,
             "is_delete": self.is_delete,
             "timestamp": self.timestamp,
             "fields": self.fields
-        }
+        })
 
     @classmethod
     def from_document(cls, document, is_delete):

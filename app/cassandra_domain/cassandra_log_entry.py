@@ -108,19 +108,19 @@ class CassandraLogEntry(AbstractDataObject):
             self.operation == other.operation and \
             self.updated_columns == other.updated_columns
 
-    def _deep_hash(self):
+    def __hash__(self):
         current_hash = hash((self.time_uuid, self.logged_keyspace, self.logged_table, self.logged_key, self.operation))
         if self.updated_columns is None:
             return current_hash
         else:
             return hash((current_hash, frozenset(self.updated_columns)))
 
-    def _deep_string_dictionary(self):
-        return {
+    def __repr__(self):
+        return repr({
             "time_uuid": self.time_uuid,
             "logged_keyspace": self.logged_keyspace,
             "logged_table": self.logged_table,
             "logged_key": self.logged_key,
             "operation": self.operation,
             "updated_columns": self.updated_columns
-        }
+        })

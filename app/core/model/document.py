@@ -64,12 +64,12 @@ class Document(AbstractDataObject):
             self.timestamp == other.timestamp and \
             self.fields == other.fields
 
-    def _deep_hash(self):
+    def __hash__(self):
         return hash((self.identifier, self.timestamp, frozenset(self.fields)))
 
-    def _deep_string_dictionary(self):
-        return {
+    def __repr__(self):
+        return repr({
             "identifier": self.identifier,
             "timestamp": self.timestamp,
             "fields": self.fields
-        }
+        })

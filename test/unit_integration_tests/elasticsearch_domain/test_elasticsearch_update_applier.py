@@ -4,11 +4,11 @@ from time import time, sleep
 
 import pytest
 
+from app.core.exception.invalid_schema_exception import InvalidSchemaException
 from app.core.model.identifier import Identifier
 from app.core.model.update import Update
 from app.core.model.field import Field
 from app.core.util.timestamp_util import TimestampUtil
-from app.elasticsearch_domain.invalid_elasticsearch_schema_exception import InvalidElasticsearchSchemaException
 from app.elasticsearch_domain.elasticsearch_update_applier import ElasticsearchUpdateApplier
 from test.fixtures.product import ProductFixture
 
@@ -36,7 +36,7 @@ class TestElasticsearchUpdateApplier:
     def test_fail_if_index_does_not_exist(self, update_applier):
         bogus_update = build_update(namespace="invalid", table="product", key=str(uuid4()), timestamp=time())
 
-        with pytest.raises(InvalidElasticsearchSchemaException) as e:
+        with pytest.raises(InvalidSchemaException) as e:
             update_applier.apply_update(bogus_update)
         assert e.value.identifier == bogus_update.identifier
 
@@ -44,7 +44,7 @@ class TestElasticsearchUpdateApplier:
         bogus_update = build_update(namespace=elasticsearch_fixture_index, table="invalid", key=str(uuid4()),
                                     timestamp=time())
 
-        with pytest.raises(InvalidElasticsearchSchemaException) as e:
+        with pytest.raises(InvalidSchemaException) as e:
             update_applier.apply_update(bogus_update)
         assert e.value.identifier == bogus_update.identifier
 
@@ -63,7 +63,7 @@ class TestElasticsearchUpdateApplier:
 
             update = build_update(namespace=_index, table=_type, key=str(_id), timestamp=time())
 
-            with pytest.raises(InvalidElasticsearchSchemaException) as e:
+            with pytest.raises(InvalidSchemaException) as e:
                 update_applier.apply_update(update)
             assert e.value.identifier == update.identifier
             assert "Could not retrieve '_timestamp' for Elasticsearch document" in e.value.message

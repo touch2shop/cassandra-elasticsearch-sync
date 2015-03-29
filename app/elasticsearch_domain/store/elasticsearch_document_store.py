@@ -1,20 +1,21 @@
-import elasticsearch.helpers
 from decimal import Decimal
 from uuid import UUID
-from app.core.abstract_document_store import AbstractDocumentStore
 
+import elasticsearch.helpers
+
+from app.core.exception.invalid_schema_exception import InvalidSchemaException
+from app.core.abstract_document_store import AbstractDocumentStore
 from app.core.abstract_iterable_result import AbstractIterableResult
 from app.core.model.document import Document
 from app.core.model.field import Field
 from app.core.util.timestamp_util import TimestampUtil
-from app.elasticsearch_domain.invalid_elasticsearch_schema_exception import InvalidElasticsearchSchemaException
 from app.elasticsearch_domain.store.abstract_elasticsearch_store import AbstractElasticsearchStore, MATCH_ALL_QUERY
 from app.elasticsearch_domain.store.elasticsearch_response_util import ElasticsearchResponseUtil
 
 
 def _build_document(identifier, timestamp, source):
     if not timestamp:
-        raise InvalidElasticsearchSchemaException(identifier=identifier,
+        raise InvalidSchemaException(identifier=identifier,
                 message="Could not retrieve '_timestamp' for Elasticsearch document. Please check your mappings.")
 
     fields = []

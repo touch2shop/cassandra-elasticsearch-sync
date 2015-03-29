@@ -1,6 +1,6 @@
 from app.core.abstract_update_applier import AbstractUpdateApplier
+from app.core.exception.invalid_schema_exception import InvalidSchemaException
 
-from app.elasticsearch_domain.invalid_elasticsearch_schema_exception import InvalidElasticsearchSchemaException
 from app.elasticsearch_domain.store.elasticsearch_document_store import ElasticsearchDocumentStore
 
 
@@ -13,8 +13,8 @@ class ElasticsearchUpdateApplier(AbstractUpdateApplier):
 
     def _check_namespace_and_table_exists(self, identifier):
         if not self._elasticsearch_client.indices.exists(index=identifier.namespace):
-            raise InvalidElasticsearchSchemaException(identifier=identifier,
+            raise InvalidSchemaException(identifier=identifier,
                 message="Index does not exist on Elasticsearch.")
         if not self._elasticsearch_client.indices.exists_type(index=identifier.namespace, doc_type=identifier.table):
-            raise InvalidElasticsearchSchemaException(identifier=identifier,
+            raise InvalidSchemaException(identifier=identifier,
                 message="Type does not exist on Elasticsearch.")

@@ -1,10 +1,12 @@
 from decimal import Decimal
 from time import time, sleep
 from uuid import uuid4
+
 import pytest
+
+from app.core.exception.invalid_schema_exception import InvalidSchemaException
 from app.core.util.timestamp_util import TimestampUtil
 from app.elasticsearch_domain.elasticsearch_update_fetcher import ElasticsearchUpdateFetcher
-from app.elasticsearch_domain.invalid_elasticsearch_schema_exception import InvalidElasticsearchSchemaException
 from test.fixtures.product import ProductFixture
 
 
@@ -139,7 +141,7 @@ class TestElasticsearchUpdateFetcher:
             elasticsearch_client.index(index=_index, doc_type=_type, id=_id, body={"foo": "bar"},
                                        timestamp=TimestampUtil.seconds_to_milliseconds(time()), refresh=True)
 
-            with pytest.raises(InvalidElasticsearchSchemaException) as e:
+            with pytest.raises(InvalidSchemaException) as e:
                 for _ in elasticsearch_update_fetcher.fetch_updates():
                     pass
 

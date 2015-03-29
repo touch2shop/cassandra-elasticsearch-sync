@@ -1,9 +1,10 @@
 from decimal import Decimal
 from time import time, sleep
 from uuid import uuid4
+
+from app.core.exception.invalid_schema_exception import InvalidSchemaException
 import pytest
 from app.cassandra_domain.cassandra_update_applier import CassandraUpdateApplier
-from app.cassandra_domain.invalid_cassandra_schema_exception import InvalidCassandraSchemaException
 from app.core.model.field import Field
 from app.core.model.identifier import Identifier
 from app.core.model.update import Update
@@ -33,7 +34,7 @@ class TestCassandraUpdateApplier:
     def test_fail_if_keyspace_does_not_exist(self, update_applier):
         bogus_update = build_update(namespace="invalid", table="product", key=str(uuid4()), timestamp=time())
 
-        with pytest.raises(InvalidCassandraSchemaException) as e:
+        with pytest.raises(InvalidSchemaException) as e:
             update_applier.apply_update(bogus_update)
         assert e.value.identifier == bogus_update.identifier
 
@@ -41,7 +42,7 @@ class TestCassandraUpdateApplier:
         bogus_update = build_update(namespace=cassandra_fixture_keyspace, table="invalid", key=str(uuid4()),
                                     timestamp=time())
 
-        with pytest.raises(InvalidCassandraSchemaException) as e:
+        with pytest.raises(InvalidSchemaException) as e:
             update_applier.apply_update(bogus_update)
         assert e.value.identifier == bogus_update.identifier
 

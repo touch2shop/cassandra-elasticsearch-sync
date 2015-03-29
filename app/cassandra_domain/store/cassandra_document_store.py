@@ -1,10 +1,11 @@
 from decimal import Decimal
 from operator import attrgetter
 from uuid import UUID
+
 import arrow
 import cassandra.cqltypes
 
-from app.cassandra_domain.invalid_cassandra_schema_exception import InvalidCassandraSchemaException
+from app.core.exception.invalid_schema_exception import InvalidSchemaException
 from app.cassandra_domain.store.cassandra_client import CassandraClient
 from app.core.abstract_document_store import AbstractDocumentStore
 from app.core.model.document import Document
@@ -135,7 +136,7 @@ class CassandraDocumentStore(AbstractDocumentStore):
         if len(rows) == 0:
             return None
         elif len(rows) > 1:
-            raise InvalidCassandraSchemaException(identifier=identifier,
+            raise InvalidSchemaException(identifier=identifier,
                     message=("More than one row found for entity on Cassandra. " +
                              "Please make sure the schema has a single primary key column with name '%s'. ")
                                 % self._id_column_name)
@@ -143,7 +144,7 @@ class CassandraDocumentStore(AbstractDocumentStore):
         row = rows[0]
 
         if not hasattr(row, self._timestamp_column_name):
-                raise InvalidCassandraSchemaException(identifier=identifier,
+                raise InvalidSchemaException(identifier=identifier,
                         message=("No timestamp column found for entity on Cassandra. " +
                                  "Please make sure the schema has a timestamp column with name '%s'. ")
                                  % self._timestamp_column_name)

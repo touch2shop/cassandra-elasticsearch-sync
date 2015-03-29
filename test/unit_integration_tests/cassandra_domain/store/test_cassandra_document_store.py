@@ -2,11 +2,12 @@ from decimal import Decimal
 from time import time
 from uuid import uuid4
 from datetime import datetime
+
+from app.core.exception.invalid_schema_exception import InvalidSchemaException
 import pytest
 from app.cassandra_domain.store.cassandra_document_store import CassandraDocumentStore
 from app.core.model.document import Document
 from app.core.model.identifier import Identifier
-from app.cassandra_domain.invalid_cassandra_schema_exception import InvalidCassandraSchemaException
 from app.core.util.datetime_util import DateTimeUtil
 from app.core.util.timestamp_util import TimestampUtil
 from test.fixtures.product import ProductFixture
@@ -70,7 +71,7 @@ class TestCassandraDocumentStore:
         cassandra_fixture_client.execute(statement, (_id, whatever))
 
         identifier = Identifier(cassandra_fixture_keyspace, "table_without_timestamp", str(_id))
-        with pytest.raises(InvalidCassandraSchemaException) as e:
+        with pytest.raises(InvalidSchemaException) as e:
             cassandra_document_store.read(identifier)
         assert e.value.identifier == identifier
         assert "No timestamp column found for entity on Cassandra." in e.value.message
@@ -102,7 +103,7 @@ class TestCassandraDocumentStore:
         cassandra_fixture_client.execute(statement, (_id, timestamp2, whatever))
 
         identifier = Identifier(cassandra_fixture_keyspace, "table_with_composite_key", str(_id))
-        with pytest.raises(InvalidCassandraSchemaException) as e:
+        with pytest.raises(InvalidSchemaException) as e:
             cassandra_document_store.read(identifier)
         assert e.value.identifier == identifier
         assert "More than one row found for entity on Cassandra." in e.value.message

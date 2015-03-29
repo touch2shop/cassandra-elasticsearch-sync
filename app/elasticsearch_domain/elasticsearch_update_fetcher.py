@@ -19,5 +19,5 @@ class ElasticsearchUpdateFetcher(AbstractUpdateFetcher):
             return self._document_store.search_all()
 
     def _to_update(self, data):
-        # TODO: as of now, it is impossible to retrieve delete updates from Elasticsearch. All updates are save only.
+        # it is impossible to retrieve delete updates from Elasticsearch. All updates are save only.
         return Update.from_document(data, is_delete=False)

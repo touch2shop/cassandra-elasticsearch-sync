@@ -100,12 +100,6 @@ class CassandraLogEntry(AbstractDataObject):
         else:
             self._updated_columns = None
 
-    def __cmp__(self, other):
-        if self.time_uuid is not None:
-            return TimeUUID.__cmp__(self.time_uuid, other.time_uuid)
-        else:
-            return -1
-
     def _deep_equals(self, other):
         return self.time_uuid == other.time_uuid and \
             self.logged_keyspace == other.logged_keyspace and \

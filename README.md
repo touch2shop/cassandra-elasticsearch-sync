@@ -6,18 +6,16 @@
 
 This is a daemon service for efficient and incremental bidirectional sync between [Cassandra](https://cassandra.apache.org) and [Elasticsearch](https://www.elastic.co).
 
-It is implemented in Python and uses my [Cassandra Logger](http://github.com/felipead/cassandra-logger) trigger to keep track of changes in the Cassandra database, thus making it very efficient.
+It is implemented in Python and uses my [Cassandra Logger](http://github.com/felipead/cassandra-logger) trigger to keep track of changes in the Cassandra database, thus making it very efficient. Synchronization is also idempotent and fault tolerant. This means that running the service with the same data more than once will produce exactly the same results.
 
-Synchronization is also idempotent and fault tolerant. This means that running the service with the same data more than once will produce exactly the same results.
-
-The purpose of this project was to present an example on how to synchronize data between major NoSQL databases. Most of the code and the techniques shown here can be easily leveraged to synchronize other databases as well.
+The purpose of this project is to serve as an example on how to synchronize data between major NoSQL databases. Most of the code and the techniques presented here can be easily leveraged to synchronize other databases.
 
 REQUIREMENTS
 ------------
 
 - Cassandra 2.1+
 - Elasticsearch 1.4+
-- Python 2.7+ (*Python 3 is not supported yet because of the [time-uuid](https://pypi.python.org/pypi/time-uuid/) package*)
+- Python 2.7 (*Python 3 is not supported yet because of the legacy [time-uuid](https://pypi.python.org/pypi/time-uuid/) package*)
 
 RATIONALE
 ---------
@@ -249,6 +247,8 @@ KNOWN ISSUES
 - Improve exception handling. Currently, if any exception occurs, like a connection timeout, the application quits. This is a deal breaker if the application needs to run as a daemon.
 
 - The solution was not tested yet in a multi-clustered environment. Therefore, please keep in mind it is still not suitable for production.
+
+- Currently, only bidirectional syncing is supported. However, in most cases it only makes sense to sync in one way, for instance, from Cassandra to Elasticsearch. A feature that would allow this behavior to be changed in  `settings.yaml` is already planned.
 
 AUTOMATED TESTS
 ---------------

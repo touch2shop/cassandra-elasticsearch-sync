@@ -11,13 +11,16 @@ os:
 virtualenv:
   system_site_packages: false
 
+env:
+  - CASSANDRA_VERSION=2.1.8
+
 before_install:
   - sudo rm -rf /var/lib/cassandra/*
-  - wget http://www.us.apache.org/dist/cassandra/2.1.3/apache-cassandra-2.1.3-bin.tar.gz && tar -xvzf apache-cassandra-2.1.3-bin.tar.gz
-  - sh setup/install-cassandra-logger.sh apache-cassandra-2.1.3
-  - sudo sh apache-cassandra-2.1.3/bin/cassandra
+  - wget http://www.us.apache.org/dist/cassandra/${CASSANDRA_VERSION}/apache-cassandra-${CASSANDRA_VERSION}-bin.tar.gz && tar -xvzf apache-cassandra-${CASSANDRA_VERSION}-bin.tar.gz
+  - sh setup/install-cassandra-logger.sh apache-cassandra-${CASSANDRA_VERSION}
+  - sudo sh apache-cassandra-${CASSANDRA_VERSION}/bin/cassandra
   - sleep 15
-  - sudo sh setup/create-cassandra-log-schema.sh apache-cassandra-2.1.3
+  - sudo sh setup/create-cassandra-log-schema.sh apache-cassandra-${CASSANDRA_VERSION}
 
 install:
   - pip install -r requirements.txt

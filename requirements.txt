@@ -1,5 +1,5 @@
-cassandra-driver>=2.1
-elasticsearch>=1.4
-time-uuid
-PyYAML
-arrow
+cassandra-driver==2.5.1
+elasticsearch==1.6.0
+time-uuid==0.1.1
+PyYAML==3.11
+arrow==0.6.0
